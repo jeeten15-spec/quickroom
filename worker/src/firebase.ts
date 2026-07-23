@@ -184,6 +184,45 @@ export async function getStorageObjectMetadata(
   return { contentType: metadata.contentType, size: Number(metadata.size) };
 }
 
+export async function deleteStorageObjectsByPrefix(env: Env, prefix: string): Promise<void> {
+  const accessToken = await getGoogleAccessToken(env);
+  let pageToken: string | undefined;
+
+  do {
+    const url = new URL(
+      `https://storage.googleapis.com/storage/v1/b/${encodePathSegment(
+        env.FIREBASE_STORAGE_BUCKET
+      )}/o`
+    );
+    url.searchParams.set('prefix', prefix);
+    if (pageToken) url.searchParams.set('pageToken', pageToken);
+
+    const response = await fetch(url, {
+      headers: { Authorization: `Bearer ${accessToken}` }
+    });
+    if (!response.ok) {
+      throw new FirebaseRequestError('Cloud Storage list request failed.', response.status);
+    }
+
+    const page = (await response.json()) as {
+      items?: Array<{ name: string }>;
+      nextPageToken?: string;
+    };
+    for (const item of page.items ?? []) {
+      const deleteResponse = await fetch(
+        `https://storage.googleapis.com/storage/v1/b/${encodePathSegment(
+          env.FIREBASE_STORAGE_BUCKET
+        )}/o/${encodePathSegment(item.name)}`,
+        { method: 'DELETE', headers: { Authorization: `Bearer ${accessToken}` } }
+      );
+      if (!deleteResponse.ok && deleteResponse.status !== 404) {
+        throw new FirebaseRequestError('Cloud Storage delete request failed.', deleteResponse.status);
+      }
+    }
+    pageToken = page.nextPageToken;
+  } while (pageToken);
+}
+
 async function databaseRequest<T>(
   env: Env,
   path: string,

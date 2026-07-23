@@ -87,6 +87,29 @@ entries after 15 seconds. This keeps all browser data access on the Worker
 boundary while providing near-real-time updates without a direct Firebase
 connection.
 
+## Expiry cleanup
+
+QuickRoom uses two free-tier cleanup paths:
+
+1. Lazy cleanup: any read, join heartbeat, send, upload, report, or leave
+   operation that encounters an expired room immediately returns an expired
+   response, removes `/rooms/{roomId}`, removes
+   `/private/{roomId}`, and starts deletion of every Storage object under
+   `/rooms/{roomId}/`.
+2. Scheduled cleanup: the Worker has an hourly Cloudflare Cron Trigger
+   (`0 * * * *`) that finds expired rooms nobody revisits and retries Storage
+   deletion when an earlier attempt failed.
+
+During cleanup, `/expiredRooms/{roomId}` is a seven-day internal tombstone. It
+keeps the user-facing result calm (`410 This room has expired`) while making
+Storage cleanup retryable. Tombstones are removed after seven days.
+
+Private messages are room-scoped at
+`/private/{roomId}/{sortedUidPair}/messages/{messageId}`. This small data-model
+extension makes private messages delete with their room. Invite Only uses the
+unguessable shared room link as its MVP invitation; explicit invite tokens are
+a future extension.
+
 ## PWA and offline behavior
 
 QuickRoom includes a web manifest and service worker. After the app shell has

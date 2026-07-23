@@ -7,6 +7,7 @@ import {
 } from './firebase';
 import {
   HttpError,
+  cleanupExpiredRooms,
   createRoom,
   getRoom,
   joinRoom,
@@ -65,6 +66,15 @@ export default {
       return json({ error: 'Not found.' }, 404, corsHeaders);
     } catch (error) {
       return errorResponse(error, corsHeaders);
+    }
+  },
+
+  async scheduled(_controller, env: Env): Promise<void> {
+    try {
+      assertFirebaseConfiguration(env);
+      await cleanupExpiredRooms(env);
+    } catch (error) {
+      console.error('QuickRoom scheduled cleanup failed.', error);
     }
   }
 } satisfies ExportedHandler<Env>;

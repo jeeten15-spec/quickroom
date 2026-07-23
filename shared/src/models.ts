@@ -149,9 +149,9 @@ export function createRoomRecord(
   };
 }
 
-export function privateMessagePath(uidA: string, uidB: string): string {
+export function privateMessagePath(roomId: string, uidA: string, uidB: string): string {
   const [firstUid, secondUid] = [uidA, uidB].sort();
-  return `/private/${firstUid}_${secondUid}/messages`;
+  return `/private/${roomId}/${firstUid}_${secondUid}/messages`;
 }
 
 export function roomImagePath(roomId: string, messageId: string, extension: string): string {

@@ -239,6 +239,7 @@ function renderSettingsStep() {
           ${renderSegment('type', 'private', 'Private')}
           ${renderSegment('type', 'invite', 'Invite Only')}
         </div>
+        <p class="input-note">Private and Invite Only rooms are accessed through their shared room link.</p>
       </fieldset>
       <fieldset class="setting-group">
         <legend>Allow private chats</legend>

@@ -9,10 +9,10 @@ import {
   type User
 } from '../../shared/src/models';
 import {
-  databaseDelete,
   databaseGet,
   databasePatch,
   databasePut,
+  deleteStorageObjectsByPrefix,
   getStorageObjectMetadata,
   signStorageDownloadUrl,
   signStorageUploadUrl,
@@ -39,6 +39,12 @@ type StoredRoom = Room & {
   messages?: Record<string, Message>;
   participants?: Record<string, Participant>;
 };
+
+interface ExpiredRoomTombstone {
+  expiredAt: number;
+  storageCleanupPending: boolean;
+  cleanedAt?: number;
+}
 
 const rateLimitState = new Map<string, number>();
 const PRESENCE_TTL_MS = 15_000;
@@ -101,7 +107,7 @@ export async function createRoom(
     [`users/${user.uid}`]: userRecord
   });
 
-  // Expiry cleanup will be scheduled here (Cron Trigger or Durable Object).
+  // The hourly Cron Trigger and lazy access checks remove this room at expiry.
   return {
     roomId,
     room,
@@ -137,6 +143,8 @@ export async function joinRoom(
     staleParticipantIds.map((uid) => [`participants/${uid}`, null])
   );
 
+  // Private and Invite Only both use the opaque room link as the MVP access
+  // capability. A future invite-token model can add explicit invitees here.
   // Repeated joins act as a lightweight heartbeat. Every heartbeat removes
   // participants inactive for 15 seconds, keeping the list current without
   // adding a route outside the locked API surface.
@@ -184,7 +192,11 @@ export async function sendMessage(
     if (recipientId === user.uid || !room.participants?.[recipientId]) {
       throw new ValidationError('Private chat participant is invalid.');
     }
-    await databasePut(env, `${privateMessagePath(user.uid, recipientId)}/${messageId}`, message);
+    await databasePut(
+      env,
+      `${privateMessagePath(roomId, user.uid, recipientId)}/${messageId}`,
+      message
+    );
     return { messageId, message, privateWith: recipientId };
   }
 
@@ -258,7 +270,7 @@ export async function reportMessage(
   const messageId = validateRoomId(input.messageId);
   const recipientId = input.recipientId === undefined ? undefined : validateUid(input.recipientId);
   const path = recipientId
-    ? `${privateMessagePath(user.uid, recipientId)}/${messageId}`
+    ? `${privateMessagePath(roomId, user.uid, recipientId)}/${messageId}`
     : `rooms/${roomId}/messages/${messageId}`;
   const message = await databaseGet<Message>(env, path);
   if (!message) throw new HttpError(404, 'Message not found.');
@@ -324,7 +336,7 @@ export async function getRoom(
     }
     const messages = (await databaseGet<Record<string, Message>>(
       env,
-      privateMessagePath(user.uid, privateWith)
+      privateMessagePath(roomId, user.uid, privateWith)
     )) ?? {};
     return {
       room: {
@@ -406,15 +418,82 @@ async function buildMessage(
 
 async function getActiveRoom(env: Env, roomId: string): Promise<StoredRoom> {
   const room = await databaseGet<StoredRoom>(env, `rooms/${roomId}`);
-  if (!room) throw new HttpError(404, 'Room not found.');
+  if (!room) {
+    const tombstone = await databaseGet<ExpiredRoomTombstone>(env, `expiredRooms/${roomId}`);
+    if (tombstone) {
+      if (tombstone.storageCleanupPending) {
+        await completeStorageCleanup(env, roomId, tombstone);
+      }
+      throw new HttpError(410, 'This room has expired.');
+    }
+    throw new HttpError(404, 'Room not found.');
+  }
 
   if (room.expiresAt !== null && room.expiresAt <= Date.now()) {
-    // Expired rooms and their storage objects are cleaned asynchronously by the
-    // future Worker cleanup job. They are unavailable immediately.
+    await cleanupExpiredRoom(env, roomId, room.expiresAt);
     throw new HttpError(410, 'This room has expired.');
   }
   await addExpiryWarningIfDue(env, roomId, room);
   return room;
+}
+
+/**
+ * Invoked by the hourly Cloudflare Cron Trigger. Lazy cleanup on every expired
+ * room access is the primary free-tier path; Cron also catches rooms nobody
+ * revisits after expiry and retries any failed Storage deletion.
+ */
+export async function cleanupExpiredRooms(env: Env): Promise<void> {
+  const now = Date.now();
+  const rooms = (await databaseGet<Record<string, StoredRoom>>(env, 'rooms')) ?? {};
+  for (const [roomId, room] of Object.entries(rooms)) {
+    if (room.expiresAt !== null && room.expiresAt <= now) {
+      await cleanupExpiredRoom(env, roomId, room.expiresAt);
+    }
+  }
+
+  const tombstones =
+    (await databaseGet<Record<string, ExpiredRoomTombstone>>(env, 'expiredRooms')) ?? {};
+  for (const [roomId, tombstone] of Object.entries(tombstones)) {
+    if (tombstone.storageCleanupPending) {
+      await completeStorageCleanup(env, roomId, tombstone);
+    } else if (tombstone.expiredAt < now - 7 * 24 * 60 * 60 * 1000) {
+      await databasePatch(env, '/', { [`expiredRooms/${roomId}`]: null });
+    }
+  }
+}
+
+async function cleanupExpiredRoom(env: Env, roomId: string, expiredAt: number): Promise<void> {
+  const tombstone: ExpiredRoomTombstone = {
+    expiredAt,
+    storageCleanupPending: true
+  };
+
+  // Remove all room-scoped database data first. The tombstone preserves the
+  // calm expired response and makes Storage deletion retryable.
+  await databasePatch(env, '/', {
+    [`rooms/${roomId}`]: null,
+    [`private/${roomId}`]: null,
+    [`expiredRooms/${roomId}`]: tombstone
+  });
+  await completeStorageCleanup(env, roomId, tombstone);
+}
+
+async function completeStorageCleanup(
+  env: Env,
+  roomId: string,
+  tombstone: ExpiredRoomTombstone
+): Promise<void> {
+  try {
+    await deleteStorageObjectsByPrefix(env, `rooms/${roomId}/`);
+    await databasePatch(env, `expiredRooms/${roomId}`, {
+      ...tombstone,
+      storageCleanupPending: false,
+      cleanedAt: Date.now()
+    });
+  } catch (error) {
+    // Leave the tombstone pending; the next access or hourly Cron retries it.
+    console.error('QuickRoom storage cleanup will retry.', error);
+  }
 }
 
 function requireParticipant(room: StoredRoom, uid: string): Participant {

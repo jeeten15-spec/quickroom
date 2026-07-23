@@ -5,6 +5,9 @@ compatibility_date = "2026-07-23"
 # Configure the production Worker route in the Cloudflare dashboard or with:
 # wrangler deploy --route api.quickroom.org/*
 
+[triggers]
+crons = ["0 * * * *"]
+
 [vars]
 FIREBASE_PROJECT_ID = "your-firebase-project-id"
 FIREBASE_DATABASE_URL = "https://your-firebase-project-id-default-rtdb.firebaseio.com"
