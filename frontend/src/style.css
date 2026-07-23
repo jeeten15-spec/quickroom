@@ -508,6 +508,8 @@ code {
   padding: 0 8px;
 }
 
+.is-hidden { display: none; }
+
 .room-details {
   display: grid;
   gap: 10px;

@@ -107,6 +107,8 @@ export class ChatRoom {
             </div>
           </div>
           <div class="header-actions">
+            <button class="small-button is-hidden" type="button" data-chat-action="close-private"
+              data-group-button>Group</button>
             <button class="small-button" type="button" data-chat-action="share">Share</button>
             <button class="small-button" type="button" data-chat-action="leave">Leave</button>
           </div>
@@ -158,6 +160,10 @@ export class ChatRoom {
     this.root.querySelector('[data-room-name]').textContent = this.privateWith
       ? `Private with ${this.privateWith.nick}`
       : this.room.name;
+    this.root.querySelector('[data-group-button]').classList.toggle(
+      'is-hidden',
+      !this.privateWith
+    );
     this.root.querySelector('[data-presence-count]').textContent = String(
       Object.keys(this.participants).length
     );
