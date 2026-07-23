@@ -264,7 +264,12 @@ export async function reportMessage(
   if (!message) throw new HttpError(404, 'Message not found.');
 
   await databasePatch(env, path, { reported: true });
-  const health = recipientId ? room.health : degradeHealthToGood(room.health);
+  const reportedMessageCount = Object.values(room.messages ?? {}).filter(
+    (roomMessage) => roomMessage.reported
+  ).length + (message.reported ? 0 : 1);
+  const health = recipientId
+    ? room.health
+    : healthForReportedMessageCount(reportedMessageCount, room.health);
   if (!recipientId && health !== room.health) {
     await updateRoomHealth(env, roomId, room, health);
   }
@@ -546,6 +551,15 @@ function createId(): string {
 
 function degradeHealthToGood(currentHealth: Room['health']): Room['health'] {
   return currentHealth === 'excellent' ? 'good' : currentHealth;
+}
+
+function healthForReportedMessageCount(
+  reportedMessageCount: number,
+  currentHealth: Room['health']
+): Room['health'] {
+  if (currentHealth === 'restricted' || reportedMessageCount >= 5) return 'restricted';
+  if (currentHealth === 'warning' || reportedMessageCount >= 3) return 'warning';
+  return degradeHealthToGood(currentHealth);
 }
 
 export class HttpError extends Error {
