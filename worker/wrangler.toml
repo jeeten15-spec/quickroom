@@ -1,0 +1,15 @@
+name = "quickroom-api"
+main = "src/index.ts"
+compatibility_date = "2026-07-23"
+
+# Configure the production Worker route in the Cloudflare dashboard or with:
+# wrangler deploy --route api.quickroom.org/*
+
+[vars]
+FIREBASE_PROJECT_ID = "your-firebase-project-id"
+FIREBASE_DATABASE_URL = "https://your-firebase-project-id-default-rtdb.firebaseio.com"
+FIREBASE_STORAGE_BUCKET = "your-firebase-project-id.firebasestorage.app"
+ALLOWED_ORIGINS = "http://localhost:5173,https://quickroom.org"
+
+# Set this encrypted secret before local or production use:
+# wrangler secret put FIREBASE_SERVICE_ACCOUNT_JSON
