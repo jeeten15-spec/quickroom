@@ -1,5 +1,7 @@
 import { apiRequest } from './api';
 import { ChatRoom } from './chat';
+import { generateNickname } from './nickname';
+import { registerPwa } from './pwa';
 import './style.css';
 
 const app = document.querySelector('#app');
@@ -491,16 +493,6 @@ function rememberNickname(nickname) {
   sessionStorage.setItem(nicknameKey, nickname);
 }
 
-function generateNickname() {
-  const adjectives = ['Blue', 'Happy', 'Silent', 'Curious', 'Swift', 'Calm', 'Bright', 'Quiet'];
-  const animals = ['Tiger', 'Fox', 'Panda', 'Owl', 'Falcon', 'Koala', 'Wolf'];
-  return `${pick(adjectives)} ${pick(animals)}`;
-}
-
-function pick(values) {
-  return values[Math.floor(Math.random() * values.length)];
-}
-
 function escapeHtml(value) {
   return String(value)
     .replace(/&/g, '&amp;')
@@ -516,3 +508,4 @@ window.addEventListener('popstate', () => {
 });
 
 render();
+registerPwa();

@@ -1,4 +1,5 @@
 import { apiGet, apiRequest } from './api';
+import { generateNickname } from './nickname';
 
 const IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
 const MESSAGE_INTERVAL_MS = 1_000;
@@ -20,6 +21,7 @@ export class ChatRoom {
     this.reportTarget = null;
     this.imageUrl = null;
     this.participantsOpen = false;
+    this.isOffline = !navigator.onLine;
     this.pollTimer = null;
     this.heartbeatTimer = null;
   }
@@ -32,6 +34,10 @@ export class ChatRoom {
       this.renderShell();
       this.startPolling();
     } catch (error) {
+      if (error.status === 410) {
+        this.renderExpired();
+        return;
+      }
       if (error.status === 403) {
         this.renderJoinRequired();
         return;
@@ -43,6 +49,8 @@ export class ChatRoom {
   destroy() {
     clearInterval(this.pollTimer);
     clearInterval(this.heartbeatTimer);
+    window.removeEventListener('online', this.handleNetworkChange);
+    window.removeEventListener('offline', this.handleNetworkChange);
     this.detachEvents();
   }
 
@@ -147,6 +155,8 @@ export class ChatRoom {
     this.root.addEventListener('submit', this.handleSubmit);
     this.root.addEventListener('input', this.handleInput);
     this.root.addEventListener('change', this.handleChange);
+    window.addEventListener('online', this.handleNetworkChange);
+    window.addEventListener('offline', this.handleNetworkChange);
     this.updateView(true);
   }
 
@@ -182,6 +192,12 @@ export class ChatRoom {
       'is-open',
       this.participantsOpen
     );
+    const composerDisabled = this.isOffline || this.room.health === 'restricted';
+    this.root.querySelector('[data-message-text]').disabled = composerDisabled;
+    this.root.querySelector('[data-image-input]').disabled = composerDisabled;
+    this.root.querySelector('[data-chat-action="choose-image"]').disabled = composerDisabled;
+    this.root.querySelector('[data-chat-form="message"] button[type="submit"]').disabled =
+      composerDisabled;
     messageList.innerHTML = renderMessages(messages, this.privateWith?.uid);
     if (shouldStickToBottom) messageList.scrollTop = messageList.scrollHeight;
     this.renderOverlay();
@@ -203,6 +219,20 @@ export class ChatRoom {
       </main>
     `;
     this.root.addEventListener('submit', this.handleSubmit);
+  }
+
+  renderExpired() {
+    this.root.innerHTML = `
+      <main class="chat-loading">
+        <section class="room-join-card">
+          <p class="eyebrow">QuickRoom</p>
+          <h1>This room has expired.</h1>
+          <p>Temporary rooms and their content are removed when their time is up.</p>
+          <button class="button button-primary" type="button" data-chat-action="leave">Return home</button>
+        </section>
+      </main>
+    `;
+    this.root.addEventListener('click', this.handleClick);
   }
 
   handleClick = async (event) => {
@@ -340,6 +370,18 @@ export class ChatRoom {
       await this.refresh();
     } catch (error) {
       this.showNotice(error.message);
+    }
+  };
+
+  handleNetworkChange = () => {
+    this.isOffline = !navigator.onLine;
+    if (this.room) {
+      this.updateView();
+      this.showNotice(
+        this.isOffline
+          ? 'You are offline. This room is available to read only.'
+          : 'You are back online.'
+      );
     }
   };
 
@@ -506,14 +548,6 @@ function formatTime(value) {
 
 function capitalize(value) {
   return value.charAt(0).toUpperCase() + value.slice(1);
-}
-
-function generateNickname() {
-  const adjectives = ['Blue', 'Happy', 'Silent', 'Curious', 'Swift', 'Calm', 'Bright', 'Quiet'];
-  const animals = ['Tiger', 'Fox', 'Panda', 'Owl', 'Falcon', 'Koala', 'Wolf'];
-  return `${adjectives[Math.floor(Math.random() * adjectives.length)]} ${
-    animals[Math.floor(Math.random() * animals.length)]
-  }`;
 }
 
 function escapeHtml(value) {

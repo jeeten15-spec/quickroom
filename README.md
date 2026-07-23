@@ -28,6 +28,8 @@ Firebase Realtime Database + Firebase Storage
 │   │   ├── auth.js
 │   │   ├── chat.js
 │   │   ├── main.js
+│   │   ├── nickname.js
+│   │   ├── pwa.js
 │   │   └── style.css
 │   └── vite.config.js
 ├── worker/                   # Cloudflare Worker API boundary
@@ -84,6 +86,13 @@ presence heartbeat every five seconds. The Worker expires inactive presence
 entries after 15 seconds. This keeps all browser data access on the Worker
 boundary while providing near-real-time updates without a direct Firebase
 connection.
+
+## PWA and offline behavior
+
+QuickRoom includes a web manifest and service worker. After the app shell has
+loaded, the service worker caches it along with the most recently viewed room
+response. When offline, that room remains available in read-only mode; sending,
+uploading, reporting, joining, and leaving require a network connection.
 
 ## Environment variables
 
@@ -185,6 +194,32 @@ The service account needs access to the Realtime Database and the default
 Firebase Storage bucket. The standard Firebase Admin service account role is
 sufficient for development; production should use a dedicated service account
 with only the required database and storage permissions.
+
+## Production Deployment Checklist
+
+1. Firebase: create the project, enable Realtime Database and the default
+   Storage bucket, enable Anonymous Authentication, and deploy the deny-all
+   Database and Storage rules with the Firebase CLI.
+2. Firebase identity: create a Web app, enable the intended Pages domains in
+   Firebase Authentication's Authorized domains, and set the four public
+   `VITE_FIREBASE_*` values in Cloudflare Pages.
+3. Worker service account: create a dedicated Firebase/Google service account
+   with Realtime Database and Storage access. Set its full JSON as
+   `FIREBASE_SERVICE_ACCOUNT_JSON` with `wrangler secret put`; set
+   `FIREBASE_PROJECT_ID`, `FIREBASE_DATABASE_URL`,
+   `FIREBASE_STORAGE_BUCKET`, and `ALLOWED_ORIGINS` as Worker variables.
+4. Storage CORS: update `firebase/storage.cors.json` with every local and
+   production Pages origin, then apply it to the bucket using the `gcloud
+   storage buckets update ... --cors-file=...` command above.
+5. Cloudflare: deploy the Worker first, configure its HTTPS route, then deploy
+   the `frontend` directory to Pages with `npm run build` and `frontend/dist`.
+   Set `VITE_WORKER_URL` to the Worker origin unless `/api` is same-origin.
+6. Two-browser acceptance test: in browser A, confirm age, create a room, and
+   copy Share. In browser B (separate anonymous session), open that link,
+   confirm age, choose a nickname, and join. Send text in both directions,
+   upload a supported image under 5 MB, open a private chat when enabled, and
+   verify the participant count, room summary, report health change, and
+   offline read-only cache.
 
 ## Known advisories
 

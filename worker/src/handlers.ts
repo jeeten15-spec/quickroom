@@ -68,7 +68,7 @@ export async function createRoom(
   );
   room.stats.participantsCurrent = 1;
   room.stats.participantsPeak = 1;
-  room.stats.messageCount = 1;
+  room.stats.messageCount = 2;
 
   const participant: Participant = {
     nick: nickname,
@@ -78,10 +78,13 @@ export async function createRoom(
   };
   const welcomeMessage = systemMessage(
     ROOM_TEMPLATES[template].welcomeMessage,
-    user.uid,
-    nickname,
+    'system',
+    'QuickRoom',
     now
   );
+  const roomCreatedMessage = systemMessage('Room created.', 'system', 'QuickRoom', now);
+  const roomCreatedMessageId = createId();
+  const welcomeMessageId = createId();
   const userRecord: User = { nick: nickname, createdAt: now, lastSeen: now };
 
   // A root PATCH makes room creation, the creator's presence, welcome message,
@@ -90,7 +93,10 @@ export async function createRoom(
     [`rooms/${roomId}`]: {
       ...room,
       participants: { [user.uid]: participant },
-      messages: { [createId()]: welcomeMessage }
+      messages: {
+        [roomCreatedMessageId]: roomCreatedMessage,
+        [welcomeMessageId]: welcomeMessage
+      }
     },
     [`users/${user.uid}`]: userRecord
   });
@@ -243,7 +249,7 @@ export async function reportMessage(
       throw new HttpError(404, 'Participant not found.');
     }
     const health = degradeHealthToGood(room.health);
-    await databasePatch(env, `rooms/${roomId}`, { health });
+    await updateRoomHealth(env, roomId, room, health);
     // The locked data model has no participant-report collection. Future
     // moderation can persist an internal report ledger outside this model.
     return { reported: true, health };
@@ -260,7 +266,7 @@ export async function reportMessage(
   await databasePatch(env, path, { reported: true });
   const health = recipientId ? room.health : degradeHealthToGood(room.health);
   if (!recipientId && health !== room.health) {
-    await databasePatch(env, `rooms/${roomId}`, { health });
+    await updateRoomHealth(env, roomId, room, health);
   }
 
   // Future report scoring can escalate good → warning → restricted and add a
@@ -402,6 +408,7 @@ async function getActiveRoom(env: Env, roomId: string): Promise<StoredRoom> {
     // future Worker cleanup job. They are unavailable immediately.
     throw new HttpError(410, 'This room has expired.');
   }
+  await addExpiryWarningIfDue(env, roomId, room);
   return room;
 }
 
@@ -433,6 +440,62 @@ function systemMessage(text: string, senderId: string, senderNick: string, times
     reported: false,
     moderated: false
   };
+}
+
+async function updateRoomHealth(
+  env: Env,
+  roomId: string,
+  room: StoredRoom,
+  health: Room['health']
+): Promise<void> {
+  if (health === room.health) return;
+
+  const message = systemMessage(
+    `Room health is now ${health}.`,
+    'system',
+    'QuickRoom',
+    Date.now()
+  );
+  await databasePatch(env, `rooms/${roomId}`, {
+    health,
+    [`messages/${createId()}`]: message,
+    stats: {
+      ...room.stats,
+      messageCount: room.stats.messageCount + 1
+    }
+  });
+}
+
+async function addExpiryWarningIfDue(
+  env: Env,
+  roomId: string,
+  room: StoredRoom
+): Promise<void> {
+  const remainingMs = room.expiresAt === null ? null : room.expiresAt - Date.now();
+  const hasWarning = room.metadata?.expiryWarning15Minutes === true;
+  if (remainingMs === null || remainingMs > 15 * 60 * 1000 || hasWarning) return;
+
+  const messageId = createId();
+  const message = systemMessage(
+    'This room expires in less than 15 minutes.',
+    'system',
+    'QuickRoom',
+    Date.now()
+  );
+  await databasePatch(env, `rooms/${roomId}`, {
+    [`messages/${messageId}`]: message,
+    stats: {
+      ...room.stats,
+      messageCount: room.stats.messageCount + 1
+    },
+    metadata: {
+      ...room.metadata,
+      expiryWarning15Minutes: true
+    }
+  });
+  room.stats.messageCount += 1;
+  room.metadata = { ...room.metadata, expiryWarning15Minutes: true };
+  room.messages = { ...(room.messages ?? {}), [messageId]: message };
 }
 
 async function withDownloadUrls(
