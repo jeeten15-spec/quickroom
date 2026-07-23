@@ -16,10 +16,21 @@ export async function apiRequest(path, body) {
   return readResponse(response);
 }
 
+export async function apiGet(path) {
+  const idToken = await getAnonymousIdToken();
+  const response = await fetch(`${workerUrl}${path}`, {
+    headers: { Authorization: `Bearer ${idToken}` }
+  });
+
+  return readResponse(response);
+}
+
 async function readResponse(response) {
   const payload = await response.json().catch(() => null);
   if (!response.ok) {
-    throw new Error(payload?.error || 'Something went wrong. Please try again.');
+    const error = new Error(payload?.error || 'Something went wrong. Please try again.');
+    error.status = response.status;
+    throw error;
   }
   return payload;
 }

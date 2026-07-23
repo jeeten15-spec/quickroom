@@ -1,7 +1,9 @@
 import { apiRequest } from './api';
+import { ChatRoom } from './chat';
 import './style.css';
 
 const app = document.querySelector('#app');
+let activeChat = null;
 
 if (!app) throw new Error('QuickRoom app root was not found.');
 
@@ -49,14 +51,24 @@ function createInitialRoomState() {
 }
 
 function render() {
+  activeChat?.destroy();
+  activeChat = null;
   app.innerHTML = `
     <main class="page-shell">
       ${state.view === 'landing' ? renderLanding() : ''}
       ${state.view === 'create' ? renderCreateRoom() : ''}
-      ${state.view === 'room-placeholder' ? renderRoomPlaceholder() : ''}
+      ${state.view === 'room-placeholder' ? '<div id="chat-root"></div>' : ''}
     </main>
     ${state.ageConfirmed ? '' : renderAgeGate()}
   `;
+
+  if (state.ageConfirmed && state.view === 'room-placeholder') {
+    const roomId = window.location.pathname.split('/').pop();
+    activeChat = new ChatRoom(document.querySelector('#chat-root'), roomId, {
+      onLeave: leaveRoomView
+    });
+    activeChat.mount();
+  }
 }
 
 function renderLanding() {
@@ -264,19 +276,6 @@ function renderStepActions(form) {
   `;
 }
 
-function renderRoomPlaceholder() {
-  const roomId = window.location.pathname.split('/').pop();
-  return `
-    <section class="room-placeholder" aria-labelledby="room-ready">
-      <div>
-        <p class="eyebrow">QuickRoom</p>
-        <h1 id="room-ready">Your room is ready.</h1>
-        <p>Room <code>${escapeHtml(roomId)}</code></p>
-      </div>
-    </section>
-  `;
-}
-
 function renderAgeGate() {
   return `
     <div class="modal-backdrop">
@@ -442,7 +441,16 @@ async function submitJoinRoom(formData) {
 
 function navigateToRoom(roomId) {
   window.history.pushState({}, '', `/room/${roomId}`);
+  sessionStorage.setItem('quickroom.current-room', roomId);
   state.view = 'room-placeholder';
+}
+
+function leaveRoomView() {
+  window.history.pushState({}, '', '/');
+  state.view = 'landing';
+  state.joinOpen = false;
+  state.error = '';
+  render();
 }
 
 function roomIdFromInput(value) {

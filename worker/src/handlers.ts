@@ -41,6 +41,7 @@ type StoredRoom = Room & {
 };
 
 const rateLimitState = new Map<string, number>();
+const PRESENCE_TTL_MS = 15_000;
 
 export async function createRoom(
   body: unknown,
@@ -114,18 +115,27 @@ export async function joinRoom(
   const nickname = validateNickname(input.nickname);
   const room = await getActiveRoom(env, roomId);
   const now = Date.now();
-  const existingParticipant = room.participants?.[user.uid];
   const participants = room.participants ?? {};
+  const staleParticipantIds = Object.entries(participants)
+    .filter(([, participant]) => participant.lastActive < now - PRESENCE_TTL_MS)
+    .map(([uid]) => uid);
+  const activeParticipants = Object.fromEntries(
+    Object.entries(participants).filter(([uid]) => !staleParticipantIds.includes(uid))
+  );
+  const existingParticipant = activeParticipants[user.uid];
   const participant: Participant = existingParticipant
     ? { ...existingParticipant, nick: nickname, lastActive: now }
     : { nick: nickname, joinedAt: now, lastActive: now, isMutedUntil: null };
-  const current = existingParticipant
-    ? room.stats.participantsCurrent
-    : room.stats.participantsCurrent + 1;
+  const current = Object.keys(activeParticipants).length + (existingParticipant ? 0 : 1);
+  const participantUpdates = Object.fromEntries(
+    staleParticipantIds.map((uid) => [`participants/${uid}`, null])
+  );
 
-  // The opaque, high-entropy room ID in the shared room URL is the MVP invite
-  // capability. The locked data model has no separate invite-token field.
+  // Repeated joins act as a lightweight heartbeat. Every heartbeat removes
+  // participants inactive for 15 seconds, keeping the list current without
+  // adding a route outside the locked API surface.
   await databasePatch(env, `rooms/${roomId}`, {
+    ...participantUpdates,
     [`participants/${user.uid}`]: participant,
     stats: {
       ...room.stats,
@@ -232,10 +242,11 @@ export async function reportMessage(
     if (!room.participants?.[participantId]) {
       throw new HttpError(404, 'Participant not found.');
     }
-    await databasePatch(env, `rooms/${roomId}`, { health: 'good' });
+    const health = degradeHealthToGood(room.health);
+    await databasePatch(env, `rooms/${roomId}`, { health });
     // The locked data model has no participant-report collection. Future
     // moderation can persist an internal report ledger outside this model.
-    return { reported: true };
+    return { reported: true, health };
   }
 
   const messageId = validateRoomId(input.messageId);
@@ -247,13 +258,14 @@ export async function reportMessage(
   if (!message) throw new HttpError(404, 'Message not found.');
 
   await databasePatch(env, path, { reported: true });
-  if (!recipientId && room.health === 'excellent') {
-    await databasePatch(env, `rooms/${roomId}`, { health: 'good' });
+  const health = recipientId ? room.health : degradeHealthToGood(room.health);
+  if (!recipientId && health !== room.health) {
+    await databasePatch(env, `rooms/${roomId}`, { health });
   }
 
   // Future report scoring can escalate good → warning → restricted and add a
   // subtle system message. The V1 data model intentionally keeps no reporter list.
-  return { reported: true };
+  return { reported: true, health };
 }
 
 export async function leaveRoom(
@@ -290,7 +302,7 @@ export async function getRoom(
   const room = await getActiveRoom(env, roomId);
   const participant = room.participants?.[user.uid];
 
-  if (room.type !== 'public' && !participant) {
+  if (!participant) {
     throw new HttpError(403, 'Join this room before viewing it.');
   }
 
@@ -304,9 +316,14 @@ export async function getRoom(
       privateMessagePath(user.uid, privateWith)
     )) ?? {};
     return {
-      room,
+      room: {
+        ...room,
+        messages: undefined
+      },
       privateWith,
-      messages: await withDownloadUrls(messages, env)
+      messages: await withDownloadUrls(messages, env),
+      participants: room.participants ?? {},
+      viewerId: user.uid
     };
   }
 
@@ -316,7 +333,8 @@ export async function getRoom(
       messages: undefined
     },
     messages: await withDownloadUrls(room.messages ?? {}, env),
-    participants: room.participants ?? {}
+    participants: room.participants ?? {},
+    viewerId: user.uid
   };
 }
 
@@ -461,6 +479,10 @@ function createId(): string {
   let binary = '';
   for (const byte of bytes) binary += String.fromCharCode(byte);
   return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+}
+
+function degradeHealthToGood(currentHealth: Room['health']): Room['health'] {
+  return currentHealth === 'excellent' ? 'good' : currentHealth;
 }
 
 export class HttpError extends Error {

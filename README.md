@@ -1,8 +1,7 @@
 # QuickRoom
 
 QuickRoom is a temporary, 18+ text-and-image discussion tool. The landing,
-Create Room, and Join Room entry flows are implemented; the chat interface is
-intentionally not started.
+Create Room, Join Room, and text-and-image chat flows are implemented.
 
 ## Architecture
 
@@ -27,6 +26,7 @@ Firebase Realtime Database + Firebase Storage
 │   ├── src/
 │   │   ├── api.js
 │   │   ├── auth.js
+│   │   ├── chat.js
 │   │   ├── main.js
 │   │   └── style.css
 │   └── vite.config.js
@@ -46,6 +46,7 @@ Firebase Realtime Database + Firebase Storage
 │   ├── .firebaserc
 │   ├── database.rules.json
 │   ├── firebase.json
+│   ├── storage.cors.json
 │   └── storage.rules
 ├── package.json
 └── .gitignore
@@ -77,6 +78,12 @@ The Worker validates all required input: templates, room names, expiry options
 (`1h`, `6h`, `24h`, `7d`, `never`), room type, nickname, text length, and image
 metadata. It uses per-isolate in-memory rate limiting for now; production-grade
 cross-isolate limits can replace this boundary with a Durable Object later.
+
+The chat frontend polls the Worker once per second for messages and sends a
+presence heartbeat every five seconds. The Worker expires inactive presence
+entries after 15 seconds. This keeps all browser data access on the Worker
+boundary while providing near-real-time updates without a direct Firebase
+connection.
 
 ## Environment variables
 
@@ -123,6 +130,14 @@ either local file or a service account key.
    service-account authority, which bypasses client security rules. Firebase
    rules cannot identify a Cloudflare Worker directly, so deny-all is the
    strictest correct client rule.
+   Configure CORS for the Storage bucket so browser uploads can use the
+   Worker-issued, short-lived signed URLs. Replace the production origin in
+   `firebase/storage.cors.json` if needed, then run:
+
+   ```bash
+   gcloud storage buckets update gs://your-firebase-storage-bucket \
+     --cors-file=firebase/storage.cors.json
+   ```
 3. Install workspace dependencies:
 
    ```bash
