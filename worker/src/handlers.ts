@@ -426,7 +426,7 @@ async function getActiveRoom(env: Env, roomId: string): Promise<StoredRoom> {
       }
       throw new HttpError(410, 'This room has expired.');
     }
-    throw new HttpError(404, 'Room not found.');
+    throw new HttpError(404, 'This room is not available.');
   }
 
   if (room.expiresAt !== null && room.expiresAt <= Date.now()) {

@@ -39,6 +39,10 @@ export class ChatRoom {
         this.renderExpired();
         return;
       }
+      if (error.status === 404) {
+        this.renderMissingRoom();
+        return;
+      }
       if (error.status === 403) {
         this.renderJoinRequired();
         return;
@@ -232,6 +236,20 @@ export class ChatRoom {
           <p class="eyebrow">QuickRoom</p>
           <h1>This room has expired.</h1>
           <p>Temporary rooms and their content are removed when their time is up.</p>
+          <button class="button button-primary" type="button" data-chat-action="leave">Return home</button>
+        </section>
+      </main>
+    `;
+    this.root.addEventListener('click', this.handleClick);
+  }
+
+  renderMissingRoom() {
+    this.root.innerHTML = `
+      <main class="chat-loading">
+        <section class="room-join-card">
+          <p class="eyebrow">QuickRoom</p>
+          <h1>This room is not available.</h1>
+          <p>Please check the link or create a new temporary room.</p>
           <button class="button button-primary" type="button" data-chat-action="leave">Return home</button>
         </section>
       </main>

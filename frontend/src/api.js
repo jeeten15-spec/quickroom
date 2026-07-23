@@ -3,26 +3,34 @@ import { getAnonymousIdToken } from './auth';
 const workerUrl = import.meta.env.VITE_WORKER_URL?.replace(/\/$/, '') ?? '';
 
 export async function apiRequest(path, body) {
-  const idToken = await getAnonymousIdToken();
-  const response = await fetch(`${workerUrl}${path}`, {
+  return request(path, {
     method: 'POST',
-    headers: {
-      Authorization: `Bearer ${idToken}`,
-      'Content-Type': 'application/json'
-    },
     body: JSON.stringify(body)
   });
-
-  return readResponse(response);
 }
 
 export async function apiGet(path) {
-  const idToken = await getAnonymousIdToken();
-  const response = await fetch(`${workerUrl}${path}`, {
-    headers: { Authorization: `Bearer ${idToken}` }
-  });
+  return request(path);
+}
 
-  return readResponse(response);
+async function request(path, options = {}) {
+  const idToken = await getAnonymousIdToken();
+  try {
+    const response = await fetch(`${workerUrl}${path}`, {
+      ...options,
+      headers: {
+        Authorization: `Bearer ${idToken}`,
+        ...(options.body ? { 'Content-Type': 'application/json' } : {})
+      }
+    });
+
+    return readResponse(response);
+  } catch (error) {
+    if (error instanceof TypeError) {
+      throw new Error('Unable to reach QuickRoom. Check your connection and try again.');
+    }
+    throw error;
+  }
 }
 
 async function readResponse(response) {

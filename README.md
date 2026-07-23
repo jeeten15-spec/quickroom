@@ -218,6 +218,87 @@ Firebase Storage bucket. The standard Firebase Admin service account role is
 sufficient for development; production should use a dedicated service account
 with only the required database and storage permissions.
 
+## Go Live
+
+Follow these steps in order. Values labelled `your-...` must be replaced with
+your own Firebase or Cloudflare values.
+
+1. Create Firebase resources.
+   - In the [Firebase console](https://console.firebase.google.com/), select
+     **Add project** and create `quickroom`.
+   - Open **Authentication → Sign-in method**, enable **Anonymous**, then open
+     **Settings → Authorized domains** and add your Pages domain and
+     `localhost`.
+   - Open **Realtime Database**, create the database, then open **Storage** and
+     create the default bucket. Note its exact bucket name.
+   - Add a Web app in **Project settings → General**. Copy its API key, auth
+     domain, project ID, and app ID.
+2. Lock down Firebase browser access.
+   - Install the Firebase CLI and authenticate: `npx firebase-tools login`.
+   - Replace the placeholder project ID in `firebase/.firebaserc`, then deploy
+     the rules:
+
+     ```bash
+     npx firebase-tools deploy --config firebase/firebase.json --project your-firebase-project-id
+     ```
+
+3. Create the Worker service account.
+   - In Firebase, open **Project settings → Service accounts → Generate new
+     private key**. Save the downloaded JSON in a password manager or secure
+     local location; never commit it or add it to Pages.
+   - In `worker/wrangler.toml`, replace `FIREBASE_PROJECT_ID`,
+     `FIREBASE_DATABASE_URL`, `FIREBASE_STORAGE_BUCKET`, and
+     `ALLOWED_ORIGINS`. These are Worker variables, not browser secrets.
+   - Authenticate Wrangler, then paste the complete JSON only when prompted:
+
+     ```bash
+     cd worker
+     npx wrangler login
+     npx wrangler secret put FIREBASE_SERVICE_ACCOUNT_JSON
+     ```
+
+4. Apply Storage CORS.
+   - Add every production Pages URL to the `origin` list in
+     `firebase/storage.cors.json`.
+   - Apply it with Google Cloud CLI:
+
+     ```bash
+     gcloud storage buckets update gs://your-firebase-storage-bucket \
+       --cors-file=firebase/storage.cors.json
+     ```
+
+5. Deploy the Worker.
+   - From `worker/`, run `npm run deploy`.
+   - In Cloudflare, attach the Worker to an HTTPS route such as
+     `api.quickroom.org/*`. Confirm the variables and secret appear in
+     **Worker Settings → Variables and Secrets**.
+   - `worker/wrangler.toml` includes the hourly Cron Trigger. After deployment,
+     confirm `0 * * * *` appears in **Worker → Triggers**.
+6. Deploy Pages.
+   - Create a Cloudflare Pages project connected to this repository.
+   - Set build root to `frontend`, build command to `npm run build`, and output
+     directory to `frontend/dist`.
+   - Add these Pages environment variables from the Firebase Web app:
+     `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`,
+     `VITE_FIREBASE_PROJECT_ID`, and `VITE_FIREBASE_APP_ID`.
+   - Set `VITE_WORKER_URL` to the Worker origin, for example
+     `https://api.quickroom.org`. Add the Pages URL to the Worker's
+     `ALLOWED_ORIGINS`, then redeploy the Worker if it changed.
+
+### First live test
+
+1. In browser A, open Pages, confirm age, create a room with **1 hour** expiry,
+   and click **Share**.
+2. In an incognito window or browser B, open the shared link, confirm age,
+   choose a nickname, and join.
+3. Send text in both directions, then upload a JPEG, PNG, WebP, or GIF under
+   5 MB. Open the image to confirm the full-size view.
+4. Confirm the participant count and summary update. Test a private message if
+   enabled, then leave browser B and confirm its participant entry disappears.
+5. After the room expires, revisit the link. It should show the expired state;
+   the lazy cleanup runs immediately and the hourly Cron catches untouched
+   rooms.
+
 ## Production Deployment Checklist
 
 1. Firebase: create the project, enable Realtime Database and the default
