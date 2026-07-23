@@ -2,6 +2,7 @@ import { apiGet, apiRequest } from './api';
 import { generateNickname } from './nickname';
 
 const IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+const BLOCKED_PHRASES = ['buy now', 'click here', 'free money', 'crypto giveaway'];
 const MESSAGE_INTERVAL_MS = 1_000;
 const HEARTBEAT_INTERVAL_MS = 5_000;
 
@@ -87,7 +88,10 @@ export class ChatRoom {
       }
       this.updateView();
     } catch (error) {
-      if (error.status === 410) this.showNotice('This room has expired.');
+      if (error.status === 410) {
+        this.destroy();
+        this.renderExpired();
+      }
     } finally {
       this.isRefreshing = false;
     }
@@ -309,6 +313,9 @@ export class ChatRoom {
     const text = this.root.querySelector('[data-message-text]').value.trim();
     if (!text) return;
     if (text.length > 500) return this.showNotice('Messages are limited to 500 characters.');
+    if (containsBlockedPhrase(text)) {
+      return this.showNotice('Please reword that message before sending.');
+    }
     if (Date.now() - this.lastSentAt < 1_500) {
       return this.showNotice('Please wait a moment before sending another message.');
     }
@@ -532,6 +539,11 @@ function validateNickname(value) {
     throw new Error('Nickname must be 3–20 letters, numbers, or spaces.');
   }
   return nickname;
+}
+
+function containsBlockedPhrase(text) {
+  const normalizedText = text.toLowerCase();
+  return BLOCKED_PHRASES.some((phrase) => normalizedText.includes(phrase));
 }
 
 function formatText(value) {
