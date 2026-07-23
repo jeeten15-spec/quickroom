@@ -1,7 +1,8 @@
 # QuickRoom
 
-QuickRoom is a temporary, 18+ text-and-image discussion tool. The Worker API is
-implemented; the frontend UI has intentionally not been started.
+QuickRoom is a temporary, 18+ text-and-image discussion tool. The landing,
+Create Room, and Join Room entry flows are implemented; the chat interface is
+intentionally not started.
 
 ## Architecture
 
@@ -22,7 +23,12 @@ Firebase Realtime Database + Firebase Storage
 │   ├── .env.example
 │   ├── index.html
 │   ├── package.json
-│   ├── src/main.js
+│   ├── public/_redirects
+│   ├── src/
+│   │   ├── api.js
+│   │   ├── auth.js
+│   │   ├── main.js
+│   │   └── style.css
 │   └── vite.config.js
 ├── worker/                   # Cloudflare Worker API boundary
 │   ├── .dev.vars.example
@@ -74,11 +80,18 @@ cross-isolate limits can replace this boundary with a Durable Object later.
 
 ## Environment variables
 
-The frontend needs no Firebase variables.
+The Firebase web configuration values below are public Firebase project
+identifiers. They are used solely for Firebase Anonymous Authentication, which
+issues the ID token required by the Worker. They do not grant database or
+Storage access; those Firebase rules remain deny-all for browser clients.
 
 | Variable | Where set | Purpose |
 | --- | --- | --- |
-| `VITE_WORKER_URL` | `frontend/.env` | Worker URL when not using the local Vite proxy |
+| `VITE_FIREBASE_API_KEY` | `frontend/.env` | Firebase web API key for Anonymous Authentication |
+| `VITE_FIREBASE_AUTH_DOMAIN` | `frontend/.env` | Firebase Authentication domain |
+| `VITE_FIREBASE_PROJECT_ID` | `frontend/.env` | Firebase project identifier used by the Auth client |
+| `VITE_FIREBASE_APP_ID` | `frontend/.env` | Firebase web app identifier |
+| `VITE_WORKER_URL` | `frontend/.env` | Worker origin; leave empty for same-origin `/api` |
 | `FIREBASE_PROJECT_ID` | Worker variable | Firebase project identifier |
 | `FIREBASE_DATABASE_URL` | Worker variable | Realtime Database URL |
 | `FIREBASE_STORAGE_BUCKET` | Worker variable | Cloud Storage bucket |
@@ -116,8 +129,11 @@ either local file or a service account key.
    npm install
    ```
 
-4. Copy the example environment files, fill in non-secret values, and start
-   both services in separate terminals:
+4. In Firebase **Project settings → General**, add a Web app if one does not
+   exist and copy its configuration values into `frontend/.env`. In Firebase
+   Authentication **Settings → Authorized domains**, add the local and deployed
+   Pages origins. Copy the Worker example variables as well, then start both
+   services in separate terminals:
 
    ```bash
    npm run dev
@@ -137,9 +153,13 @@ either local file or a service account key.
    `api.quickroom.org/*`, and update `ALLOWED_ORIGINS` with the Pages domain.
 6. Create a Cloudflare Pages project connected to this repository. Use
    `frontend` as the build root, `npm run build` as the build command, and
-   `frontend/dist` as the output directory. Set `VITE_WORKER_URL` to the
-   deployed Worker origin only if Pages will not proxy `/api` through the same
-   origin.
+   `frontend/dist` as the output directory. Set the five `VITE_*` frontend
+   variables from `frontend/.env`; `VITE_WORKER_URL` must point to the deployed
+   Worker unless Pages serves the Worker under the same `/api` origin. Add the
+   Pages URL to the Worker's `ALLOWED_ORIGINS`.
+
+The frontend only calls the Worker after Firebase Anonymous Authentication
+provides an ID token. It never imports Firebase Realtime Database or Storage.
 
 Cloudflare Workers cannot reliably run the Node-oriented Firebase Admin SDK.
 The Worker uses a service-account integration boundary for Firebase and Google
