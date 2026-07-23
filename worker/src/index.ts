@@ -1,54 +1,77 @@
-import type { Env } from './firebase';
-
-type RouteName =
-  | 'createRoom'
-  | 'joinRoom'
-  | 'sendMessage'
-  | 'uploadImage'
-  | 'report'
-  | 'leaveRoom'
-  | 'getRoom';
-
-const routeMethods: Record<RouteName, string> = {
-  createRoom: 'POST',
-  joinRoom: 'POST',
-  sendMessage: 'POST',
-  uploadImage: 'POST',
-  report: 'POST',
-  leaveRoom: 'POST',
-  getRoom: 'GET'
-};
+import {
+  FirebaseAuthError,
+  FirebaseRequestError,
+  assertFirebaseConfiguration,
+  type Env,
+  verifyFirebaseIdToken
+} from './firebase';
+import {
+  HttpError,
+  createRoom,
+  getRoom,
+  joinRoom,
+  leaveRoom,
+  reportMessage,
+  sendMessage,
+  uploadImage
+} from './handlers';
+import { ValidationError } from './validation';
 
 export default {
   async fetch(request, env: Env): Promise<Response> {
     const origin = request.headers.get('Origin');
-    const corsHeaders = getCorsHeaders(origin, env);
+    if (origin && !isAllowedOrigin(origin, env)) {
+      return json({ error: 'Origin is not allowed.' }, 403, {});
+    }
+    const corsHeaders = getCorsHeaders(origin);
 
     if (request.method === 'OPTIONS') {
       return new Response(null, { status: 204, headers: corsHeaders });
     }
 
-    const pathname = new URL(request.url).pathname;
-    const route = pathname.replace(/^\/api\//, '') as RouteName;
+    try {
+      assertFirebaseConfiguration(env);
+      const user = await verifyFirebaseIdToken(request.headers.get('Authorization'), env);
+      const url = new URL(request.url);
 
-    if (!Object.hasOwn(routeMethods, route)) {
+      if (request.method === 'POST' && url.pathname === '/api/createRoom') {
+        return json(await createRoom(await readJson(request), user, env), 201, corsHeaders);
+      }
+      if (request.method === 'POST' && url.pathname === '/api/joinRoom') {
+        return json(await joinRoom(await readJson(request), user, env), 200, corsHeaders);
+      }
+      if (request.method === 'POST' && url.pathname === '/api/sendMessage') {
+        return json(await sendMessage(await readJson(request), user, env), 201, corsHeaders);
+      }
+      if (request.method === 'POST' && url.pathname === '/api/uploadImage') {
+        return json(await uploadImage(await readJson(request), user, env), 200, corsHeaders);
+      }
+      if (request.method === 'POST' && url.pathname === '/api/report') {
+        return json(await reportMessage(await readJson(request), user, env), 200, corsHeaders);
+      }
+      if (request.method === 'POST' && url.pathname === '/api/leaveRoom') {
+        return json(await leaveRoom(await readJson(request), user, env), 200, corsHeaders);
+      }
+
+      const roomMatch = /^\/api\/room\/([A-Za-z0-9_-]+)$/.exec(url.pathname);
+      if (request.method === 'GET' && roomMatch) {
+        return json(
+          await getRoom(roomMatch[1], url.searchParams.get('privateWith'), user, env),
+          200,
+          corsHeaders
+        );
+      }
+
       return json({ error: 'Not found.' }, 404, corsHeaders);
+    } catch (error) {
+      return errorResponse(error, corsHeaders);
     }
-
-    if (request.method !== routeMethods[route]) {
-      return json({ error: 'Method not allowed.' }, 405, corsHeaders);
-    }
-
-    return handlePlaceholder(route, corsHeaders);
   }
 } satisfies ExportedHandler<Env>;
 
-function getCorsHeaders(origin: string | null, env: Env): HeadersInit {
-  const allowedOrigins = env.ALLOWED_ORIGINS.split(',').map((value) => value.trim());
-  const allowedOrigin = origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
-
+function getCorsHeaders(origin: string | null): HeadersInit {
   return {
-    'Access-Control-Allow-Origin': allowedOrigin,
+    ...(origin ? { 'Access-Control-Allow-Origin': origin } : {}),
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'Content-Type': 'application/json; charset=utf-8',
@@ -56,28 +79,42 @@ function getCorsHeaders(origin: string | null, env: Env): HeadersInit {
   };
 }
 
-function handlePlaceholder(route: RouteName, headers: HeadersInit): Response {
-  /**
-   * Each route will validate the anonymous identity, request payload, room
-   * state, expiry, health state, and private-chat permission before writing.
-   *
-   * - createRoom: validate room input; create exact Room data and system message.
-   * - joinRoom: validate room/link and nickname; update presence.
-   * - sendMessage: enforce 500 characters and 1 message per 1.5 seconds.
-   * - uploadImage: validate JPEG/PNG/WebP/GIF and 5 MB max; issue signed URLs.
-   * - report: record report and apply moderation/room-health hooks.
-   * - leaveRoom: remove presence and update statistics.
-   * - getRoom: return a read model for the frontend.
-   *
-   * Firebase Realtime Database writes, rate-limit state, moderation calls,
-   * expiry cleanup, future payments, analytics, ads, and AI participant hooks
-   * remain exclusively in this Worker.
-   */
-  return json(
-    { error: `${route} is scaffolded but not implemented.` },
-    501,
-    headers
-  );
+async function readJson(request: Request): Promise<unknown> {
+  if (!request.headers.get('Content-Type')?.startsWith('application/json')) {
+    throw new ValidationError('Content-Type must be application/json.');
+  }
+  const contentLength = Number(request.headers.get('Content-Length') ?? 0);
+  if (contentLength > 32 * 1024) {
+    throw new HttpError(413, 'Request body is too large.');
+  }
+
+  try {
+    return await request.json();
+  } catch {
+    throw new ValidationError('Request body must contain valid JSON.');
+  }
+}
+
+function isAllowedOrigin(origin: string, env: Env): boolean {
+  return env.ALLOWED_ORIGINS.split(',').some((allowedOrigin) => allowedOrigin.trim() === origin);
+}
+
+function errorResponse(error: unknown, headers: HeadersInit): Response {
+  if (error instanceof ValidationError) {
+    return json({ error: error.message }, 400, headers);
+  }
+  if (error instanceof FirebaseAuthError) {
+    return json({ error: error.message }, 401, headers);
+  }
+  if (error instanceof HttpError) {
+    return json({ error: error.message }, error.status, headers);
+  }
+  if (error instanceof FirebaseRequestError) {
+    return json({ error: 'The service is temporarily unavailable.' }, 502, headers);
+  }
+
+  console.error(error);
+  return json({ error: 'Internal server error.' }, 500, headers);
 }
 
 function json(body: unknown, status: number, headers: HeadersInit): Response {

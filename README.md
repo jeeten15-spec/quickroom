@@ -1,8 +1,7 @@
 # QuickRoom
 
-QuickRoom is a temporary, 18+ text-and-image discussion tool. This repository
-contains only the initial locked-architecture scaffold; no product UI or
-business logic has been implemented yet.
+QuickRoom is a temporary, 18+ text-and-image discussion tool. The Worker API is
+implemented; the frontend UI has intentionally not been started.
 
 ## Architecture
 
@@ -30,7 +29,9 @@ Firebase Realtime Database + Firebase Storage
 │   ├── package.json
 │   ├── src/
 │   │   ├── firebase.ts
-│   │   └── index.ts
+│   │   ├── handlers.ts
+│   │   ├── index.ts
+│   │   └── validation.ts
 │   └── wrangler.toml
 ├── shared/                   # Exact Firebase record types and helpers
 │   ├── package.json
@@ -44,10 +45,11 @@ Firebase Realtime Database + Firebase Storage
 └── .gitignore
 ```
 
-## API scaffold
+## Worker API
 
-The Worker currently accepts CORS preflight requests and exposes these
-unimplemented API route placeholders:
+All API routes require a Firebase Anonymous Authentication ID token in
+`Authorization: Bearer <id-token>`. The Worker verifies the token with
+Firebase's public signing keys before it reads or writes data.
 
 | Route | Method |
 | --- | --- |
@@ -57,11 +59,18 @@ unimplemented API route placeholders:
 | `/api/uploadImage` | `POST` |
 | `/api/report` | `POST` |
 | `/api/leaveRoom` | `POST` |
-| `/api/getRoom` | `GET` |
+| `/api/room/:roomId` | `GET` |
 
-Each returns `501` until the next implementation phase. The Worker source marks
-the locations for validation, rate limiting, service-account REST access,
-Cloud Storage signed URLs, moderation, cleanup, and future payments/AI hooks.
+`POST /api/uploadImage` validates image metadata and returns a 15-minute signed
+Cloud Storage upload URL. The browser uploads directly to that one-time scoped
+URL, then calls `sendMessage` with the returned `imagePath`, `contentType`, and
+`size`. Before creating the image message, the Worker reads object metadata to
+verify its actual type and byte size.
+
+The Worker validates all required input: templates, room names, expiry options
+(`1h`, `6h`, `24h`, `7d`, `never`), room type, nickname, text length, and image
+metadata. It uses per-isolate in-memory rate limiting for now; production-grade
+cross-isolate limits can replace this boundary with a Durable Object later.
 
 ## Environment variables
 
@@ -84,9 +93,10 @@ either local file or a service account key.
 
 1. Create a Firebase project in the Firebase console. Enable **Realtime
    Database**, choose the desired region, and create the default **Storage**
-   bucket. Enable Firebase Anonymous Authentication for the later identity
-   implementation. Create a service account key in **Project settings → Service
-   accounts** and keep its complete JSON private.
+   bucket. Enable **Anonymous** in Firebase Authentication's sign-in providers.
+   API callers must obtain an Anonymous Authentication ID token and pass it to
+   the Worker; the API verifies it server-side. Create a service account key in
+   **Project settings → Service accounts** and keep its complete JSON private.
 2. Replace `your-firebase-project-id` in `firebase/.firebaserc`,
    `worker/wrangler.toml`, and the local Worker variables. Install the Firebase
    CLI, authenticate with `firebase login`, then deploy the deny-all client
@@ -96,8 +106,10 @@ either local file or a service account key.
    npx firebase-tools deploy --config firebase/firebase.json --project your-firebase-project-id
    ```
 
-   These rules intentionally deny every browser read and write. The future
-   Worker uses service-account authority, which bypasses client security rules.
+   These rules intentionally deny every browser read and write. The Worker uses
+   service-account authority, which bypasses client security rules. Firebase
+   rules cannot identify a Cloudflare Worker directly, so deny-all is the
+   strictest correct client rule.
 3. Install workspace dependencies:
 
    ```bash
@@ -130,7 +142,28 @@ either local file or a service account key.
    origin.
 
 Cloudflare Workers cannot reliably run the Node-oriented Firebase Admin SDK.
-The Worker scaffold therefore reserves a service-account integration boundary
-for Firebase and Google REST APIs using Web Crypto. This provides the same
-server-only privileged access while remaining compatible with the Workers
-runtime.
+The Worker uses a service-account integration boundary for Firebase and Google
+REST APIs using Web Crypto. This provides the same server-only privileged
+access while remaining compatible with the Workers runtime.
+
+The service account needs access to the Realtime Database and the default
+Firebase Storage bucket. The standard Firebase Admin service account role is
+sufficient for development; production should use a dedicated service account
+with only the required database and storage permissions.
+
+## Known advisories
+
+`npm audit` reports no advisories in `frontend`. It reports three high-severity
+development-only transitive advisories in `worker`:
+
+| Package | Installed version | Dependency path | Advisory |
+| --- | --- | --- | --- |
+| `wrangler` | `4.113.0` | direct development dependency | inherits `miniflare` advisory |
+| `miniflare` | `4.20260721.0` | `wrangler → miniflare` | inherits `sharp` advisory |
+| `sharp` | `0.34.5` | `wrangler → miniflare → sharp` | `GHSA-f88m-g3jw-g9cj` / CVE-2026-33327, CVE-2026-33328, CVE-2026-35590, CVE-2026-35591 |
+
+The installed Wrangler release is the latest available release and still
+depends on this Miniflare/Sharp chain. `npm audit fix` cannot resolve it without
+forcing an incompatible dependency override. These packages are used only for
+local Worker development and dry-run deployment; they are not bundled into the
+deployed Worker. No override was added to avoid risking Wrangler compatibility.
