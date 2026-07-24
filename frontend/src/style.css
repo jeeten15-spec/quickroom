@@ -129,6 +129,12 @@ footer {
   font-size: 13px;
 }
 
+.footer-welcome {
+  margin-bottom: 8px;
+  color: #555555;
+  font-size: 13px;
+}
+
 footer span {
   padding: 0 4px;
 }
@@ -435,7 +441,9 @@ code {
 
 .chat-page {
   width: min(100%, 1120px);
+  display: flex;
   min-height: 100vh;
+  flex-direction: column;
   margin: auto;
   padding: 16px;
 }
@@ -541,7 +549,8 @@ code {
 
 .chat-layout {
   display: grid;
-  min-height: calc(100vh - 160px);
+  min-height: 0;
+  flex: 1;
   border-top: 0;
   border-radius: 0 0 12px 12px;
 }
@@ -549,10 +558,11 @@ code {
 .message-panel {
   display: grid;
   grid-template-rows: minmax(280px, 1fr) auto auto;
-  min-height: 60vh;
+  min-height: 0;
 }
 
 .message-list {
+  min-height: 0;
   overflow-y: auto;
   padding: 18px;
 }
@@ -737,7 +747,8 @@ code {
 }
 
 .report-dialog,
-.room-join-card {
+.room-join-card,
+.share-dialog {
   display: grid;
   width: min(100%, 380px);
   gap: 16px;
@@ -748,13 +759,35 @@ code {
 }
 
 .report-dialog h2,
-.room-join-card h1 {
+.room-join-card h1,
+.share-dialog h2 {
   margin: 0;
   font-size: 22px;
   letter-spacing: -0.025em;
 }
 
 .report-dialog p {
+  color: #555555;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.share-dialog {
+  text-align: center;
+}
+
+.share-dialog code {
+  display: block;
+  overflow-wrap: anywhere;
+  padding: 12px;
+  border: 1px solid #e5e5e5;
+  border-radius: 9px;
+  background: #fafafa;
+  color: #111111;
+  font-size: 15px;
+}
+
+.share-dialog > p:not(.eyebrow) {
   color: #555555;
   font-size: 15px;
   line-height: 1.45;

@@ -19,7 +19,7 @@ const templates = [
   ['event', '🎉', 'Event', 'Event Room'],
   ['brainstorm', '💡', 'Brainstorm', 'Brainstorm'],
   ['interview', '📋', 'Interview', 'Interview Room'],
-  ['blank', '✨', 'Blank', 'Untitled Room']
+  ['blank', '✨', 'Let me Decide', 'Untitled Room']
 ];
 
 const ageGateKey = 'quickroom.age-confirmed';
@@ -90,7 +90,10 @@ function renderLanding() {
           }
         </div>
       </div>
-      <footer>18+ only <span>·</span> Temporary rooms <span>·</span> No accounts</footer>
+      <footer>
+        <p class="footer-welcome">Welcome to your private space</p>
+        <span>18+ only</span> <span>·</span> Temporary rooms <span>·</span> No accounts
+      </footer>
     </section>
   `;
 }
@@ -98,9 +101,9 @@ function renderLanding() {
 function renderJoinForm() {
   return `
     <form class="join-form" data-form="join">
-      <label for="join-room">Room link or code</label>
+      <label for="join-room">Room code</label>
       <input id="join-room" name="room" type="text" autocomplete="off" required
-        placeholder="Paste a link or room code" />
+        placeholder="Enter the room code" />
       <label for="join-nickname">Nickname</label>
       <input id="join-nickname" name="nickname" type="text" minlength="3" maxlength="20"
         value="${escapeHtml(state.joinNickname)}" required />
@@ -457,19 +460,11 @@ function leaveRoomView() {
 }
 
 function roomIdFromInput(value) {
-  if (typeof value !== 'string') throw new Error('Enter a room link or code.');
-  const input = value.trim();
-  let roomId = input;
+  if (typeof value !== 'string') throw new Error('Enter a room code.');
+  const roomId = value.trim();
 
-  if (input.includes('://')) {
-    try {
-      roomId = new URL(input).pathname.split('/').filter(Boolean).pop() || '';
-    } catch {
-      throw new Error('Enter a valid room link or code.');
-    }
-  }
   if (!/^[A-Za-z0-9_-]{16,64}$/.test(roomId)) {
-    throw new Error('Enter a valid room link or code.');
+    throw new Error('Enter a valid room code.');
   }
   return roomId;
 }

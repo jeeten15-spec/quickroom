@@ -21,6 +21,7 @@ export class ChatRoom {
     this.isRefreshing = false;
     this.reportTarget = null;
     this.imageUrl = null;
+    this.shareCode = null;
     this.participantsOpen = false;
     this.isOffline = !navigator.onLine;
     this.pollTimer = null;
@@ -64,6 +65,7 @@ export class ChatRoom {
     this.root.removeEventListener('submit', this.handleSubmit);
     this.root.removeEventListener('input', this.handleInput);
     this.root.removeEventListener('change', this.handleChange);
+    this.root.removeEventListener('keydown', this.handleKeyDown);
   }
 
   async loadGroup() {
@@ -163,6 +165,7 @@ export class ChatRoom {
     this.root.addEventListener('submit', this.handleSubmit);
     this.root.addEventListener('input', this.handleInput);
     this.root.addEventListener('change', this.handleChange);
+    this.root.addEventListener('keydown', this.handleKeyDown);
     window.addEventListener('online', this.handleNetworkChange);
     window.addEventListener('offline', this.handleNetworkChange);
     this.updateView(true);
@@ -170,8 +173,6 @@ export class ChatRoom {
 
   updateView(initial = false) {
     const messageList = this.root.querySelector('[data-message-list]');
-    const shouldStickToBottom =
-      initial || messageList.scrollHeight - messageList.scrollTop - messageList.clientHeight < 80;
     const messages = this.privateWith ? this.privateMessages : this.groupMessages;
 
     this.root.querySelector('[data-room-icon]').textContent = this.room.icon;
@@ -207,7 +208,7 @@ export class ChatRoom {
     this.root.querySelector('[data-chat-form="message"] button[type="submit"]').disabled =
       composerDisabled;
     messageList.innerHTML = renderMessages(messages, this.privateWith?.uid);
-    if (shouldStickToBottom) messageList.scrollTop = messageList.scrollHeight;
+    messageList.scrollTop = messageList.scrollHeight;
     this.renderOverlay();
   }
 
@@ -264,11 +265,12 @@ export class ChatRoom {
 
     if (action === 'share') {
       try {
-        await navigator.clipboard.writeText(window.location.href);
-        this.showNotice('Link copied.');
+        await navigator.clipboard.writeText(this.roomId);
       } catch {
-        this.showNotice('Copy this room link from your address bar.');
+        // The visible code remains available for manual copying.
       }
+      this.shareCode = this.roomId;
+      this.renderOverlay();
     }
     if (action === 'leave') await this.leave();
     if (action === 'choose-image') this.root.querySelector('[data-image-input]').click();
@@ -303,6 +305,7 @@ export class ChatRoom {
     if (action === 'close-overlay') {
       this.reportTarget = null;
       this.imageUrl = null;
+      this.shareCode = null;
       this.renderOverlay();
     }
     if (action === 'confirm-report') await this.submitReport();
@@ -353,6 +356,17 @@ export class ChatRoom {
     if (!event.target.matches('[data-message-text]')) return;
     const length = event.target.value.length;
     this.root.querySelector('[data-character-count]').textContent = `${length} / 500`;
+  };
+
+  handleKeyDown = (event) => {
+    if (
+      event.target.matches('[data-message-text]') &&
+      event.key === 'Enter' &&
+      !event.shiftKey
+    ) {
+      event.preventDefault();
+      event.target.closest('form').requestSubmit();
+    }
   };
 
   handleChange = async (event) => {
@@ -465,6 +479,20 @@ export class ChatRoom {
         <div class="chat-overlay">
           <button class="overlay-close" type="button" data-chat-action="close-overlay" aria-label="Close">×</button>
           <img src="${escapeHtml(this.imageUrl)}" alt="Shared image" />
+        </div>
+      `;
+      return;
+    }
+    if (this.shareCode) {
+      overlay.innerHTML = `
+        <div class="chat-overlay">
+          <section class="share-dialog" role="dialog" aria-modal="true" aria-labelledby="share-title">
+            <p class="eyebrow">Room code copied</p>
+            <h2 id="share-title">Share this code</h2>
+            <code>${escapeHtml(this.shareCode)}</code>
+            <p>Send it to someone, then they can choose “Join existing room” and enter the code.</p>
+            <button class="button button-primary" type="button" data-chat-action="close-overlay">Done</button>
+          </section>
         </div>
       `;
       return;

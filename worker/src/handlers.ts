@@ -121,7 +121,6 @@ export async function joinRoom(
   env: Env
 ): Promise<Record<string, unknown>> {
   const input = expectRecord(body);
-  enforceRateLimit(`join:${user.uid}`, 2_000);
 
   const roomId = validateRoomId(input.roomId);
   const nickname = validateNickname(input.nickname);
