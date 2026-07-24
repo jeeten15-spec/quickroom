@@ -345,7 +345,7 @@ async function signStorageUrl(
     credentialScope,
     canonicalRequestHash
   ].join('\n');
-  const signature = await signWithServiceAccount(serviceAccount, stringToSign);
+  const signature = bytesToHex(await signWithServiceAccount(serviceAccount, stringToSign));
   const signedUrl = `https://storage.googleapis.com${canonicalUri}?${canonicalQuery}&X-Goog-Signature=${signature}`;
   const expiresAt = now.getTime() + expiresInSeconds * 1000;
 
@@ -393,13 +393,13 @@ async function signJwt(
     serviceAccount,
     `${encodedHeader}.${encodedPayload}`
   );
-  return `${encodedHeader}.${encodedPayload}.${signature}`;
+  return `${encodedHeader}.${encodedPayload}.${bytesToBase64Url(signature)}`;
 }
 
 async function signWithServiceAccount(
   serviceAccount: FirebaseServiceAccount,
   value: string
-): Promise<string> {
+): Promise<Uint8Array> {
   const privateKey = await crypto.subtle.importKey(
     'pkcs8',
     pemToArrayBuffer(serviceAccount.private_key),
@@ -412,7 +412,7 @@ async function signWithServiceAccount(
     privateKey,
     new TextEncoder().encode(value)
   );
-  return bytesToHex(new Uint8Array(signature));
+  return new Uint8Array(signature);
 }
 
 async function sha256Hex(value: string): Promise<string> {
