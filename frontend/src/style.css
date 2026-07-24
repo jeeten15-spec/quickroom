@@ -34,14 +34,6 @@ button:disabled {
   min-height: 100vh;
 }
 
-.global-payment {
-  display: grid;
-  min-height: 56px;
-  place-items: center;
-  padding: 8px 24px 20px;
-  background: #fafafa;
-}
-
 .landing,
 .flow,
 .room-placeholder {

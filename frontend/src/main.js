@@ -68,7 +68,6 @@ function render() {
       ${state.view === 'about' ? renderAbout() : ''}
       ${state.view === 'blog' ? renderBlog() : ''}
     </main>
-    <div class="global-payment" id="payment-button"></div>
     ${state.ageConfirmed ? '' : renderAgeGate()}
     ${state.contactOpen ? renderContactForm() : ''}
   `;
@@ -81,7 +80,6 @@ function render() {
     activeChat.mount();
   }
 
-  mountPaymentButton();
 }
 
 function renderLanding() {
@@ -494,19 +492,6 @@ function renderAgeGate() {
 
 function renderError() {
   return state.error ? `<p class="form-error" role="alert">${escapeHtml(state.error)}</p>` : '';
-}
-
-function mountPaymentButton() {
-  const target = document.querySelector('#payment-button');
-  if (!target) return;
-
-  const form = document.createElement('form');
-  const script = document.createElement('script');
-  script.src = 'https://checkout.razorpay.com/v1/payment-button.js';
-  script.dataset.paymentButtonId = 'pl_THLZBqdXrwPI5h';
-  script.async = true;
-  form.append(script);
-  target.append(form);
 }
 
 
