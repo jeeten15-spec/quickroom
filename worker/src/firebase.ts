@@ -274,6 +274,7 @@ async function getGoogleAccessToken(env: Env): Promise<string> {
     iss: serviceAccount.client_email,
     scope: [
       'https://www.googleapis.com/auth/firebase.database',
+      'https://www.googleapis.com/auth/userinfo.email',
       'https://www.googleapis.com/auth/devstorage.read_write'
     ].join(' '),
     aud: serviceAccount.token_uri,
