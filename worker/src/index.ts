@@ -124,6 +124,7 @@ function errorResponse(error: unknown, headers: HeadersInit): Response {
     return json({ error: error.message }, error.status, headers);
   }
   if (error instanceof FirebaseRequestError) {
+    console.error('QuickRoom Firebase request failed.', error.status, error.message);
     return json({ error: 'The service is temporarily unavailable.' }, 502, headers);
   }
 
