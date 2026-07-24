@@ -9,10 +9,10 @@ compatibility_date = "2026-07-23"
 crons = ["0 * * * *"]
 
 [vars]
-FIREBASE_PROJECT_ID = "your-firebase-project-id"
-FIREBASE_DATABASE_URL = "https://your-firebase-project-id-default-rtdb.firebaseio.com"
-FIREBASE_STORAGE_BUCKET = "your-firebase-project-id.firebasestorage.app"
-ALLOWED_ORIGINS = "http://localhost:5173,https://quickroom.org"
+FIREBASE_PROJECT_ID = "quickroom-4bdcd"
+FIREBASE_DATABASE_URL = "https://quickroom-4bdcd-default-rtdb.asia-southeast1.firebasedatabase.app"
+FIREBASE_STORAGE_BUCKET = "quickroom-4bdcd.firebasestorage.app"
+ALLOWED_ORIGINS = "http://localhost:5173,https://quickroom.org,https://www.quickroom.org"
 
 # Set this encrypted secret before local or production use:
 # wrangler secret put FIREBASE_SERVICE_ACCOUNT_JSON
