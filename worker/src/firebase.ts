@@ -240,10 +240,12 @@ async function databaseRequest<T>(
     .map(encodePathSegment)
     .join('/');
   const url = new URL(`${databaseUrl.toString().replace(/\/$/, '')}/${encodedPath}.json`);
+  // Realtime Database REST accepts Google OAuth service-account tokens through
+  // its `access_token` query parameter, not an Authorization header.
+  url.searchParams.set('access_token', accessToken);
   const response = await fetch(url, {
     method,
     headers: {
-      Authorization: `Bearer ${accessToken}`,
       ...(value === undefined ? {} : { 'Content-Type': 'application/json' })
     },
     body: value === undefined ? undefined : JSON.stringify(value)
