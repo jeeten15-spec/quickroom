@@ -145,15 +145,20 @@ footer {
   text-decoration: none;
 }
 
+.footer-links button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #0066ff;
+  font-size: inherit;
+}
+
 .footer-links a:hover {
   text-decoration: underline;
 }
 
-.payment-button {
-  display: grid;
-  min-height: 38px;
-  place-items: center;
-  margin-top: 16px;
+.footer-links button:hover {
+  text-decoration: underline;
 }
 
 footer span {
@@ -822,6 +827,87 @@ code {
   padding: 24px;
   color: #555555;
   text-align: center;
+}
+
+.info-page {
+  width: min(100%, 720px);
+  margin: auto;
+  padding: 28px 24px 64px;
+  color: #222222;
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.info-page > .back-link {
+  display: inline-block;
+  margin-bottom: 36px;
+}
+
+.info-page h1 {
+  margin: 0 0 32px;
+  font-size: clamp(2rem, 7vw, 2.75rem);
+}
+
+.info-page h2 {
+  margin: 42px 0 14px;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.info-page h3 {
+  margin: 28px 0 8px;
+  font-size: 17px;
+}
+
+.info-page p {
+  margin: 0 0 14px;
+}
+
+.info-page ul {
+  margin: 0 0 16px;
+  padding-left: 22px;
+}
+
+.contact-modal {
+  position: relative;
+  display: grid;
+  width: min(100%, 440px);
+  gap: 14px;
+  padding: 28px;
+  border: 1px solid #e5e5e5;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.contact-modal h1 {
+  font-size: 22px;
+}
+
+.contact-modal p {
+  color: #555555;
+  font-size: 15px;
+}
+
+.contact-modal textarea {
+  width: 100%;
+  padding: 12px;
+  resize: vertical;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  outline: none;
+  font-size: 15px;
+}
+
+.contact-modal textarea:focus {
+  border-color: #0066ff;
+}
+
+.contact-close {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  color: #555555;
 }
 
 @media (min-width: 640px) {

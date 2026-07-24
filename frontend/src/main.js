@@ -28,6 +28,7 @@ const state = {
   ageConfirmed: localStorage.getItem(ageGateKey) === 'true',
   view: getInitialView(),
   joinOpen: false,
+  contactOpen: false,
   error: '',
   busy: false,
   create: createInitialRoomState(),
@@ -37,7 +38,11 @@ const state = {
 function getInitialView() {
   return /^\/room\/[A-Za-z0-9_-]{16,64}$/.test(window.location.pathname)
     ? 'room-placeholder'
-    : 'landing';
+    : window.location.pathname === '/about'
+      ? 'about'
+      : window.location.pathname === '/blog'
+        ? 'blog'
+        : 'landing';
 }
 
 function createInitialRoomState() {
@@ -60,8 +65,11 @@ function render() {
       ${state.view === 'landing' ? renderLanding() : ''}
       ${state.view === 'create' ? renderCreateRoom() : ''}
       ${state.view === 'room-placeholder' ? '<div id="chat-root"></div>' : ''}
+      ${state.view === 'about' ? renderAbout() : ''}
+      ${state.view === 'blog' ? renderBlog() : ''}
     </main>
     ${state.ageConfirmed ? '' : renderAgeGate()}
+    ${state.contactOpen ? renderContactForm() : ''}
   `;
 
   if (state.ageConfirmed && state.view === 'room-placeholder') {
@@ -72,9 +80,6 @@ function render() {
     activeChat.mount();
   }
 
-  if (state.view === 'landing') {
-    mountPaymentButton();
-  }
 }
 
 function renderLanding() {
@@ -95,13 +100,13 @@ function renderLanding() {
         </div>
       </div>
       <footer>
-        <p class="footer-welcome">The fastest way to start a private discussion. No app. No account. No phone number. Just create, share, and collaborate.</p>
+        <p class="footer-welcome">The fastest way to start a private discussion. No app. No account. No phone number.</p>
         <p class="footer-links">
-          <span>Blog</span> <span>·</span> <span>About Us</span> <span>·</span>
-          <a href="mailto:feedback@quickroom.org">Contact Us</a>
+          <a href="/blog" data-action="navigate">Blog</a> <span>·</span>
+          <a href="/about" data-action="navigate">About Us</a> <span>·</span>
+          <button type="button" data-action="open-contact">Contact Us</button>
         </p>
         <p>18+ only <span>·</span> Temporary rooms</p>
-        <div class="payment-button" id="payment-button"></div>
       </footer>
     </section>
   `;
@@ -282,6 +287,182 @@ function renderSegment(group, value, label) {
   `;
 }
 
+function renderAbout() {
+  return `
+    <article class="info-page">
+      <a class="back-link" href="/" data-action="navigate">QuickRoom</a>
+      <h1>About QuickRoom</h1>
+      <p>QuickRoom was created with a simple belief:</p>
+      <p><strong>Technology should remove friction—not create it.</strong></p>
+      <p>Our journey didn't begin in a Silicon Valley startup or a large technology company.</p>
+      <p>It began with a simple observation.</p>
+      <p>Every day, millions of people need a quick place to collaborate, ask questions, solve problems, or simply talk.</p>
+      <p>Yet most online communication tools ask for too much before the conversation even begins.</p>
+      <p>Create an account.</p>
+      <p>Verify your phone.</p>
+      <p>Install an app.</p>
+      <p>Invite contacts.</p>
+      <p>Accept permissions.</p>
+      <p>Manage another notification.</p>
+      <p>We wondered:</p>
+      <p><strong>What if starting a conversation could be as simple as creating a document or opening a web page?</strong></p>
+      <p>That question became QuickRoom.</p>
+
+      <h2>Our Mission</h2>
+      <p>Our mission is to build the simplest, fastest, and most respectful collaboration platform on the web.</p>
+      <p>We believe people should be able to create a private room in seconds, share a link, and start collaborating immediately.</p>
+      <p>No unnecessary barriers.</p>
+      <p>No complicated setup.</p>
+      <p>Just meaningful conversations.</p>
+
+      <h2>Our Story</h2>
+      <p>QuickRoom was founded by someone who comes from a humble background and has always believed that technology should create opportunities rather than obstacles.</p>
+      <p>Growing up without unlimited resources teaches an important lesson:</p>
+      <p><strong>The best tools are often the simplest ones.</strong></p>
+      <p>That philosophy influences every decision we make.</p>
+      <p>We aren't trying to build the biggest social network.</p>
+      <p>We're trying to build one of the most useful tools on the Internet.</p>
+      <p>If QuickRoom helps a student prepare for an exam, enables a family to organize an event, allows a team to solve a problem, or helps strangers collaborate on an idea, then we're moving in the right direction.</p>
+
+      <h2>Our Principles</h2>
+      <h3>Simplicity</h3>
+      <p>The best technology often feels invisible.</p>
+      <p>If something can be done with one click instead of five, we'll choose one.</p>
+      <h3>Privacy</h3>
+      <p>People shouldn't have to share personal information just to have a conversation.</p>
+      <p>Privacy isn't a premium feature.</p>
+      <p>It should be the default.</p>
+      <h3>Respect</h3>
+      <p>We want QuickRoom to remain a welcoming place where ideas are shared respectfully.</p>
+      <p>Healthy communities don't happen by accident—they're built intentionally.</p>
+      <h3>Accessibility</h3>
+      <p>We believe useful technology should be available to as many people as possible.</p>
+      <p>That's why we aim to keep the core experience free and lightweight, working directly in your browser without requiring powerful devices or expensive hardware.</p>
+
+      <h2>Our Commitment</h2>
+      <p>We're intentionally keeping QuickRoom clean.</p>
+      <p>No clutter.</p>
+      <p>No unnecessary features.</p>
+      <p>No endless distractions.</p>
+      <p>As the platform grows, we'll continue to focus on thoughtful improvements rather than feature overload.</p>
+      <p>If advertising is ever introduced, it will be carefully designed so that it never interrupts conversations or compromises the user experience.</p>
+      <p>Our users are not the product.</p>
+      <p>They're the reason the product exists.</p>
+
+      <h2>Looking Ahead</h2>
+      <p>QuickRoom is only the beginning.</p>
+      <p>Our vision extends beyond chat.</p>
+      <p>We're building a browser-first collaboration platform that will eventually include intelligent study tools, shared workspaces, AI-powered assistance, collaborative documents, and other lightweight tools that help people learn, create, and solve problems together.</p>
+      <p>We're taking small steps, listening carefully to our community, and improving continuously.</p>
+      <p>Thank you for being part of the journey.</p>
+      <p>We're glad you're here.</p>
+    </article>
+  `;
+}
+
+function renderBlog() {
+  return `
+    <article class="info-page">
+      <a class="back-link" href="/" data-action="navigate">QuickRoom</a>
+      <h1>QuickRoom is Here: Create a Private Chat Room in Seconds. No App. No Login. No Clutter.</h1>
+      <h2>The Internet Made Starting a Conversation Surprisingly Difficult</h2>
+      <p>It sounds strange, but in 2026, starting a simple private conversation with a group of people has become harder than it should be.</p>
+      <p>Need to discuss tomorrow's assignment with classmates?</p>
+      <p>Create a WhatsApp group.</p>
+      <p>Need to brainstorm with a few colleagues?</p>
+      <p>Set up a Discord server.</p>
+      <p>Want to collaborate during a hackathon?</p>
+      <p>Create a Slack workspace.</p>
+      <p>Planning a family event?</p>
+      <p>Start another messaging group.</p>
+      <p>Almost every platform expects you to create an account, verify your email or phone number, install an app, share your personal information, manage notifications, and maintain yet another permanent group that you'll probably never use again.</p>
+      <p>We believe there's a better way.</p>
+      <p>Today, we're excited to launch <strong>QuickRoom</strong>.</p>
+
+      <h2>What is QuickRoom?</h2>
+      <p>QuickRoom is the fastest way to create a private chat room.</p>
+      <p>No registration.</p><p>No phone number.</p><p>No email.</p><p>No app to install.</p><p>No complicated setup.</p>
+      <p>Just create a room, share the link, and start talking.</p>
+      <p>Whether you're studying for an exam, solving a coding problem, planning an event, helping a friend, or simply having a short discussion, QuickRoom lets you create a temporary collaboration space in seconds.</p>
+
+      <h2>Why We Built QuickRoom</h2>
+      <p>The idea began with a simple question:</p>
+      <p><strong>Why should a five-minute conversation require a permanent account?</strong></p>
+      <p>The web has become incredibly powerful, yet many everyday interactions have become unnecessarily complicated.</p>
+      <p>We wanted to build something that feels like the early Internet—simple, fast, lightweight, and open—but with modern security, privacy, and thoughtful design.</p>
+      <p>QuickRoom is our attempt to remove friction.</p>
+      <p>You shouldn't have to hand over your personal information just to have a conversation.</p>
+
+      <h2>Designed for Temporary Collaboration</h2>
+      <p>QuickRoom isn't trying to replace your favorite messaging app.</p>
+      <p>Instead, it's designed for moments where you need a conversation <strong>right now</strong>.</p>
+      <p>Examples include:</p>
+      <ul>
+        <li>Study groups</li><li>Exam preparation</li><li>Coding help</li><li>Project discussions</li><li>Online classes</li><li>Book clubs</li><li>Brainstorming sessions</li><li>Family planning</li><li>Event coordination</li><li>Community discussions</li><li>Interview panels</li><li>Quick support conversations</li>
+      </ul>
+      <p>Create a room.</p><p>Share the link.</p><p>Collaborate.</p>
+      <p>When you're done, the room automatically expires.</p><p>Simple.</p>
+
+      <h2>Built Around Privacy</h2>
+      <p>Every QuickRoom starts with privacy in mind.</p>
+      <p>There are no mandatory user profiles.</p><p>No phone numbers.</p><p>No email addresses.</p><p>No permanent identity.</p>
+      <p>Rooms are temporary by default, and users can choose how long they remain available.</p>
+      <p>We believe conversations don't always need to live forever.</p>
+
+      <h2>Clean by Design</h2>
+      <p>The modern web is full of distractions.</p>
+      <p>Autoplay videos.</p><p>Pop-ups.</p><p>Cookie banners.</p><p>Floating chat widgets.</p><p>Endless notifications.</p>
+      <p>QuickRoom is intentionally different.</p>
+      <p>Our design philosophy is simple:</p>
+      <p><strong>Every pixel should have a purpose.</strong></p>
+      <p>We want the interface to disappear so your conversation becomes the focus.</p>
+
+      <h2>Where We're Going</h2>
+      <p>This is only Phase One.</p>
+      <p>QuickRoom starts as a lightweight browser-based chat platform, but our vision is much larger.</p>
+      <p>Over the coming months, we plan to introduce features that make collaboration even easier while keeping the experience simple.</p>
+      <p>Some of the ideas we're exploring include:</p>
+      <ul>
+        <li>Temporary image sharing</li><li>Smart room templates</li><li>Shared notes</li><li>Collaborative whiteboards</li><li>AI-powered discussion summaries</li><li>Study assistants</li><li>Instant quizzes from shared notes</li><li>PDF collaboration</li><li>Polls</li><li>Shared task lists</li>
+      </ul>
+      <p>Our long-term goal is to build the simplest browser-based collaboration platform on the Internet.</p>
+
+      <h2>Keeping QuickRoom Accessible</h2>
+      <p>We're committed to keeping QuickRoom accessible to everyone.</p>
+      <p>Our goal is to keep the core experience free.</p>
+      <p>If we ever introduce premium features, they'll enhance the experience rather than restrict basic collaboration.</p>
+      <p>Should we introduce advertising in the future, it will always be respectful, minimal, and never interfere with conversations.</p>
+      <p>Users come first.</p><p>Always.</p>
+
+      <h2>We'd Love Your Feedback</h2>
+      <p>QuickRoom is just getting started.</p>
+      <p>Some of our best ideas have already come from conversations with students, educators, developers, and curious early users.</p>
+      <p>If you have suggestions, feature requests, or ideas, we'd genuinely love to hear from you.</p>
+      <p>Together, we hope to build something that's useful, simple, and enjoyable for millions of people around the world.</p>
+      <p>Welcome to QuickRoom.</p>
+      <p>Create a room.</p><p>Share a link.</p><p>Start talking.</p>
+    </article>
+  `;
+}
+
+function renderContactForm() {
+  return `
+    <div class="modal-backdrop">
+      <form class="contact-modal" data-form="contact">
+        <button class="overlay-close contact-close" type="button" data-action="close-contact" aria-label="Close">×</button>
+        <h1>Contact Us</h1>
+        <p>Share a question, idea, or suggestion.</p>
+        <label for="contact-message">Your message</label>
+        <textarea id="contact-message" name="message" rows="6" maxlength="2000" required></textarea>
+        <div class="form-actions">
+          <button class="button button-secondary" type="button" data-action="close-contact">Cancel</button>
+          <button class="button button-primary" type="submit">Continue</button>
+        </div>
+      </form>
+    </div>
+  `;
+}
+
 function renderStepActions(form) {
   return `
     <div class="form-actions">
@@ -313,18 +494,6 @@ function renderError() {
   return state.error ? `<p class="form-error" role="alert">${escapeHtml(state.error)}</p>` : '';
 }
 
-function mountPaymentButton() {
-  const target = document.querySelector('#payment-button');
-  if (!target) return;
-
-  const form = document.createElement('form');
-  const script = document.createElement('script');
-  script.src = 'https://checkout.razorpay.com/v1/payment-button.js';
-  script.dataset.paymentButtonId = 'pl_THLZBqdXrwPI5h';
-  script.async = true;
-  form.append(script);
-  target.append(form);
-}
 
 app.addEventListener('click', async (event) => {
   const button = event.target.closest('[data-action]');
@@ -333,6 +502,14 @@ app.addEventListener('click', async (event) => {
   const { action } = button.dataset;
   if (!state.ageConfirmed && action !== 'confirm-age') return;
 
+  if (action === 'navigate') {
+    event.preventDefault();
+    window.history.pushState({}, '', button.getAttribute('href'));
+    state.contactOpen = false;
+    state.view = getInitialView();
+    render();
+    return;
+  }
   if (action === 'confirm-age') {
     if (!document.querySelector('#age-confirmation')?.checked) return;
     localStorage.setItem(ageGateKey, 'true');
@@ -352,6 +529,14 @@ app.addEventListener('click', async (event) => {
   if (action === 'open-join') {
     state.joinOpen = true;
     state.error = '';
+    render();
+  }
+  if (action === 'open-contact') {
+    state.contactOpen = true;
+    render();
+  }
+  if (action === 'close-contact') {
+    state.contactOpen = false;
     render();
   }
   if (action === 'close-join') {
@@ -395,6 +580,16 @@ app.addEventListener('submit', async (event) => {
   state.error = '';
 
   try {
+    if (form.dataset.form === 'contact') {
+      const message = String(formData.get('message') || '').trim();
+      if (!message) throw new Error('Please enter a message.');
+      state.contactOpen = false;
+      window.location.href = `mailto:feedback@quickroom.org?subject=${encodeURIComponent(
+        'QuickRoom feedback'
+      )}&body=${encodeURIComponent(message)}`;
+      render();
+      return;
+    }
     if (form.dataset.form === 'room-name') {
       state.create.name = validateRoomName(formData.get('name'));
       state.create.step = 3;
