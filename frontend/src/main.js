@@ -71,6 +71,10 @@ function render() {
     });
     activeChat.mount();
   }
+
+  if (state.view === 'landing') {
+    mountPaymentButton();
+  }
 }
 
 function renderLanding() {
@@ -91,8 +95,13 @@ function renderLanding() {
         </div>
       </div>
       <footer>
-        <p class="footer-welcome">Welcome to your private space</p>
-        <span>18+ only</span> <span>·</span> Temporary rooms <span>·</span> No accounts
+        <p class="footer-welcome">The fastest way to start a private discussion. No app. No account. No phone number. Just create, share, and collaborate.</p>
+        <p class="footer-links">
+          <span>Blog</span> <span>·</span> <span>About Us</span> <span>·</span>
+          <a href="mailto:feedback@quickroom.org">Contact Us</a>
+        </p>
+        <p>18+ only <span>·</span> Temporary rooms</p>
+        <div class="payment-button" id="payment-button"></div>
       </footer>
     </section>
   `;
@@ -302,6 +311,19 @@ function renderAgeGate() {
 
 function renderError() {
   return state.error ? `<p class="form-error" role="alert">${escapeHtml(state.error)}</p>` : '';
+}
+
+function mountPaymentButton() {
+  const target = document.querySelector('#payment-button');
+  if (!target) return;
+
+  const form = document.createElement('form');
+  const script = document.createElement('script');
+  script.src = 'https://checkout.razorpay.com/v1/payment-button.js';
+  script.dataset.paymentButtonId = 'pl_THLZBqdXrwPI5h';
+  script.async = true;
+  form.append(script);
+  target.append(form);
 }
 
 app.addEventListener('click', async (event) => {

@@ -132,7 +132,28 @@ footer {
 .footer-welcome {
   margin-bottom: 8px;
   color: #555555;
-  font-size: 13px;
+  font-size: 18px;
+  line-height: 1.4;
+}
+
+.footer-links {
+  margin-bottom: 8px;
+}
+
+.footer-links a {
+  color: #0066ff;
+  text-decoration: none;
+}
+
+.footer-links a:hover {
+  text-decoration: underline;
+}
+
+.payment-button {
+  display: grid;
+  min-height: 38px;
+  place-items: center;
+  margin-top: 16px;
 }
 
 footer span {
@@ -442,7 +463,8 @@ code {
 .chat-page {
   width: min(100%, 1120px);
   display: flex;
-  min-height: 100vh;
+  height: 100dvh;
+  min-height: 0;
   flex-direction: column;
   margin: auto;
   padding: 16px;
