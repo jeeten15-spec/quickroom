@@ -22,6 +22,7 @@ export class ChatRoom {
     this.reportTarget = null;
     this.imageUrl = null;
     this.shareCode = null;
+    this.renderedMessageKey = '';
     this.participantsOpen = false;
     this.isOffline = !navigator.onLine;
     this.pollTimer = null;
@@ -207,8 +208,12 @@ export class ChatRoom {
     this.root.querySelector('[data-chat-action="choose-image"]').disabled = composerDisabled;
     this.root.querySelector('[data-chat-form="message"] button[type="submit"]').disabled =
       composerDisabled;
-    messageList.innerHTML = renderMessages(messages, this.privateWith?.uid);
-    messageList.scrollTop = messageList.scrollHeight;
+    const messageKey = createMessageKey(messages, this.privateWith?.uid);
+    if (initial || messageKey !== this.renderedMessageKey) {
+      messageList.innerHTML = renderMessages(messages, this.privateWith?.uid);
+      messageList.scrollTop = messageList.scrollHeight;
+      this.renderedMessageKey = messageKey;
+    }
     this.renderOverlay();
   }
 
@@ -284,10 +289,12 @@ export class ChatRoom {
       if (!participant) return;
       this.privateWith = { uid, nick: participant.nick };
       this.privateMessages = {};
+      this.renderedMessageKey = '';
       await this.refresh();
     }
     if (action === 'close-private') {
       this.privateWith = null;
+      this.renderedMessageKey = '';
       this.updateView();
     }
     if (action === 'report-message') {
@@ -577,6 +584,23 @@ function renderMessages(messages, privateWithUid) {
       `
     )
     .join('');
+}
+
+function createMessageKey(messages, privateWithUid) {
+  return JSON.stringify({
+    privateWithUid: privateWithUid || null,
+    messages: Object.entries(messages).map(([id, message]) => [
+      id,
+      message.type,
+      message.text,
+      message.imageUrl,
+      message.imageSize,
+      message.senderId,
+      message.timestamp,
+      message.reported,
+      message.moderated
+    ])
+  });
 }
 
 function validateNickname(value) {
