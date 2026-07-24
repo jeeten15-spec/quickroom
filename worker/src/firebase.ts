@@ -34,13 +34,13 @@ interface CachedAccessToken {
   expiresAt: number;
 }
 
-interface CachedFirebaseCertificates {
-  certificates: Record<string, string>;
+interface CachedFirebasePublicKeys {
+  keys: Record<string, JsonWebKey>;
   expiresAt: number;
 }
 
 let cachedAccessToken: CachedAccessToken | undefined;
-let cachedFirebaseCertificates: CachedFirebaseCertificates | undefined;
+let cachedFirebasePublicKeys: CachedFirebasePublicKeys | undefined;
 
 export function getFirebaseServiceAccount(env: Env): FirebaseServiceAccount {
   try {
@@ -106,15 +106,15 @@ export async function verifyFirebaseIdToken(
     throw new FirebaseAuthError('The Firebase ID token is invalid or expired.');
   }
 
-  const certificates = await getFirebaseCertificates();
-  const certificate = certificates[header.kid];
-  if (!certificate) {
+  const publicKeys = await getFirebasePublicKeys();
+  const publicKeyData = publicKeys[header.kid];
+  if (!publicKeyData) {
     throw new FirebaseAuthError('The Firebase ID token signing key is unavailable.');
   }
 
   const publicKey = await crypto.subtle.importKey(
-    'spki',
-    pemToArrayBuffer(certificate),
+    'jwk',
+    publicKeyData,
     { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
     false,
     ['verify']
@@ -354,13 +354,13 @@ async function signStorageUrl(
     : { uploadUrl: '', downloadUrl: signedUrl, expiresAt };
 }
 
-async function getFirebaseCertificates(): Promise<Record<string, string>> {
-  if (cachedFirebaseCertificates && cachedFirebaseCertificates.expiresAt > Date.now()) {
-    return cachedFirebaseCertificates.certificates;
+async function getFirebasePublicKeys(): Promise<Record<string, JsonWebKey>> {
+  if (cachedFirebasePublicKeys && cachedFirebasePublicKeys.expiresAt > Date.now()) {
+    return cachedFirebasePublicKeys.keys;
   }
 
   const response = await fetch(
-    'https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com'
+    'https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com'
   );
   if (!response.ok) {
     throw new FirebaseAuthError('Firebase token signing keys are unavailable.');
@@ -368,12 +368,17 @@ async function getFirebaseCertificates(): Promise<Record<string, string>> {
 
   const cacheControl = response.headers.get('cache-control') ?? '';
   const maxAge = Number(/max-age=(\d+)/.exec(cacheControl)?.[1] ?? 3600);
-  const certificates = (await response.json()) as Record<string, string>;
-  cachedFirebaseCertificates = {
-    certificates,
+  const keySet = (await response.json()) as { keys: JsonWebKey[] };
+  const keys = Object.fromEntries(
+    keySet.keys
+      .filter((key) => typeof key.kid === 'string')
+      .map((key) => [key.kid as string, key])
+  );
+  cachedFirebasePublicKeys = {
+    keys,
     expiresAt: Date.now() + maxAge * 1000
   };
-  return certificates;
+  return keys;
 }
 
 async function signJwt(
