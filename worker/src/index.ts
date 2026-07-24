@@ -1,5 +1,6 @@
 import {
   FirebaseAuthError,
+  FirebaseConfigurationError,
   FirebaseRequestError,
   assertFirebaseConfiguration,
   type Env,
@@ -115,6 +116,9 @@ function errorResponse(error: unknown, headers: HeadersInit): Response {
   }
   if (error instanceof FirebaseAuthError) {
     return json({ error: error.message }, 401, headers);
+  }
+  if (error instanceof FirebaseConfigurationError) {
+    return json({ error: error.message }, 503, headers);
   }
   if (error instanceof HttpError) {
     return json({ error: error.message }, error.status, headers);

@@ -17,7 +17,9 @@ function getFirebaseAuth() {
     .filter(([, value]) => !value)
     .map(([key]) => key);
   if (missingConfig.length) {
-    throw new Error(`Missing frontend Firebase configuration: ${missingConfig.join(', ')}.`);
+    throw new Error(
+      'QuickRoom is not configured on this device yet. Add the Firebase Web app values to frontend/.env, then restart the frontend server.'
+    );
   }
 
   auth = getAuth(initializeApp(firebaseConfig));

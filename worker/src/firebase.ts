@@ -46,18 +46,21 @@ export function getFirebaseServiceAccount(env: Env): FirebaseServiceAccount {
   try {
     return JSON.parse(env.FIREBASE_SERVICE_ACCOUNT_JSON) as FirebaseServiceAccount;
   } catch {
-    throw new Error('FIREBASE_SERVICE_ACCOUNT_JSON must be valid JSON.');
+    throw new FirebaseConfigurationError('The Worker service-account secret is invalid.');
   }
 }
 
 export function assertFirebaseConfiguration(env: Env): void {
-  if (
-    !env.FIREBASE_PROJECT_ID ||
-    !env.FIREBASE_DATABASE_URL ||
-    !env.FIREBASE_STORAGE_BUCKET ||
-    !env.FIREBASE_SERVICE_ACCOUNT_JSON
-  ) {
-    throw new Error('Firebase Worker configuration is incomplete.');
+  const requiredValues = [
+    env.FIREBASE_PROJECT_ID,
+    env.FIREBASE_DATABASE_URL,
+    env.FIREBASE_STORAGE_BUCKET,
+    env.FIREBASE_SERVICE_ACCOUNT_JSON
+  ];
+  if (requiredValues.some((value) => !value || value.includes('your-firebase-project-id'))) {
+    throw new FirebaseConfigurationError(
+      'QuickRoom is not configured yet. Add Firebase Worker variables and the service-account secret.'
+    );
   }
 }
 
@@ -450,6 +453,8 @@ function rfc3986Encode(value: string): string {
 }
 
 export class FirebaseAuthError extends Error {}
+
+export class FirebaseConfigurationError extends Error {}
 
 export class FirebaseRequestError extends Error {
   constructor(message: string, public readonly status: number) {
