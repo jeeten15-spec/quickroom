@@ -2,6 +2,7 @@ import { apiRequest } from './api';
 import { ChatRoom } from './chat';
 import { generateNickname } from './nickname';
 import { registerPwa } from './pwa';
+import { useCasePages } from './use-cases';
 import './style.css';
 
 const app = document.querySelector('#app');
@@ -36,13 +37,17 @@ const state = {
 };
 
 function getInitialView() {
-  return /^\/room\/[A-Za-z0-9_-]{16,64}$/.test(window.location.pathname)
+  const pathname = window.location.pathname;
+  const slug = pathname.replace(/^\//, '');
+  return /^\/room\/[A-Za-z0-9_-]{16,64}$/.test(pathname)
     ? 'room-placeholder'
-    : window.location.pathname === '/about'
+    : pathname === '/about'
       ? 'about'
-      : window.location.pathname === '/blog'
+      : pathname === '/blog'
         ? 'blog'
-        : 'landing';
+        : useCasePages[slug]
+          ? slug
+          : 'landing';
 }
 
 function createInitialRoomState() {
@@ -67,6 +72,7 @@ function render() {
       ${state.view === 'room-placeholder' ? '<div id="chat-root"></div>' : ''}
       ${state.view === 'about' ? renderAbout() : ''}
       ${state.view === 'blog' ? renderBlog() : ''}
+      ${useCasePages[state.view] ? renderUseCase(state.view) : ''}
     </main>
     ${state.ageConfirmed ? '' : renderAgeGate()}
     ${state.contactOpen ? renderContactForm() : ''}
@@ -79,6 +85,8 @@ function render() {
     });
     activeChat.mount();
   }
+
+  updateDocumentMetadata();
 
 }
 
@@ -360,6 +368,39 @@ function renderAbout() {
   `;
 }
 
+function renderUseCase(slug) {
+  const page = useCasePages[slug];
+  return `
+    <article class="info-page use-case-page">
+      <a class="back-link" href="/" data-action="navigate">QuickRoom</a>
+      <p class="eyebrow">QuickRoom use case</p>
+      <h1>${escapeHtml(page.title)}</h1>
+      <p class="use-case-intro">${escapeHtml(page.intro)}</p>
+      <button class="button button-primary use-case-cta" type="button" data-action="open-create">Create a room</button>
+      ${page.sections
+        .map(
+          (section) => `
+            <section>
+              <h2>${escapeHtml(section.heading)}</h2>
+              ${(section.paragraphs || [])
+                .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`)
+                .join('')}
+              ${
+                section.list
+                  ? `<ul>${section.list
+                      .map((item) => `<li>${escapeHtml(item)}</li>`)
+                      .join('')}</ul>`
+                  : ''
+              }
+            </section>
+          `
+        )
+        .join('')}
+      <button class="button button-primary use-case-cta" type="button" data-action="open-create">Create a room</button>
+    </article>
+  `;
+}
+
 function renderBlog() {
   return `
     <article class="info-page">
@@ -443,6 +484,42 @@ function renderBlog() {
       <p>Create a room.</p><p>Share a link.</p><p>Start talking.</p>
     </article>
   `;
+}
+
+function updateDocumentMetadata() {
+  const page = useCasePages[state.view];
+  const metadata =
+    page
+      ? { title: page.seoTitle, description: page.description }
+      : state.view === 'about'
+        ? {
+            title: 'About QuickRoom — Private Temporary Collaboration',
+            description: 'Learn why QuickRoom exists and how it keeps temporary collaboration simple and respectful.'
+          }
+        : state.view === 'blog'
+          ? {
+              title: 'QuickRoom Blog — Private Chat Rooms Without the Clutter',
+              description: 'Read about private, temporary browser-based collaboration with QuickRoom.'
+            }
+          : {
+              title: 'QuickRoom — Create a Room. Share a Code. Start Talking.',
+              description: 'Create a temporary private chat room without signup, email, phone number, or app installation.'
+            };
+  document.title = metadata.title;
+  let description = document.querySelector('meta[name="description"]');
+  if (!description) {
+    description = document.createElement('meta');
+    description.name = 'description';
+    document.head.append(description);
+  }
+  description.content = metadata.description;
+  let canonical = document.querySelector('link[rel="canonical"]');
+  if (!canonical) {
+    canonical = document.createElement('link');
+    canonical.rel = 'canonical';
+    document.head.append(canonical);
+  }
+  canonical.href = `https://quickroom.org${window.location.pathname}`;
 }
 
 function renderContactForm() {

@@ -864,6 +864,22 @@ code {
   margin: 0 0 14px;
 }
 
+.use-case-page .eyebrow {
+  margin-bottom: 12px;
+}
+
+.use-case-intro {
+  max-width: 640px;
+  color: #555555;
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.use-case-cta {
+  width: auto;
+  margin: 12px 0 10px;
+}
+
 .info-page ul {
   margin: 0 0 16px;
   padding-left: 22px;

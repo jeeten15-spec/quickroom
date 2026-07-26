@@ -9,4 +9,28 @@
   <url>
     <loc>https://quickroom.org/blog</loc>
   </url>
+  <url>
+    <loc>https://quickroom.org/temporary-chat-room</loc>
+  </url>
+  <url>
+    <loc>https://quickroom.org/private-chat-room-no-signup</loc>
+  </url>
+  <url>
+    <loc>https://quickroom.org/study-group-chat</loc>
+  </url>
+  <url>
+    <loc>https://quickroom.org/hackathon-chat-room</loc>
+  </url>
+  <url>
+    <loc>https://quickroom.org/family-planning-chat</loc>
+  </url>
+  <url>
+    <loc>https://quickroom.org/interview-panel-chat</loc>
+  </url>
+  <url>
+    <loc>https://quickroom.org/book-club-chat</loc>
+  </url>
+  <url>
+    <loc>https://quickroom.org/event-backchannel</loc>
+  </url>
 </urlset>
