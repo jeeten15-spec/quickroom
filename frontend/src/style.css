@@ -880,7 +880,8 @@ code {
   margin: 12px 0 10px;
 }
 
-.info-page ul {
+.info-page ul,
+.info-page ol {
   margin: 0 0 16px;
   padding-left: 22px;
 }

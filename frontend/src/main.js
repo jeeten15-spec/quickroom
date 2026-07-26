@@ -3,6 +3,7 @@ import { ChatRoom } from './chat';
 import { generateNickname } from './nickname';
 import { registerPwa } from './pwa';
 import { useCasePages } from './use-cases';
+import { guides } from './guides';
 import './style.css';
 
 const app = document.querySelector('#app');
@@ -45,7 +46,7 @@ function getInitialView() {
       ? 'about'
       : pathname === '/blog'
         ? 'blog'
-        : useCasePages[slug]
+        : (useCasePages[slug] || guides[slug])
           ? slug
           : 'landing';
 }
@@ -73,6 +74,7 @@ function render() {
       ${state.view === 'about' ? renderAbout() : ''}
       ${state.view === 'blog' ? renderBlog() : ''}
       ${useCasePages[state.view] ? renderUseCase(state.view) : ''}
+      ${guides[state.view] ? renderGuide(state.view) : ''}
     </main>
     ${state.ageConfirmed ? '' : renderAgeGate()}
     ${state.contactOpen ? renderContactForm() : ''}
@@ -401,6 +403,38 @@ function renderUseCase(slug) {
   `;
 }
 
+function renderGuide(slug) {
+  const guide = guides[slug];
+  return `
+    <article class="info-page guide-page">
+      <a class="back-link" href="/" data-action="navigate">QuickRoom</a>
+      <p class="eyebrow">Practical guide</p>
+      <h1>${escapeHtml(guide.title)}</h1>
+      <p class="use-case-intro">${escapeHtml(guide.intro)}</p>
+      ${guide.sections
+        .map(
+          (section) => `
+            <section>
+              <h2>${escapeHtml(section.heading)}</h2>
+              ${(section.paragraphs || [])
+                .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`)
+                .join('')}
+              ${
+                section.list
+                  ? `<ol>${section.list
+                      .map((item) => `<li>${escapeHtml(item)}</li>`)
+                      .join('')}</ol>`
+                  : ''
+              }
+            </section>
+          `
+        )
+        .join('')}
+      <button class="button button-primary use-case-cta" type="button" data-action="open-create">Create a room</button>
+    </article>
+  `;
+}
+
 function renderBlog() {
   return `
     <article class="info-page">
@@ -475,6 +509,13 @@ function renderBlog() {
       <p>Should we introduce advertising in the future, it will always be respectful, minimal, and never interfere with conversations.</p>
       <p>Users come first.</p><p>Always.</p>
 
+      <h2>Practical Guides</h2>
+      <ul>
+        <li><a href="/private-study-group-without-whatsapp" data-action="navigate">How to start a private study group without WhatsApp</a></li>
+        <li><a href="/temporary-chat-room-for-hackathons" data-action="navigate">A temporary chat room for hackathons</a></li>
+        <li><a href="/short-lived-event-backchannel" data-action="navigate">How to run a short-lived event backchannel</a></li>
+      </ul>
+
       <h2>We'd Love Your Feedback</h2>
       <p>QuickRoom is just getting started.</p>
       <p>Some of our best ideas have already come from conversations with students, educators, developers, and curious early users.</p>
@@ -487,7 +528,7 @@ function renderBlog() {
 }
 
 function updateDocumentMetadata() {
-  const page = useCasePages[state.view];
+  const page = useCasePages[state.view] || guides[state.view];
   const metadata =
     page
       ? { title: page.seoTitle, description: page.description }
