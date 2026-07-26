@@ -77,7 +77,7 @@ URL, then calls `sendMessage` with the returned `imagePath`, `contentType`, and
 verify its actual type and byte size.
 
 The Worker validates all required input: templates, room names, expiry options
-(`1h`, `6h`, `24h`, `7d`, `never`), room type, nickname, text length, and image
+(`1h`, `6h`, `24h`, `7d`, `3mo`), room type, nickname, text length, and image
 metadata. It uses per-isolate in-memory rate limiting for now; production-grade
 cross-isolate limits can replace this boundary with a Durable Object later.
 

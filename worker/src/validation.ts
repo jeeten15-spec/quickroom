@@ -5,7 +5,7 @@ export const EXPIRY_OPTIONS = {
   '6h': 6 * 60 * 60 * 1000,
   '24h': 24 * 60 * 60 * 1000,
   '7d': 7 * 24 * 60 * 60 * 1000,
-  never: null
+  '3mo': 90 * 24 * 60 * 60 * 1000
 } as const;
 
 export const IMAGE_TYPES = {
@@ -63,10 +63,10 @@ export function validateBoolean(value: unknown, fieldName: string): boolean {
 
 export function validateExpiry(value: unknown): number | null {
   if (typeof value !== 'string' || !Object.hasOwn(EXPIRY_OPTIONS, value)) {
-    throw new ValidationError('Expiry must be 1h, 6h, 24h, 7d, or never.');
+    throw new ValidationError('Expiry must be 1h, 6h, 24h, 7d, or 3mo.');
   }
   const duration = EXPIRY_OPTIONS[value as ExpiryOption];
-  return duration === null ? null : Date.now() + duration;
+  return Date.now() + duration;
 }
 
 export function validateRoomId(value: unknown): string {

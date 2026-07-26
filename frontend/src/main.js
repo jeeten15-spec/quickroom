@@ -195,7 +195,7 @@ function renderExpiryStep() {
     ['6h', '6 hours'],
     ['24h', '24 hours'],
     ['7d', '7 days'],
-    ['never', 'Never']
+    ['3mo', '3 months']
   ];
   return `
     <div class="step-intro">
