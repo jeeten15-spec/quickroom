@@ -37,6 +37,8 @@ const state = {
   contactOpen: false,
   publicRooms: [],
   publicRoomsLoaded: false,
+  publicRoomsLoadedAt: 0,
+  publicRoomsLoading: false,
   joinCode: '',
   error: '',
   busy: false,
@@ -105,8 +107,8 @@ function render() {
 
   updateDocumentMetadata();
 
-  if (state.ageConfirmed && state.view === 'landing' && !state.publicRoomsLoaded) {
-    loadPublicRooms();
+  if (state.ageConfirmed && state.view === 'landing') {
+    loadPublicRoomsIfNeeded();
   }
 
 }
@@ -128,8 +130,8 @@ function renderLanding() {
               : `<button class="text-link" type="button" data-action="open-join">Join with code or link</button>`
           }
         </div>
-        ${renderCoordinationJobs()}
         ${renderPublicRooms()}
+        ${renderCoordinationJobs()}
       </div>
       <footer>
         <p class="footer-welcome">Built for private coordination first. No app. No account. No phone number.</p>
@@ -818,6 +820,9 @@ app.addEventListener('click', async (event) => {
     window.history.pushState({}, '', button.getAttribute('href'));
     state.contactOpen = false;
     state.view = getInitialView();
+    if (state.view === 'landing') {
+      state.publicRoomsLoaded = false;
+    }
     render();
     return;
   }
@@ -835,6 +840,7 @@ app.addEventListener('click', async (event) => {
   if (action === 'leave-create') {
     state.view = 'landing';
     state.error = '';
+    state.publicRoomsLoaded = false;
     render();
   }
   if (action === 'open-join') {
@@ -995,14 +1001,24 @@ async function submitJoinRoom(formData) {
   }
 }
 
+async function loadPublicRoomsIfNeeded() {
+  const stale = !state.publicRoomsLoaded || Date.now() - state.publicRoomsLoadedAt > 10_000;
+  if (!stale || state.publicRoomsLoading) return;
+  await loadPublicRooms();
+}
+
 async function loadPublicRooms() {
+  state.publicRoomsLoading = true;
   state.publicRoomsLoaded = true;
+  state.publicRoomsLoadedAt = Date.now();
   try {
     const response = await apiGet('/api/publicRooms');
-    state.publicRooms = response.rooms || [];
+    state.publicRooms = Array.isArray(response.rooms) ? response.rooms : [];
     if (state.view === 'landing') render();
   } catch {
     // Public room discovery is optional; the private create/join flow stays available.
+  } finally {
+    state.publicRoomsLoading = false;
   }
 }
 
@@ -1040,6 +1056,7 @@ function leaveRoomView() {
   state.view = 'landing';
   state.joinOpen = false;
   state.error = '';
+  state.publicRoomsLoaded = false;
   render();
 }
 
@@ -1086,6 +1103,9 @@ function escapeHtml(value) {
 
 window.addEventListener('popstate', () => {
   state.view = getInitialView();
+  if (state.view === 'landing') {
+    state.publicRoomsLoaded = false;
+  }
   render();
 });
 

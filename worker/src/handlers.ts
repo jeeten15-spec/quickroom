@@ -150,13 +150,43 @@ export async function createRoom(
 }
 
 export async function getPublicRooms(env: Env): Promise<{ rooms: Array<PublicRoomListing & { roomId: string }> }> {
-  const listings = (await databaseGet<Record<string, PublicRoomListing>>(env, 'publicRooms')) ?? {};
   const now = Date.now();
+  const listings = {
+    ...((await databaseGet<Record<string, PublicRoomListing>>(env, 'publicRooms')) ?? {})
+  };
+
+  // Heal discovery if a public room exists but is missing from the index
+  // (for example after a partial write or older client).
+  const allRooms = (await databaseGet<Record<string, StoredRoom>>(env, 'rooms')) ?? {};
+  const indexRepairs: Record<string, PublicRoomListing> = {};
+  for (const [roomId, room] of Object.entries(allRooms)) {
+    if (room.type !== 'public') continue;
+    if (room.expiresAt !== null && room.expiresAt <= now) continue;
+    if (listings[roomId]) continue;
+    const listing: PublicRoomListing = {
+      name: room.name,
+      icon: room.icon,
+      createdAt: room.createdAt,
+      expiresAt: room.expiresAt ?? now + 24 * 60 * 60 * 1000
+    };
+    listings[roomId] = listing;
+    indexRepairs[`publicRooms/${roomId}`] = listing;
+  }
+  if (Object.keys(indexRepairs).length) {
+    await databasePatch(env, '/', indexRepairs).catch(() => {
+      // Listing can still be returned even if the repair write fails.
+    });
+  }
+
   const rooms = Object.entries(listings)
-    .filter(([, room]) => room.expiresAt > now)
+    .filter(([, room]) => {
+      if (!room || typeof room !== 'object') return false;
+      if (room.expiresAt == null) return true;
+      return Number(room.expiresAt) > now;
+    })
     .map(([roomId, room]) => ({ roomId, ...room }))
-    .sort((left, right) => right.createdAt - left.createdAt)
-    .slice(0, 12);
+    .sort((left, right) => (right.createdAt || 0) - (left.createdAt || 0))
+    .slice(0, 24);
 
   return { rooms };
 }
