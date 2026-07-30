@@ -9,8 +9,8 @@ export async function apiRequest(path, body) {
   });
 }
 
-export async function apiGet(path) {
-  return request(path);
+export async function apiGet(path, extraHeaders = {}) {
+  return request(path, { headers: extraHeaders });
 }
 
 async function request(path, options = {}) {
@@ -20,7 +20,8 @@ async function request(path, options = {}) {
       ...options,
       headers: {
         Authorization: `Bearer ${idToken}`,
-        ...(options.body ? { 'Content-Type': 'application/json' } : {})
+        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+        ...(options.headers || {})
       }
     });
 

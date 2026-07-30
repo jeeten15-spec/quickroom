@@ -13,6 +13,7 @@ export interface Env {
   FIREBASE_STORAGE_BUCKET: string;
   FIREBASE_SERVICE_ACCOUNT_JSON: string;
   ALLOWED_ORIGINS: string;
+  METRICS_ADMIN_TOKEN?: string;
 }
 
 export interface FirebaseServiceAccount {

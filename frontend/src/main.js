@@ -2,10 +2,13 @@ import { apiGet, apiRequest } from './api';
 import { ChatRoom } from './chat';
 import { generateNickname } from './nickname';
 import { registerPwa } from './pwa';
-import { useCasePages } from './use-cases';
+import { coordinationJobs, useCasePages } from './use-cases';
 import { guides } from './guides';
 import { articles } from './articles';
 import './style.css';
+
+const GITHUB_URL = 'https://github.com/jeeten15-spec/quickroom';
+const metricsTokenKey = 'quickroom.metrics-token';
 
 const app = document.querySelector('#app');
 let activeChat = null;
@@ -38,7 +41,11 @@ const state = {
   error: '',
   busy: false,
   create: createInitialRoomState(),
-  joinNickname: sessionStorage.getItem(nicknameKey) || generateNickname()
+  joinNickname: sessionStorage.getItem(nicknameKey) || generateNickname(),
+  metrics: null,
+  metricsError: '',
+  metricsToken: sessionStorage.getItem(metricsTokenKey) || '',
+  metricsBusy: false
 };
 
 function getInitialView() {
@@ -50,9 +57,11 @@ function getInitialView() {
       ? 'about'
       : pathname === '/blog'
         ? 'blog'
-        : (useCasePages[slug] || guides[slug] || articles[slug])
-          ? slug
-          : 'landing';
+        : pathname === '/dashboard'
+          ? 'dashboard'
+          : (useCasePages[slug] || guides[slug] || articles[slug])
+            ? slug
+            : 'landing';
 }
 
 function createInitialRoomState() {
@@ -62,7 +71,7 @@ function createInitialRoomState() {
     name: 'Study Room',
     expiry: '24h',
     nickname: sessionStorage.getItem(nicknameKey) || generateNickname(),
-    type: 'public',
+    type: 'private',
     allowPrivateChat: true
   };
 }
@@ -77,6 +86,7 @@ function render() {
       ${state.view === 'room-placeholder' ? '<div id="chat-root"></div>' : ''}
       ${state.view === 'about' ? renderAbout() : ''}
       ${state.view === 'blog' ? renderBlog() : ''}
+      ${state.view === 'dashboard' ? renderDashboard() : ''}
       ${useCasePages[state.view] ? renderUseCase(state.view) : ''}
       ${guides[state.view] ? renderGuide(state.view) : ''}
       ${articles[state.view] ? renderArticle(state.view) : ''}
@@ -106,25 +116,28 @@ function renderLanding() {
     <section class="landing" aria-labelledby="quickroom-title">
       <div class="landing-content">
         <h1 id="quickroom-title">QuickRoom</h1>
-        <p class="tagline">Create a room. Share a link. Start talking.</p>
+        <p class="tagline">Temporary rooms for private coordination—events, study groups, client handoffs, travel plans.</p>
+        <p class="landing-support">Create a room. Share a link, code, or QR. Talk. Let it expire.</p>
         <button class="button button-primary" type="button" data-action="open-create">
-          Create Room
+          Create private room
         </button>
         <div class="join-area">
           ${
             state.joinOpen
               ? renderJoinForm()
-              : `<button class="text-link" type="button" data-action="open-join">Join existing room</button>`
+              : `<button class="text-link" type="button" data-action="open-join">Join with code or link</button>`
           }
         </div>
+        ${renderCoordinationJobs()}
         ${renderPublicRooms()}
       </div>
       <footer>
-        <p class="footer-welcome">The fastest way to start a private discussion. No app. No account. No phone number.</p>
+        <p class="footer-welcome">Built for private coordination first. No app. No account. No phone number.</p>
         <p class="footer-links">
           <a href="/blog" data-action="navigate">Blog</a> <span>·</span>
           <a href="/about" data-action="navigate">About Us</a> <span>·</span>
-          <button type="button" data-action="open-contact">Contact Us</button>
+          <button type="button" data-action="open-contact">Contact Us</button> <span>·</span>
+          <a href="${GITHUB_URL}" target="_blank" rel="noopener noreferrer">GitHub</a>
         </p>
         <p>18+ only <span>·</span> Temporary rooms</p>
       </footer>
@@ -132,12 +145,33 @@ function renderLanding() {
   `;
 }
 
+function renderCoordinationJobs() {
+  return `
+    <section class="job-links" aria-labelledby="jobs-title">
+      <h2 id="jobs-title">Private coordination</h2>
+      <p class="job-links-intro">Exact jobs QuickRoom is built for.</p>
+      <div class="job-link-list">
+        ${coordinationJobs
+          .map(
+            (job) => `
+              <a class="job-link" href="${escapeHtml(job.href)}" data-action="navigate">
+                <strong>${escapeHtml(job.label)}</strong>
+                <span>${escapeHtml(job.blurb)}</span>
+              </a>
+            `
+          )
+          .join('')}
+      </div>
+    </section>
+  `;
+}
+
 function renderJoinForm() {
   return `
     <form class="join-form" data-form="join">
-      <label for="join-room">Room code</label>
+      <label for="join-room">Room code or join link</label>
       <input id="join-room" name="room" type="text" autocomplete="off" required
-        placeholder="Enter the room code" value="${escapeHtml(state.joinCode)}" />
+        placeholder="Code or https://quickroom.org/room/…" value="${escapeHtml(state.joinCode)}" />
       <label for="join-nickname">Nickname</label>
       <input id="join-nickname" name="nickname" type="text" minlength="3" maxlength="20"
         value="${escapeHtml(state.joinNickname)}" required />
@@ -153,12 +187,13 @@ function renderJoinForm() {
 }
 
 function renderPublicRooms() {
-  if (!state.publicRooms.length) return '';
-
   return `
     <section class="public-rooms" aria-labelledby="public-rooms-title">
-      <h2 id="public-rooms-title">Public rooms</h2>
-      <div class="public-room-list">
+      <h2 id="public-rooms-title">Public topic rooms</h2>
+      <p class="public-rooms-note">Open discovery for faster reach. Prefer Private rooms for events, clients, classes, and travel.</p>
+      ${
+        state.publicRooms.length
+          ? `<div class="public-room-list">
         ${state.publicRooms
           .map(
             (room) => `
@@ -169,8 +204,80 @@ function renderPublicRooms() {
             `
           )
           .join('')}
-      </div>
+      </div>`
+          : `<p class="public-rooms-empty">No active public rooms right now. Create a Private room for your group instead.</p>`
+      }
     </section>
+  `;
+}
+
+function renderGithubTrust() {
+  return `
+    <p class="trust-github">
+      Open source on
+      <a href="${GITHUB_URL}" target="_blank" rel="noopener noreferrer">GitHub</a>
+      — inspect the code, follow development, and help build trust.
+    </p>
+  `;
+}
+
+function renderDashboard() {
+  return `
+    <article class="info-page dashboard-page">
+      <a class="back-link" href="/" data-action="navigate">QuickRoom</a>
+      <p class="eyebrow">Operator metrics</p>
+      <h1>Growth dashboard</h1>
+      <p class="use-case-intro">Rooms created / week, joining quality, share behaviour, and return creators.</p>
+      ${
+        state.metrics
+          ? renderDashboardMetrics()
+          : `
+            <form class="dashboard-auth" data-form="dashboard-auth">
+              <label for="metrics-token">Admin token</label>
+              <input id="metrics-token" name="token" type="password" autocomplete="current-password"
+                value="${escapeHtml(state.metricsToken)}" required />
+              ${state.metricsError ? `<p class="form-error" role="alert">${escapeHtml(state.metricsError)}</p>` : ''}
+              <button class="button button-primary" type="submit" ${state.metricsBusy ? 'disabled' : ''}>
+                ${state.metricsBusy ? 'Loading…' : 'Load metrics'}
+              </button>
+            </form>
+          `
+      }
+    </article>
+  `;
+}
+
+function renderDashboardMetrics() {
+  const m = state.metrics;
+  return `
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <p class="metric-label">Rooms created / week</p>
+        <p class="metric-value">${escapeHtml(String(m.roomsCreatedWeek))}</p>
+      </div>
+      <div class="metric-card">
+        <p class="metric-label">Median joiners / room</p>
+        <p class="metric-value">${escapeHtml(String(m.medianJoiners))}</p>
+      </div>
+      <div class="metric-card">
+        <p class="metric-label">Rooms with ≥2 people</p>
+        <p class="metric-value">${escapeHtml(m.pctRoomsWithTwoPlus)}%</p>
+      </div>
+      <div class="metric-card">
+        <p class="metric-label">Share-click rate</p>
+        <p class="metric-value">${escapeHtml(m.shareClickRate)}%</p>
+      </div>
+      <div class="metric-card">
+        <p class="metric-label">Return creators</p>
+        <p class="metric-value">${escapeHtml(m.returnCreatorsPct)}%</p>
+        <p class="metric-note">${escapeHtml(String(m.returnCreators))} of ${escapeHtml(String(m.creatorsThisWeek))} creators this week</p>
+      </div>
+    </div>
+    <p class="dashboard-updated">Window: last 7 days · Updated ${escapeHtml(new Date(m.generatedAt).toLocaleString())}</p>
+    <div class="form-actions">
+      <button class="button button-secondary" type="button" data-action="refresh-metrics">Refresh</button>
+      <button class="button button-secondary" type="button" data-action="clear-metrics">Sign out</button>
+    </div>
   `;
 }
 
@@ -298,7 +405,7 @@ function renderSettingsStep() {
           ${renderSegment('type', 'private', 'Private')}
           ${renderSegment('type', 'invite', 'Invite Only')}
         </div>
-        <p class="input-note">Private and Invite Only rooms are accessed through their shared room link.</p>
+        <p class="input-note">Private and Invite Only rooms are joined with the share link, room code, or QR. Public rooms can also appear in discovery.</p>
       </fieldset>
       <fieldset class="setting-group">
         <legend>Allow private chats</legend>
@@ -398,6 +505,7 @@ function renderAbout() {
       <p>We're taking small steps, listening carefully to our community, and improving continuously.</p>
       <p>Thank you for being part of the journey.</p>
       <p>We're glad you're here.</p>
+      ${renderGithubTrust()}
     </article>
   `;
 }
@@ -581,6 +689,16 @@ function renderBlog() {
         <li><a href="/short-lived-event-backchannel" data-action="navigate">How to run a short-lived event backchannel</a></li>
       </ul>
 
+      <h2>Private coordination jobs</h2>
+      <ul>
+        ${coordinationJobs
+          .map(
+            (job) =>
+              `<li><a href="${escapeHtml(job.href)}" data-action="navigate">${escapeHtml(job.label)}</a> — ${escapeHtml(job.blurb)}</li>`
+          )
+          .join('')}
+      </ul>
+
       <h2>Latest Article</h2>
       <p><a href="/blog/private-chat-room-no-signup-global-guide" data-action="navigate">Private Chat Rooms Without Signup: A Practical Global Guide</a></p>
 
@@ -591,6 +709,7 @@ function renderBlog() {
       <p>Together, we hope to build something that's useful, simple, and enjoyable for millions of people around the world.</p>
       <p>Welcome to QuickRoom.</p>
       <p>Create a room.</p><p>Share a link.</p><p>Start talking.</p>
+      ${renderGithubTrust()}
     </article>
   `;
 }
@@ -610,9 +729,15 @@ function updateDocumentMetadata() {
               title: 'QuickRoom Blog — Private Chat Rooms Without the Clutter',
               description: 'Read about private, temporary browser-based collaboration with QuickRoom.'
             }
+          : state.view === 'dashboard'
+            ? {
+                title: 'QuickRoom Dashboard — Growth Metrics',
+                description: 'Operator metrics for QuickRoom room creation, joining, and sharing.'
+              }
           : {
-              title: 'QuickRoom — Create a Room. Share a Code. Start Talking.',
-              description: 'Create a temporary private chat room without signup, email, phone number, or app installation.'
+              title: 'QuickRoom — Temporary Rooms for Private Coordination',
+              description:
+                'Create a temporary private chat room for events, study groups, client handoffs, and travel plans—no signup, app, or phone number.'
             };
   document.title = metadata.title;
   let description = document.querySelector('meta[name="description"]');
@@ -737,6 +862,16 @@ app.addEventListener('click', async (event) => {
     state.error = '';
     render();
   }
+  if (action === 'refresh-metrics') {
+    await loadMetrics();
+  }
+  if (action === 'clear-metrics') {
+    state.metrics = null;
+    state.metricsToken = '';
+    state.metricsError = '';
+    sessionStorage.removeItem(metricsTokenKey);
+    render();
+  }
   if (action === 'choose-template') {
     const template = templates.find(([id]) => id === button.dataset.template);
     if (!template) return;
@@ -810,6 +945,11 @@ app.addEventListener('submit', async (event) => {
     if (form.dataset.form === 'join') {
       await submitJoinRoom(formData);
     }
+    if (form.dataset.form === 'dashboard-auth') {
+      state.metricsToken = String(formData.get('token') || '').trim();
+      sessionStorage.setItem(metricsTokenKey, state.metricsToken);
+      await loadMetrics();
+    }
   } catch (error) {
     state.error = error.message || 'Please check your details and try again.';
     render();
@@ -866,6 +1006,29 @@ async function loadPublicRooms() {
   }
 }
 
+async function loadMetrics() {
+  if (!state.metricsToken) {
+    state.metricsError = 'Enter the admin token.';
+    render();
+    return;
+  }
+  state.metricsBusy = true;
+  state.metricsError = '';
+  render();
+  try {
+    const response = await apiGet('/api/metrics', {
+      'X-Admin-Token': state.metricsToken
+    });
+    state.metrics = response;
+  } catch (error) {
+    state.metrics = null;
+    state.metricsError = error.message || 'Unable to load metrics.';
+  } finally {
+    state.metricsBusy = false;
+    render();
+  }
+}
+
 function navigateToRoom(roomId) {
   window.history.pushState({}, '', `/room/${roomId}`);
   sessionStorage.setItem('quickroom.current-room', roomId);
@@ -881,11 +1044,13 @@ function leaveRoomView() {
 }
 
 function roomIdFromInput(value) {
-  if (typeof value !== 'string') throw new Error('Enter a room code.');
-  const roomId = value.trim();
+  if (typeof value !== 'string') throw new Error('Enter a room code or join link.');
+  const trimmed = value.trim();
+  const fromUrl = /\/room\/([A-Za-z0-9_-]{16,64})(?:[/?#]|$)/.exec(trimmed);
+  const roomId = fromUrl ? fromUrl[1] : trimmed;
 
   if (!/^[A-Za-z0-9_-]{16,64}$/.test(roomId)) {
-    throw new Error('Enter a valid room code.');
+    throw new Error('Enter a valid room code or join link.');
   }
   return roomId;
 }

@@ -258,5 +258,389 @@ export const useCasePages = {
         ]
       }
     ]
+  },
+  'chat-for-event-volunteers': {
+    title: 'Chat for Event Volunteers',
+    seoTitle: 'Chat for Event Volunteers — Temporary Staff Coordination | QuickRoom',
+    description:
+      'Create a private chat for event volunteers. Share a join link or QR code, coordinate shifts and updates, then let the room expire after the event.',
+    intro:
+      'Volunteer teams need clear coordination during an event—not another permanent group chat that outlives the shift schedule.',
+    sections: [
+      {
+        heading: 'One room for the volunteer team',
+        paragraphs: [
+          'Create a Private room before doors open. Name it after the event and role—Door Team, Stage Crew, Registration—so everyone knows which channel they are in.',
+          'Share the join link, room code, or printable QR card at the briefing. Volunteers join from a browser without installing an app or sharing phone numbers.'
+        ]
+      },
+      {
+        heading: 'What belongs in the room',
+        list: [
+          'Shift swaps and late arrivals',
+          'Venue updates and safety notes',
+          'Photos of signage, badges, or seating plans',
+          'A quiet place for leads to answer questions without flooding a public attendee channel'
+        ]
+      },
+      {
+        heading: 'Expire when the event ends',
+        paragraphs: [
+          'Set expiry to the end of the day or the weekend. When the event closes, the room and its images leave with it—no leftover volunteer group to manage later.',
+          'Keep a separate Public or attendee backchannel if guests also need a room; staff coordination works best Private.'
+        ]
+      }
+    ]
+  },
+  'study-group-chat-no-whatsapp': {
+    title: 'Study Group Chat Without WhatsApp',
+    seoTitle: 'Study Group Chat No WhatsApp — Temporary Class Chat | QuickRoom',
+    description:
+      'Start a study group chat without WhatsApp, phone numbers, or permanent groups. Share a link or QR code and revise together in the browser.',
+    intro:
+      'Classmates often need a focused study thread for one assignment or exam—not another WhatsApp group that stays forever.',
+    sections: [
+      {
+        heading: 'Skip the phone-number invite',
+        paragraphs: [
+          'WhatsApp requires phone contacts and usually creates a permanent group. QuickRoom uses a nickname and a room code or join link instead.',
+          'Create a Study room, set an expiry that matches the revision window, and share the QR or link in your class channel.'
+        ]
+      },
+      {
+        heading: 'Built for short study sprints',
+        list: [
+          'Tonight’s homework clarification',
+          'Exam revision for one subject',
+          'Sharing photographed diagrams or whiteboard work',
+          'Tutoring sessions that should end when the session ends'
+        ]
+      },
+      {
+        heading: 'Keep school systems for official records',
+        paragraphs: [
+          'Use QuickRoom as the lightweight discussion layer. Grades, submissions, and personal student records belong in school-approved platforms.',
+          'Choose Private or Invite Only and send the code only to the study group.'
+        ]
+      }
+    ]
+  },
+  'temporary-client-chat-share-images': {
+    title: 'Temporary Client Chat to Share Images',
+    seoTitle: 'Temporary Client Chat — Share Images Without Permanent Threads | QuickRoom',
+    description:
+      'Create a temporary client chat to share images, screenshots, and updates without another permanent Slack or WhatsApp thread.',
+    intro:
+      'Client handoffs often need a short-lived place to exchange images and decisions—then a clean end when the delivery is done.',
+    sections: [
+      {
+        heading: 'A room for one engagement',
+        paragraphs: [
+          'Create a Private Business room named after the project or milestone. Share the join link with the client contact so they can open it in a browser.',
+          'Upload mockups, annotated screenshots, packaging photos, or site references as images. Keep formal contracts and invoices in your usual tools.'
+        ]
+      },
+      {
+        heading: 'Why temporary beats permanent',
+        list: [
+          'No need to add the client to your personal messaging app',
+          'No leftover group after the project ships',
+          'Clear expiry for feedback windows and revision rounds',
+          'Simple access via link, code, or QR—no account setup for the client'
+        ]
+      },
+      {
+        heading: 'Suggested setup',
+        paragraphs: [
+          'Use a one-day or one-week expiry for a review cycle, or three months for a longer engagement. Treat the room code like a client invitation and do not post it publicly.',
+          'When the handoff is complete, let the room expire so the conversation does not linger.'
+        ]
+      }
+    ]
+  },
+  'classroom-backchannel': {
+    title: 'Classroom Backchannel',
+    seoTitle: 'Classroom Backchannel — Temporary Class Chat Without Accounts | QuickRoom',
+    description:
+      'Create a classroom backchannel for questions, links, and coordination during a lesson or workshop—without forcing students onto another permanent app.',
+    intro:
+      'A classroom backchannel gives learners a quiet place to ask questions and share resources while a lesson is underway.',
+    sections: [
+      {
+        heading: 'For one class session or module',
+        paragraphs: [
+          'Create a room at the start of a lecture, lab, or workshop. Display the QR code or printable join card so students can enter from their phones.',
+          'Use the Study or Event template and a clear room name such as Biology Lab Week 4.'
+        ]
+      },
+      {
+        heading: 'Useful classroom patterns',
+        list: [
+          'Collect questions without interrupting the presenter',
+          'Share a diagram or worksheet photo with the group',
+          'Coordinate breakout groups during a hybrid class',
+          'Expire the room after the session or the module week'
+        ]
+      },
+      {
+        heading: 'Keep expectations clear',
+        paragraphs: [
+          'Set respectful participation rules at the start. QuickRoom is for adult (18+) use, so it fits adult education, university cohorts, and professional workshops rather than under-18 classrooms.',
+          'Official grades and attendance should stay in your learning platform; the backchannel is for live discussion only.'
+        ]
+      }
+    ]
+  },
+  'travel-planning-chat': {
+    title: 'Travel Planning Chat',
+    seoTitle: 'Travel Planning Chat — Temporary Trip Coordination Room | QuickRoom',
+    description:
+      'Plan a trip in a temporary chat room. Share itineraries, tickets photos, and meetup details without creating another permanent group.',
+    intro:
+      'Trips need a shared thread for logistics—then silence once everyone is home. A temporary room matches that lifecycle.',
+    sections: [
+      {
+        heading: 'One room for one trip',
+        paragraphs: [
+          'Create a Family or blank Private room named after the destination and dates. Share the join link with travelling companions before departure.',
+          'Post meeting points, timing changes, and photos of tickets or reservations as needed.'
+        ]
+      },
+      {
+        heading: 'Travel-friendly sharing',
+        list: [
+          'QR codes work well at airports and hotel lobbies',
+          'Printable join cards help travellers who prefer scanning to typing',
+          'Choose an expiry a day or two after return',
+          'Keep passport and payment details out of chat—share only what is needed to meet up'
+        ]
+      },
+      {
+        heading: 'Private by default',
+        paragraphs: [
+          'Travel plans are personal. Use Private or Invite Only and send access only to people on the trip.',
+          'When the trip ends, the room expires so the coordination thread does not become permanent clutter.'
+        ]
+      }
+    ]
+  },
+  'freelance-client-handoff': {
+    title: 'Freelance Client Handoff',
+    seoTitle: 'Freelance Client Handoff Chat — Temporary Delivery Room | QuickRoom',
+    description:
+      'Create a temporary handoff room for freelancers and clients to exchange delivery notes, screenshots, and revision feedback.',
+    intro:
+      'A handoff should be focused and finite: deliver, answer questions, collect feedback, then close.',
+    sections: [
+      {
+        heading: 'Separate delivery from personal chat',
+        paragraphs: [
+          'Instead of mixing client work into personal messengers, open a QuickRoom for the handoff window. Share the link in your email or invoice note.',
+          'Clients join with a nickname—no account creation—and can review images and messages in the browser.'
+        ]
+      },
+      {
+        heading: 'What to put in the room',
+        list: [
+          'Delivery checklists and acceptance notes',
+          'Before/after screenshots',
+          'Revision requests tied to a milestone',
+          'A clear expiry aligned with the feedback deadline'
+        ]
+      },
+      {
+        heading: 'Professional boundaries',
+        paragraphs: [
+          'Keep contracts, payments, and legal documents in your usual business tools. QuickRoom is the temporary coordination layer around delivery.',
+          'When the revision window closes, let the room expire.'
+        ]
+      }
+    ]
+  },
+  'workshop-qa-room': {
+    title: 'Workshop Q&A Room',
+    seoTitle: 'Workshop Q&A Room — Temporary Audience Questions Chat | QuickRoom',
+    description:
+      'Run a workshop Q&A room for live questions, links, and follow-ups. Share a QR code so attendees join in seconds.',
+    intro:
+      'Workshops move fast. A dedicated Q&A room keeps questions visible without derailing the presenter.',
+    sections: [
+      {
+        heading: 'Display the QR at the start',
+        paragraphs: [
+          'Create an Event room and put the printable join card on the opening slide or near the entrance. Attendees scan and join without an app install.',
+          'Choose an expiry for the end of the workshop day so follow-up questions have a short home.'
+        ]
+      },
+      {
+        heading: 'Facilitator tips',
+        list: [
+          'Ask people to include their name in the nickname',
+          'Pin important links by repeating them clearly in chat',
+          'Use a Private staff room alongside a wider attendee room if needed',
+          'Moderate with the report tools if the room is broadly shared'
+        ]
+      },
+      {
+        heading: 'After the workshop',
+        paragraphs: [
+          'Export nothing by default—rooms are temporary. If you need lasting notes, copy key takeaways into your usual documentation before expiry.',
+          'That keeps the Q&A useful in the moment without creating another permanent community to maintain.'
+        ]
+      }
+    ]
+  },
+  'meetup-organizer-chat': {
+    title: 'Meetup Organizer Chat',
+    seoTitle: 'Meetup Organizer Chat — Private Host Coordination | QuickRoom',
+    description:
+      'Coordinate meetup hosts and organisers in a private temporary chat. Share updates, venue photos, and day-of logistics with a join link.',
+    intro:
+      'Organisers need a calm backstage channel while attendees get a separate public or event room.',
+    sections: [
+      {
+        heading: 'Backstage for hosts',
+        paragraphs: [
+          'Create a Private room for organisers, speakers, and venue contacts. Keep the attendee-facing chat separate so logistics stay clear.',
+          'Share the organiser link only in the host briefing email or staff Slack alternative.'
+        ]
+      },
+      {
+        heading: 'Day-of coordination',
+        list: [
+          'Door counts and capacity updates',
+          'Speaker timing and AV notes',
+          'Photos of room layout or signage',
+          'Emergency contacts among the organiser team only'
+        ]
+      },
+      {
+        heading: 'Clean close',
+        paragraphs: [
+          'Expire the organiser room after wrap-up. If you run recurring meetups, create a fresh room per event instead of recycling an old thread.',
+          'That keeps each gathering’s context intact without permanent organiser clutter.'
+        ]
+      }
+    ]
+  },
+  'remote-interview-prep-chat': {
+    title: 'Remote Interview Prep Chat',
+    seoTitle: 'Remote Interview Prep Chat — Temporary Candidate Coordination | QuickRoom',
+    description:
+      'Create a temporary interview prep chat for candidates and coaches—or for panelists before a remote interview—without another permanent channel.',
+    intro:
+      'Interview prep is time-bound. A temporary room matches the rehearsal window and then disappears.',
+    sections: [
+      {
+        heading: 'Prep without permanent groups',
+        paragraphs: [
+          'Open a Private Interview or Study room for a mock interview, panel sync, or candidate briefing. Share the join link in the calendar invite.',
+          'Participants can exchange notes and screenshots without adding personal phone numbers.'
+        ]
+      },
+      {
+        heading: 'Good fits',
+        list: [
+          'Candidate and coach rehearsal sessions',
+          'Panelist sync before a remote interview',
+          'Sharing a practice prompt image or whiteboard photo',
+          'Short expiry aligned to the interview day'
+        ]
+      },
+      {
+        heading: 'Keep official records elsewhere',
+        paragraphs: [
+          'Hiring decisions and formal evaluations belong in your ATS or HR system. QuickRoom is for live coordination only.',
+          'Share access only with authorised participants.'
+        ]
+      }
+    ]
+  },
+  'temporary-support-chat': {
+    title: 'Temporary Support Chat',
+    seoTitle: 'Temporary Support Chat — Short-Lived Help Room Without Accounts | QuickRoom',
+    description:
+      'Offer a temporary support chat for a launch, outage, or onboarding window. Customers join by link—no account required.',
+    intro:
+      'Some support moments are short: a product launch, a classroom office hour, or a weekend onboarding push.',
+    sections: [
+      {
+        heading: 'Open a window, then close it',
+        paragraphs: [
+          'Create a Private or Invite Only room for the support window. Share the link on your status page, email, or launch post.',
+          'Helpers can share screenshots and steps as images while the room is active.'
+        ]
+      },
+      {
+        heading: 'When this works well',
+        list: [
+          'Launch-day FAQ threads',
+          'Office hours for a course or cohort',
+          'Incident communication for a small customer set',
+          'Onboarding help during a migration weekend'
+        ]
+      },
+      {
+        heading: 'Boundaries',
+        paragraphs: [
+          'QuickRoom is not a full helpdesk. For tickets, SLAs, and identity-verified support, keep your existing support system.',
+          'Use expiry so the temporary channel does not become an unmoderated forever-inbox.'
+        ]
+      }
+    ]
   }
 };
+
+/** Homepage job links — private coordination first, then broader use cases. */
+export const coordinationJobs = [
+  {
+    href: '/chat-for-event-volunteers',
+    label: 'Event volunteers',
+    blurb: 'Coordinate staff with a private room and QR card.'
+  },
+  {
+    href: '/study-group-chat-no-whatsapp',
+    label: 'Study group',
+    blurb: 'Revise together without WhatsApp or phone numbers.'
+  },
+  {
+    href: '/temporary-client-chat-share-images',
+    label: 'Client image chat',
+    blurb: 'Share mockups and screenshots for one engagement.'
+  },
+  {
+    href: '/classroom-backchannel',
+    label: 'Classroom backchannel',
+    blurb: 'Collect questions during a lesson or workshop.'
+  },
+  {
+    href: '/travel-planning-chat',
+    label: 'Travel planning',
+    blurb: 'One trip, one room, then it expires.'
+  },
+  {
+    href: '/freelance-client-handoff',
+    label: 'Freelance handoff',
+    blurb: 'Delivery notes and revisions in a finite room.'
+  },
+  {
+    href: '/workshop-qa-room',
+    label: 'Workshop Q&A',
+    blurb: 'Audience questions via join link or QR.'
+  },
+  {
+    href: '/meetup-organizer-chat',
+    label: 'Meetup organisers',
+    blurb: 'Backstage logistics for hosts and speakers.'
+  },
+  {
+    href: '/remote-interview-prep-chat',
+    label: 'Interview prep',
+    blurb: 'Short-lived prep for candidates or panels.'
+  },
+  {
+    href: '/temporary-support-chat',
+    label: 'Temporary support',
+    blurb: 'Launch-day or office-hour help without accounts.'
+  }
+];

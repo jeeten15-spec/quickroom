@@ -10,12 +10,14 @@ import {
   HttpError,
   cleanupExpiredRooms,
   createRoom,
+  getMetrics,
   getPublicRooms,
   getRoom,
   joinRoom,
   leaveRoom,
   reportMessage,
   sendMessage,
+  trackEvent,
   uploadImage
 } from './handlers';
 import { ValidationError } from './validation';
@@ -55,8 +57,14 @@ export default {
       if (request.method === 'POST' && url.pathname === '/api/leaveRoom') {
         return json(await leaveRoom(await readJson(request), user, env), 200, corsHeaders);
       }
+      if (request.method === 'POST' && url.pathname === '/api/trackEvent') {
+        return json(await trackEvent(await readJson(request), user, env), 200, corsHeaders);
+      }
       if (request.method === 'GET' && url.pathname === '/api/publicRooms') {
         return json(await getPublicRooms(env), 200, corsHeaders);
+      }
+      if (request.method === 'GET' && url.pathname === '/api/metrics') {
+        return json(await getMetrics(request.headers.get('X-Admin-Token'), env), 200, corsHeaders);
       }
 
       const roomMatch = /^\/api\/room\/([A-Za-z0-9_-]+)$/.exec(url.pathname);
@@ -88,7 +96,7 @@ function getCorsHeaders(origin: string | null): HeadersInit {
   return {
     ...(origin ? { 'Access-Control-Allow-Origin': origin } : {}),
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Admin-Token',
     'Content-Type': 'application/json; charset=utf-8',
     Vary: 'Origin'
   };

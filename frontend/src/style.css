@@ -50,9 +50,162 @@ button:disabled {
 
 .landing-content {
   display: grid;
-  width: min(100%, 440px);
+  width: min(100%, 520px);
   margin: auto;
   gap: 18px;
+}
+
+.landing-support {
+  color: #666666;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.job-links,
+.public-rooms {
+  text-align: left;
+  padding-top: 8px;
+}
+
+.job-links h2,
+.public-rooms h2 {
+  margin: 0 0 6px;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+}
+
+.job-links-intro,
+.public-rooms-note,
+.public-rooms-empty {
+  margin: 0 0 12px;
+  color: #666666;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.job-link-list {
+  display: grid;
+  gap: 8px;
+}
+
+.job-link {
+  display: grid;
+  gap: 2px;
+  padding: 10px 0;
+  border-bottom: 1px solid #ececec;
+  color: inherit;
+  text-decoration: none;
+}
+
+.job-link:last-child {
+  border-bottom: 0;
+}
+
+.job-link strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.job-link span {
+  color: #666666;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.trust-github {
+  margin-top: 36px !important;
+  padding-top: 18px;
+  border-top: 1px solid #ececec;
+  color: #555555;
+  font-size: 14px;
+}
+
+.trust-github a {
+  color: #111111;
+}
+
+.dashboard-auth {
+  display: grid;
+  gap: 12px;
+  max-width: 360px;
+  margin-top: 12px;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin: 24px 0 12px;
+}
+
+.metric-card {
+  padding: 16px 14px;
+  border: 1px solid #e8e8e8;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.metric-label {
+  margin: 0 0 8px !important;
+  color: #666666;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.metric-value {
+  margin: 0 !important;
+  font-size: 28px;
+  font-weight: 650;
+  letter-spacing: -0.03em;
+}
+
+.metric-note,
+.dashboard-updated {
+  margin: 8px 0 0 !important;
+  color: #777777;
+  font-size: 12px;
+}
+
+.share-dialog {
+  width: min(100%, 420px);
+}
+
+.share-qr {
+  width: 220px;
+  height: 220px;
+  margin: 0 auto;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.share-field {
+  display: grid;
+  gap: 6px;
+  text-align: left;
+}
+
+.share-field > span {
+  color: #666666;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.share-link {
+  font-size: 13px !important;
+}
+
+.share-notice {
+  margin: 0;
+  color: #1f6b3a !important;
+  font-size: 14px !important;
+}
+
+.share-actions {
+  display: grid;
+  gap: 8px;
 }
 
 h1,

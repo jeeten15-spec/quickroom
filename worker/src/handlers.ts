@@ -47,8 +47,23 @@ interface ExpiredRoomTombstone {
   cleanedAt?: number;
 }
 
+interface MetricsRoomRecord {
+  createdAt: number;
+  createdBy: string;
+  participantsPeak: number;
+  shareClicks: number;
+  type: string;
+}
+
+interface MetricsCreatorRecord {
+  roomCount: number;
+  lastCreatedAt: number;
+}
+
 const rateLimitState = new Map<string, number>();
 const PRESENCE_TTL_MS = 15_000;
+const METRICS_RETENTION_MS = 45 * 24 * 60 * 60 * 1000;
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
 export async function createRoom(
   body: unknown,
@@ -115,8 +130,16 @@ export async function createRoom(
       }
     },
     [`users/${user.uid}`]: userRecord,
-    ...(publicListing ? { [`publicRooms/${roomId}`]: publicListing } : {})
+    ...(publicListing ? { [`publicRooms/${roomId}`]: publicListing } : {}),
+    [`metrics/rooms/${roomId}`]: {
+      createdAt: now,
+      createdBy: user.uid,
+      participantsPeak: 1,
+      shareClicks: 0,
+      type: room.type
+    } satisfies MetricsRoomRecord
   });
+  await bumpCreatorMetrics(env, user.uid, now);
 
   // The hourly Cron Trigger and lazy access checks remove this room at expiry.
   return {
@@ -136,6 +159,67 @@ export async function getPublicRooms(env: Env): Promise<{ rooms: Array<PublicRoo
     .slice(0, 12);
 
   return { rooms };
+}
+
+export async function trackEvent(
+  body: unknown,
+  user: AuthenticatedUser,
+  env: Env
+): Promise<{ ok: true }> {
+  const input = expectRecord(body);
+  const event = input.event;
+  if (event !== 'share') {
+    throw new ValidationError('Unsupported analytics event.');
+  }
+  const roomId = validateRoomId(input.roomId);
+  enforceRateLimit(`share:${user.uid}:${roomId}`, 2_000);
+  const metricsRoom = await databaseGet<MetricsRoomRecord>(env, `metrics/rooms/${roomId}`);
+  if (!metricsRoom) {
+    // Room may predate metrics; ignore quietly so share UX stays calm.
+    return { ok: true };
+  }
+  await databasePatch(env, `metrics/rooms/${roomId}`, {
+    ...metricsRoom,
+    shareClicks: (metricsRoom.shareClicks || 0) + 1
+  });
+  return { ok: true };
+}
+
+export async function getMetrics(
+  adminToken: string | null,
+  env: Env
+): Promise<Record<string, unknown>> {
+  const expected = env.METRICS_ADMIN_TOKEN?.trim();
+  if (!expected) {
+    throw new HttpError(503, 'Metrics are not configured yet.');
+  }
+  if (!adminToken || adminToken !== expected) {
+    throw new HttpError(401, 'Invalid admin token.');
+  }
+
+  const now = Date.now();
+  const weekStart = now - WEEK_MS;
+  const rooms = (await databaseGet<Record<string, MetricsRoomRecord>>(env, 'metrics/rooms')) ?? {};
+  const creators =
+    (await databaseGet<Record<string, MetricsCreatorRecord>>(env, 'metrics/creators')) ?? {};
+  const weekRooms = Object.values(rooms).filter((room) => room.createdAt >= weekStart);
+  const peaks = weekRooms.map((room) => room.participantsPeak || 1).sort((a, b) => a - b);
+  const roomsCreatedWeek = weekRooms.length;
+  const roomsWithTwoPlus = weekRooms.filter((room) => (room.participantsPeak || 1) >= 2).length;
+  const roomsWithShare = weekRooms.filter((room) => (room.shareClicks || 0) > 0).length;
+  const creatorIds = [...new Set(weekRooms.map((room) => room.createdBy))];
+  const returnCreators = creatorIds.filter((uid) => (creators[uid]?.roomCount || 0) >= 2).length;
+
+  return {
+    generatedAt: now,
+    roomsCreatedWeek,
+    medianJoiners: median(peaks),
+    pctRoomsWithTwoPlus: percent(roomsWithTwoPlus, roomsCreatedWeek),
+    shareClickRate: percent(roomsWithShare, roomsCreatedWeek),
+    returnCreators,
+    creatorsThisWeek: creatorIds.length,
+    returnCreatorsPct: percent(returnCreators, creatorIds.length)
+  };
 }
 
 export async function joinRoom(
@@ -180,6 +264,7 @@ export async function joinRoom(
     }
   });
   await touchUser(env, user.uid, nickname, now);
+  await updateMetricsPeak(env, roomId, Math.max(room.stats.participantsPeak, current));
 
   return { roomId, room: await getActiveRoom(env, roomId) };
 }
@@ -482,6 +567,8 @@ export async function cleanupExpiredRooms(env: Env): Promise<void> {
       await databasePatch(env, '/', { [`expiredRooms/${roomId}`]: null });
     }
   }
+
+  await pruneOldMetrics(env, now);
 }
 
 async function cleanupExpiredRoom(env: Env, roomId: string, expiredAt: number): Promise<void> {
@@ -662,6 +749,51 @@ function healthForReportedMessageCount(
   if (currentHealth === 'restricted' || reportedMessageCount >= 5) return 'restricted';
   if (currentHealth === 'warning' || reportedMessageCount >= 3) return 'warning';
   return degradeHealthToGood(currentHealth);
+}
+
+async function bumpCreatorMetrics(env: Env, uid: string, now: number): Promise<void> {
+  const existing = await databaseGet<MetricsCreatorRecord>(env, `metrics/creators/${uid}`);
+  await databasePut(env, `metrics/creators/${uid}`, {
+    roomCount: (existing?.roomCount || 0) + 1,
+    lastCreatedAt: now
+  } satisfies MetricsCreatorRecord);
+}
+
+async function updateMetricsPeak(env: Env, roomId: string, participantsPeak: number): Promise<void> {
+  const metricsRoom = await databaseGet<MetricsRoomRecord>(env, `metrics/rooms/${roomId}`);
+  if (!metricsRoom) return;
+  if ((metricsRoom.participantsPeak || 1) >= participantsPeak) return;
+  await databasePatch(env, `metrics/rooms/${roomId}`, {
+    ...metricsRoom,
+    participantsPeak
+  });
+}
+
+async function pruneOldMetrics(env: Env, now: number): Promise<void> {
+  const rooms = (await databaseGet<Record<string, MetricsRoomRecord>>(env, 'metrics/rooms')) ?? {};
+  const deletions: Record<string, null> = {};
+  for (const [roomId, room] of Object.entries(rooms)) {
+    if (room.createdAt < now - METRICS_RETENTION_MS) {
+      deletions[`metrics/rooms/${roomId}`] = null;
+    }
+  }
+  if (Object.keys(deletions).length) {
+    await databasePatch(env, '/', deletions);
+  }
+}
+
+function median(values: number[]): number {
+  if (!values.length) return 0;
+  const mid = Math.floor(values.length / 2);
+  if (values.length % 2 === 0) {
+    return Math.round(((values[mid - 1] + values[mid]) / 2) * 10) / 10;
+  }
+  return values[mid];
+}
+
+function percent(part: number, whole: number): number {
+  if (!whole) return 0;
+  return Math.round((part / whole) * 1000) / 10;
 }
 
 export class HttpError extends Error {

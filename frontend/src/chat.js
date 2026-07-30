@@ -1,10 +1,15 @@
 import { apiGet, apiRequest } from './api';
 import { generateNickname } from './nickname';
+import QRCode from 'qrcode';
 
 const IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
 const BLOCKED_PHRASES = ['buy now', 'click here', 'free money', 'crypto giveaway'];
 const MESSAGE_INTERVAL_MS = 1_000;
 const HEARTBEAT_INTERVAL_MS = 5_000;
+
+function roomShareUrl(roomId) {
+  return `https://quickroom.org/room/${roomId}`;
+}
 
 export class ChatRoom {
   constructor(root, roomId, { onLeave }) {
@@ -22,6 +27,8 @@ export class ChatRoom {
     this.reportTarget = null;
     this.imageUrl = null;
     this.shareCode = null;
+    this.shareQrDataUrl = null;
+    this.shareNotice = '';
     this.renderedMessageKey = '';
     this.participantsOpen = false;
     this.isOffline = !navigator.onLine;
@@ -269,13 +276,7 @@ export class ChatRoom {
     const action = button.dataset.chatAction;
 
     if (action === 'share') {
-      try {
-        await navigator.clipboard.writeText(this.roomId);
-      } catch {
-        // The visible code remains available for manual copying.
-      }
-      this.shareCode = this.roomId;
-      this.renderOverlay();
+      await this.openShareDialog();
     }
     if (action === 'leave') await this.leave();
     if (action === 'choose-image') this.root.querySelector('[data-image-input]').click();
@@ -313,7 +314,21 @@ export class ChatRoom {
       this.reportTarget = null;
       this.imageUrl = null;
       this.shareCode = null;
+      this.shareQrDataUrl = null;
+      this.shareNotice = '';
       this.renderOverlay();
+    }
+    if (action === 'copy-share-link') {
+      await this.copyShareValue(roomShareUrl(this.roomId), 'Join link copied');
+    }
+    if (action === 'copy-share-code') {
+      await this.copyShareValue(this.roomId, 'Room code copied');
+    }
+    if (action === 'native-share') {
+      await this.nativeShare();
+    }
+    if (action === 'print-join-card') {
+      this.printJoinCard();
     }
     if (action === 'confirm-report') await this.submitReport();
     if (action === 'view-image') {
@@ -321,6 +336,145 @@ export class ChatRoom {
       this.renderOverlay();
     }
   };
+
+  async openShareDialog() {
+    const shareUrl = roomShareUrl(this.roomId);
+    this.shareCode = this.roomId;
+    this.shareNotice = '';
+    try {
+      this.shareQrDataUrl = await QRCode.toDataURL(shareUrl, {
+        width: 220,
+        margin: 1,
+        color: { dark: '#111111', light: '#ffffff' }
+      });
+    } catch {
+      this.shareQrDataUrl = null;
+    }
+    this.renderOverlay();
+    apiRequest('/api/trackEvent', { event: 'share', roomId: this.roomId }).catch(() => {});
+  }
+
+  async copyShareValue(value, notice) {
+    try {
+      await navigator.clipboard.writeText(value);
+      this.shareNotice = notice;
+    } catch {
+      this.shareNotice = 'Copy manually from the fields below.';
+    }
+    this.renderOverlay();
+  }
+
+  async nativeShare() {
+    const shareUrl = roomShareUrl(this.roomId);
+    const roomName = this.room?.name || 'QuickRoom';
+    if (!navigator.share) {
+      await this.copyShareValue(shareUrl, 'Join link copied');
+      return;
+    }
+    try {
+      await navigator.share({
+        title: roomName,
+        text: `Join “${roomName}” on QuickRoom. Code: ${this.roomId}`,
+        url: shareUrl
+      });
+      this.shareNotice = 'Shared';
+      this.renderOverlay();
+    } catch {
+      // User cancelled or share failed; keep the dialog open.
+    }
+  }
+
+  printJoinCard() {
+    const shareUrl = roomShareUrl(this.roomId);
+    const roomName = this.room?.name || 'QuickRoom';
+    const qr = this.shareQrDataUrl
+      ? `<img src="${this.shareQrDataUrl}" alt="QR code to join" width="220" height="220" />`
+      : '';
+    const popup = window.open('', '_blank', 'noopener,noreferrer,width=480,height=720');
+    if (!popup) {
+      this.shareNotice = 'Allow pop-ups to print the join card.';
+      this.renderOverlay();
+      return;
+    }
+    popup.document.write(`<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Join ${escapeHtml(roomName)}</title>
+  <style>
+    @page { margin: 16mm; }
+    body {
+      margin: 0;
+      color: #111;
+      font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+      background: #f7f4ef;
+    }
+    .card {
+      box-sizing: border-box;
+      width: 100%;
+      min-height: 100vh;
+      padding: 36px 28px;
+      display: grid;
+      gap: 18px;
+      justify-items: center;
+      text-align: center;
+      background:
+        radial-gradient(circle at top, #fffdf8 0%, #f3eee6 55%, #ebe4d8 100%);
+    }
+    .brand {
+      margin: 0;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-size: 12px;
+      color: #6b6358;
+    }
+    h1 {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+    }
+    .qr {
+      padding: 14px;
+      background: #fff;
+      border: 1px solid #d9d1c4;
+    }
+    .code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 18px;
+      letter-spacing: 0.04em;
+      padding: 10px 14px;
+      border: 1px dashed #b9ae9d;
+      background: #fff;
+    }
+    .url {
+      max-width: 340px;
+      overflow-wrap: anywhere;
+      font-size: 13px;
+      color: #4d463c;
+    }
+    .hint {
+      margin: 0;
+      font-size: 13px;
+      color: #6b6358;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <p class="brand">QuickRoom</p>
+    <h1>${escapeHtml(roomName)}</h1>
+    <p class="hint">Scan to join · no app · no account</p>
+    <div class="qr">${qr}</div>
+    <div class="code">${escapeHtml(this.roomId)}</div>
+    <p class="url">${escapeHtml(shareUrl)}</p>
+    <p class="hint">18+ temporary room</p>
+  </div>
+  <script>window.onload = () => { window.print(); };</script>
+</body>
+</html>`);
+    popup.document.close();
+  }
 
   handleSubmit = async (event) => {
     event.preventDefault();
@@ -491,14 +645,34 @@ export class ChatRoom {
       return;
     }
     if (this.shareCode) {
+      const shareUrl = roomShareUrl(this.shareCode);
       overlay.innerHTML = `
         <div class="chat-overlay">
           <section class="share-dialog" role="dialog" aria-modal="true" aria-labelledby="share-title">
-            <p class="eyebrow">Room code copied</p>
-            <h2 id="share-title">Share this code</h2>
-            <code>${escapeHtml(this.shareCode)}</code>
-            <p>Send it to someone, then they can choose “Join existing room” and enter the code.</p>
-            <button class="button button-primary" type="button" data-chat-action="close-overlay">Done</button>
+            <p class="eyebrow">Invite people</p>
+            <h2 id="share-title">Share this room</h2>
+            ${
+              this.shareQrDataUrl
+                ? `<img class="share-qr" src="${this.shareQrDataUrl}" width="220" height="220" alt="QR code for this room" />`
+                : ''
+            }
+            <div class="share-field">
+              <span>Room code</span>
+              <code>${escapeHtml(this.shareCode)}</code>
+            </div>
+            <div class="share-field">
+              <span>Join link</span>
+              <code class="share-link">${escapeHtml(shareUrl)}</code>
+            </div>
+            ${this.shareNotice ? `<p class="share-notice">${escapeHtml(this.shareNotice)}</p>` : ''}
+            <p>Send the link, show the QR, or hand out a printable join card at IRL events.</p>
+            <div class="share-actions">
+              <button class="button button-primary" type="button" data-chat-action="native-share">Share</button>
+              <button class="button button-secondary" type="button" data-chat-action="copy-share-link">Copy link</button>
+              <button class="button button-secondary" type="button" data-chat-action="copy-share-code">Copy code</button>
+              <button class="button button-secondary" type="button" data-chat-action="print-join-card">Print join card</button>
+              <button class="button button-secondary" type="button" data-chat-action="close-overlay">Done</button>
+            </div>
           </section>
         </div>
       `;
