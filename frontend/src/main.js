@@ -1,9 +1,10 @@
-import { apiRequest } from './api';
+import { apiGet, apiRequest } from './api';
 import { ChatRoom } from './chat';
 import { generateNickname } from './nickname';
 import { registerPwa } from './pwa';
 import { useCasePages } from './use-cases';
 import { guides } from './guides';
+import { articles } from './articles';
 import './style.css';
 
 const app = document.querySelector('#app');
@@ -31,6 +32,9 @@ const state = {
   view: getInitialView(),
   joinOpen: false,
   contactOpen: false,
+  publicRooms: [],
+  publicRoomsLoaded: false,
+  joinCode: '',
   error: '',
   busy: false,
   create: createInitialRoomState(),
@@ -46,7 +50,7 @@ function getInitialView() {
       ? 'about'
       : pathname === '/blog'
         ? 'blog'
-        : (useCasePages[slug] || guides[slug])
+        : (useCasePages[slug] || guides[slug] || articles[slug])
           ? slug
           : 'landing';
 }
@@ -75,6 +79,7 @@ function render() {
       ${state.view === 'blog' ? renderBlog() : ''}
       ${useCasePages[state.view] ? renderUseCase(state.view) : ''}
       ${guides[state.view] ? renderGuide(state.view) : ''}
+      ${articles[state.view] ? renderArticle(state.view) : ''}
     </main>
     ${state.ageConfirmed ? '' : renderAgeGate()}
     ${state.contactOpen ? renderContactForm() : ''}
@@ -89,6 +94,10 @@ function render() {
   }
 
   updateDocumentMetadata();
+
+  if (state.ageConfirmed && state.view === 'landing' && !state.publicRoomsLoaded) {
+    loadPublicRooms();
+  }
 
 }
 
@@ -108,6 +117,7 @@ function renderLanding() {
               : `<button class="text-link" type="button" data-action="open-join">Join existing room</button>`
           }
         </div>
+        ${renderPublicRooms()}
       </div>
       <footer>
         <p class="footer-welcome">The fastest way to start a private discussion. No app. No account. No phone number.</p>
@@ -127,7 +137,7 @@ function renderJoinForm() {
     <form class="join-form" data-form="join">
       <label for="join-room">Room code</label>
       <input id="join-room" name="room" type="text" autocomplete="off" required
-        placeholder="Enter the room code" />
+        placeholder="Enter the room code" value="${escapeHtml(state.joinCode)}" />
       <label for="join-nickname">Nickname</label>
       <input id="join-nickname" name="nickname" type="text" minlength="3" maxlength="20"
         value="${escapeHtml(state.joinNickname)}" required />
@@ -139,6 +149,28 @@ function renderJoinForm() {
         </button>
       </div>
     </form>
+  `;
+}
+
+function renderPublicRooms() {
+  if (!state.publicRooms.length) return '';
+
+  return `
+    <section class="public-rooms" aria-labelledby="public-rooms-title">
+      <h2 id="public-rooms-title">Public rooms</h2>
+      <div class="public-room-list">
+        ${state.publicRooms
+          .map(
+            (room) => `
+              <button class="public-room" type="button" data-action="join-public" data-room-code="${escapeHtml(room.roomId)}">
+                <span aria-hidden="true">${escapeHtml(room.icon)}</span>
+                <span>${escapeHtml(room.name)}</span>
+              </button>
+            `
+          )
+          .join('')}
+      </div>
+    </section>
   `;
 }
 
@@ -435,6 +467,39 @@ function renderGuide(slug) {
   `;
 }
 
+function renderArticle(slug) {
+  const article = articles[slug];
+  return `
+    <article class="info-page article-page">
+      <a class="back-link" href="/blog" data-action="navigate">QuickRoom Blog</a>
+      <p class="eyebrow">QuickRoom guide</p>
+      <h1>${escapeHtml(article.title)}</h1>
+      <p class="article-date">${escapeHtml(article.publishedAt)}</p>
+      <p class="use-case-intro">${escapeHtml(article.intro)}</p>
+      ${article.sections
+        .map(
+          (section) => `
+            <section>
+              <h2>${escapeHtml(section.heading)}</h2>
+              ${(section.paragraphs || [])
+                .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`)
+                .join('')}
+              ${
+                section.list
+                  ? `<ul>${section.list
+                      .map((item) => `<li>${escapeHtml(item)}</li>`)
+                      .join('')}</ul>`
+                  : ''
+              }
+            </section>
+          `
+        )
+        .join('')}
+      <button class="button button-primary use-case-cta" type="button" data-action="open-create">Create a room</button>
+    </article>
+  `;
+}
+
 function renderBlog() {
   return `
     <article class="info-page">
@@ -516,6 +581,9 @@ function renderBlog() {
         <li><a href="/short-lived-event-backchannel" data-action="navigate">How to run a short-lived event backchannel</a></li>
       </ul>
 
+      <h2>Latest Article</h2>
+      <p><a href="/blog/private-chat-room-no-signup-global-guide" data-action="navigate">Private Chat Rooms Without Signup: A Practical Global Guide</a></p>
+
       <h2>We'd Love Your Feedback</h2>
       <p>QuickRoom is just getting started.</p>
       <p>Some of our best ideas have already come from conversations with students, educators, developers, and curious early users.</p>
@@ -528,7 +596,7 @@ function renderBlog() {
 }
 
 function updateDocumentMetadata() {
-  const page = useCasePages[state.view] || guides[state.view];
+  const page = useCasePages[state.view] || guides[state.view] || articles[state.view];
   const metadata =
     page
       ? { title: page.seoTitle, description: page.description }
@@ -646,6 +714,7 @@ app.addEventListener('click', async (event) => {
   }
   if (action === 'open-join') {
     state.joinOpen = true;
+    state.joinCode = '';
     state.error = '';
     render();
   }
@@ -659,6 +728,12 @@ app.addEventListener('click', async (event) => {
   }
   if (action === 'close-join') {
     state.joinOpen = false;
+    state.error = '';
+    render();
+  }
+  if (action === 'join-public') {
+    state.joinCode = button.dataset.roomCode;
+    state.joinOpen = true;
     state.error = '';
     render();
   }
@@ -777,6 +852,17 @@ async function submitJoinRoom(formData) {
   } finally {
     state.busy = false;
     render();
+  }
+}
+
+async function loadPublicRooms() {
+  state.publicRoomsLoaded = true;
+  try {
+    const response = await apiGet('/api/publicRooms');
+    state.publicRooms = response.rooms || [];
+    if (state.view === 'landing') render();
+  } catch {
+    // Public room discovery is optional; the private create/join flow stays available.
   }
 }
 

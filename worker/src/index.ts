@@ -10,6 +10,7 @@ import {
   HttpError,
   cleanupExpiredRooms,
   createRoom,
+  getPublicRooms,
   getRoom,
   joinRoom,
   leaveRoom,
@@ -53,6 +54,9 @@ export default {
       }
       if (request.method === 'POST' && url.pathname === '/api/leaveRoom') {
         return json(await leaveRoom(await readJson(request), user, env), 200, corsHeaders);
+      }
+      if (request.method === 'GET' && url.pathname === '/api/publicRooms') {
+        return json(await getPublicRooms(env), 200, corsHeaders);
       }
 
       const roomMatch = /^\/api\/room\/([A-Za-z0-9_-]+)$/.exec(url.pathname);

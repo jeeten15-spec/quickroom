@@ -68,6 +68,13 @@ export interface User {
   isPro?: boolean;
 }
 
+export interface PublicRoomListing {
+  name: string;
+  icon: string;
+  createdAt: number;
+  expiresAt: number;
+}
+
 export interface RoomTemplateConfig {
   icon: string;
   suggestedTitle: string;

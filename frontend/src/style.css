@@ -109,6 +109,50 @@ h1 {
   min-height: 30px;
 }
 
+.public-rooms {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+  text-align: left;
+}
+
+.public-rooms h2 {
+  margin: 0;
+  color: #777777;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.public-room-list {
+  display: grid;
+  gap: 6px;
+}
+
+.public-room {
+  display: flex;
+  min-height: 40px;
+  align-items: center;
+  gap: 9px;
+  padding: 0 10px;
+  overflow: hidden;
+  border: 1px solid #e5e5e5;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #111111;
+  font-size: 13px;
+  text-align: left;
+}
+
+.public-room:hover {
+  border-color: #0066ff;
+}
+
+.public-room span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .text-link,
 .back-link {
   padding: 4px;
@@ -873,6 +917,12 @@ code {
   color: #555555;
   font-size: 18px;
   line-height: 1.5;
+}
+
+.article-date {
+  margin: -18px 0 24px !important;
+  color: #777777;
+  font-size: 13px;
 }
 
 .use-case-cta {

@@ -5,6 +5,7 @@ import {
   roomImagePath,
   type Message,
   type Participant,
+  type PublicRoomListing,
   type Room,
   type User
 } from '../../shared/src/models';
@@ -92,6 +93,15 @@ export async function createRoom(
   const roomCreatedMessageId = createId();
   const welcomeMessageId = createId();
   const userRecord: User = { nick: nickname, createdAt: now, lastSeen: now };
+  const publicListing: PublicRoomListing | undefined =
+    room.type === 'public'
+      ? {
+          name: room.name,
+          icon: room.icon,
+          createdAt: room.createdAt,
+          expiresAt: room.expiresAt as number
+        }
+      : undefined;
 
   // A root PATCH makes room creation, the creator's presence, welcome message,
   // and user record a single Realtime Database multi-location update.
@@ -104,7 +114,8 @@ export async function createRoom(
         [welcomeMessageId]: welcomeMessage
       }
     },
-    [`users/${user.uid}`]: userRecord
+    [`users/${user.uid}`]: userRecord,
+    ...(publicListing ? { [`publicRooms/${roomId}`]: publicListing } : {})
   });
 
   // The hourly Cron Trigger and lazy access checks remove this room at expiry.
@@ -113,6 +124,18 @@ export async function createRoom(
     room,
     shareUrl: `https://quickroom.org/room/${roomId}`
   };
+}
+
+export async function getPublicRooms(env: Env): Promise<{ rooms: Array<PublicRoomListing & { roomId: string }> }> {
+  const listings = (await databaseGet<Record<string, PublicRoomListing>>(env, 'publicRooms')) ?? {};
+  const now = Date.now();
+  const rooms = Object.entries(listings)
+    .filter(([, room]) => room.expiresAt > now)
+    .map(([roomId, room]) => ({ roomId, ...room }))
+    .sort((left, right) => right.createdAt - left.createdAt)
+    .slice(0, 12);
+
+  return { rooms };
 }
 
 export async function joinRoom(
@@ -472,6 +495,7 @@ async function cleanupExpiredRoom(env: Env, roomId: string, expiredAt: number): 
   await databasePatch(env, '/', {
     [`rooms/${roomId}`]: null,
     [`private/${roomId}`]: null,
+    [`publicRooms/${roomId}`]: null,
     [`expiredRooms/${roomId}`]: tombstone
   });
   await completeStorageCleanup(env, roomId, tombstone);
