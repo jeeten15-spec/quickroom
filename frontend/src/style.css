@@ -117,12 +117,57 @@ button:disabled {
   line-height: 1.35;
 }
 
-.trust-github {
-  margin-top: 36px !important;
-  padding-top: 18px;
-  border-top: 1px solid #ececec;
-  color: #555555;
-  font-size: 14px;
+.support-block {
+  display: grid;
+  gap: 8px;
+  width: min(100%, 360px);
+  margin: 28px auto 8px;
+  padding: 16px 14px;
+  border: 1px solid #ececec;
+  border-radius: 12px;
+  background: #ffffff;
+  text-align: center;
+}
+
+.support-block-compact {
+  margin-top: 20px;
+  padding: 12px;
+}
+
+.flow .support-block,
+.info-page .support-block,
+.chat-loading .support-block {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.support-title {
+  margin: 0;
+  color: #111111;
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.support-copy,
+.support-fallback {
+  margin: 0;
+  color: #666666;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.paypal-button-wrap,
+.paypal-hosted-button {
+  width: min(100%, 320px);
+  margin: 4px auto 0;
+}
+
+.support-dialog .support-block {
+  margin: 0;
+  border: 0;
+  padding: 0;
+  background: transparent;
 }
 
 .trust-github a {

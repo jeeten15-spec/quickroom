@@ -1,5 +1,6 @@
 import { apiGet, apiRequest } from './api';
 import { generateNickname } from './nickname';
+import { mountPaypalSupport, renderSupportBlock } from './support';
 import QRCode from 'qrcode';
 
 const IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
@@ -29,6 +30,7 @@ export class ChatRoom {
     this.shareCode = null;
     this.shareQrDataUrl = null;
     this.shareNotice = '';
+    this.supportOpen = false;
     this.renderedMessageKey = '';
     this.participantsOpen = false;
     this.isOffline = !navigator.onLine;
@@ -136,6 +138,7 @@ export class ChatRoom {
             <button class="small-button is-hidden" type="button" data-chat-action="close-private"
               data-group-button>Group</button>
             <button class="small-button" type="button" data-chat-action="share">Share</button>
+            <button class="small-button" type="button" data-chat-action="support">Support</button>
             <button class="small-button" type="button" data-chat-action="leave">Leave</button>
           </div>
         </header>
@@ -237,9 +240,11 @@ export class ChatRoom {
           <p class="form-error" data-join-error></p>
           <button class="button button-primary" type="submit">Join Room</button>
         </form>
+        ${renderSupportBlock({ compact: true })}
       </main>
     `;
     this.root.addEventListener('submit', this.handleSubmit);
+    mountPaypalSupport(this.root);
   }
 
   renderExpired() {
@@ -251,9 +256,11 @@ export class ChatRoom {
           <p>Temporary rooms and their content are removed when their time is up.</p>
           <button class="button button-primary" type="button" data-chat-action="leave">Return home</button>
         </section>
+        ${renderSupportBlock({ compact: true })}
       </main>
     `;
     this.root.addEventListener('click', this.handleClick);
+    mountPaypalSupport(this.root);
   }
 
   renderMissingRoom() {
@@ -265,9 +272,11 @@ export class ChatRoom {
           <p>Please check the link or create a new temporary room.</p>
           <button class="button button-primary" type="button" data-chat-action="leave">Return home</button>
         </section>
+        ${renderSupportBlock({ compact: true })}
       </main>
     `;
     this.root.addEventListener('click', this.handleClick);
+    mountPaypalSupport(this.root);
   }
 
   handleClick = async (event) => {
@@ -277,6 +286,14 @@ export class ChatRoom {
 
     if (action === 'share') {
       await this.openShareDialog();
+    }
+    if (action === 'support') {
+      this.reportTarget = null;
+      this.imageUrl = null;
+      this.shareCode = null;
+      this.supportOpen = true;
+      this.renderOverlay();
+      mountPaypalSupport(this.root);
     }
     if (action === 'leave') await this.leave();
     if (action === 'choose-image') this.root.querySelector('[data-image-input]').click();
@@ -316,6 +333,7 @@ export class ChatRoom {
       this.shareCode = null;
       this.shareQrDataUrl = null;
       this.shareNotice = '';
+      this.supportOpen = false;
       this.renderOverlay();
     }
     if (action === 'copy-share-link') {
@@ -339,6 +357,7 @@ export class ChatRoom {
 
   async openShareDialog() {
     const shareUrl = roomShareUrl(this.roomId);
+    this.supportOpen = false;
     this.shareCode = this.roomId;
     this.shareNotice = '';
     try {
@@ -640,6 +659,17 @@ export class ChatRoom {
         <div class="chat-overlay">
           <button class="overlay-close" type="button" data-chat-action="close-overlay" aria-label="Close">×</button>
           <img src="${escapeHtml(this.imageUrl)}" alt="Shared image" />
+        </div>
+      `;
+      return;
+    }
+    if (this.supportOpen) {
+      overlay.innerHTML = `
+        <div class="chat-overlay">
+          <section class="share-dialog support-dialog" role="dialog" aria-modal="true" aria-label="Support QuickRoom">
+            ${renderSupportBlock()}
+            <button class="button button-secondary" type="button" data-chat-action="close-overlay">Close</button>
+          </section>
         </div>
       `;
       return;

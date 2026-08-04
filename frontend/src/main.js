@@ -5,6 +5,7 @@ import { registerPwa } from './pwa';
 import { coordinationJobs, useCasePages } from './use-cases';
 import { guides } from './guides';
 import { articles } from './articles';
+import { mountPaypalSupport, renderSupportBlock } from './support';
 import './style.css';
 
 const GITHUB_URL = 'https://github.com/jeeten15-spec/quickroom';
@@ -111,6 +112,7 @@ function render() {
     loadPublicRoomsIfNeeded();
   }
 
+  mountPaypalSupport(app);
 }
 
 function renderLanding() {
@@ -135,6 +137,7 @@ function renderLanding() {
       </div>
       <footer>
         <p class="footer-welcome">Built for private coordination first. No app. No account. No phone number.</p>
+        ${renderSupportBlock()}
         <p class="footer-links">
           <a href="/blog" data-action="navigate">Blog</a> <span>·</span>
           <a href="/about" data-action="navigate">About Us</a> <span>·</span>
@@ -245,6 +248,7 @@ function renderDashboard() {
             </form>
           `
       }
+      ${renderSupportBlock({ compact: true })}
     </article>
   `;
 }
@@ -298,6 +302,7 @@ function renderCreateRoom() {
         ${step === 4 ? renderNicknameStep() : ''}
         ${step === 5 ? renderSettingsStep() : ''}
       </div>
+      ${renderSupportBlock({ compact: true })}
     </section>
   `;
 }
@@ -508,6 +513,7 @@ function renderAbout() {
       <p>Thank you for being part of the journey.</p>
       <p>We're glad you're here.</p>
       ${renderGithubTrust()}
+      ${renderSupportBlock()}
     </article>
   `;
 }
@@ -541,6 +547,7 @@ function renderUseCase(slug) {
         )
         .join('')}
       <button class="button button-primary use-case-cta" type="button" data-action="open-create">Create a room</button>
+      ${renderSupportBlock({ compact: true })}
     </article>
   `;
 }
@@ -573,6 +580,7 @@ function renderGuide(slug) {
         )
         .join('')}
       <button class="button button-primary use-case-cta" type="button" data-action="open-create">Create a room</button>
+      ${renderSupportBlock({ compact: true })}
     </article>
   `;
 }
@@ -606,6 +614,7 @@ function renderArticle(slug) {
         )
         .join('')}
       <button class="button button-primary use-case-cta" type="button" data-action="open-create">Create a room</button>
+      ${renderSupportBlock({ compact: true })}
     </article>
   `;
 }
@@ -712,6 +721,7 @@ function renderBlog() {
       <p>Welcome to QuickRoom.</p>
       <p>Create a room.</p><p>Share a link.</p><p>Start talking.</p>
       ${renderGithubTrust()}
+      ${renderSupportBlock()}
     </article>
   `;
 }
