@@ -1,12 +1,18 @@
 const PAYPAL_CLIENT_ID =
   'BAAY-NrgK6PrSduATvNMOG5HYyMLDG61OTFS_BHzyAAjJcz-1fBRRwMXmemDx03BojVXz_T_Xj9or7i3QU';
 
-// Optional: second half of PayPal's embed code (paypal-container-XXXX / hostedButtonId).
+// Second half of PayPal's embed code: hostedButtonId / paypal-container-XXXX.
+// Set with VITE_PAYPAL_HOSTED_BUTTON_ID at build time when available.
 const PAYPAL_HOSTED_BUTTON_ID = (import.meta.env.VITE_PAYPAL_HOSTED_BUTTON_ID || '').trim();
+
+// Reliable no-popup fallback while the hosted button id is not configured.
+// Opens PayPal Donate in a new tab (hosted-buttons client ids cannot use Buttons.createOrder).
+const PAYPAL_DONATE_URL =
+  'https://www.paypal.com/donate/?business=Jeeten15%40gmail.com&no_recurring=0&item_name=Buy%20QuickRoom%20a%20coffee&currency_code=USD';
 
 const SDK_SRC = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(
   PAYPAL_CLIENT_ID
-)}&components=hosted-buttons,buttons&disable-funding=venmo&currency=USD`;
+)}&components=hosted-buttons&disable-funding=venmo&currency=USD`;
 
 let sdkPromise;
 
@@ -29,24 +35,60 @@ export function mountPaypalSupport(root = document) {
   const nodes = [...root.querySelectorAll('[data-paypal-support]')];
   if (!nodes.length) return;
 
+  for (const node of nodes) {
+    if (PAYPAL_HOSTED_BUTTON_ID) {
+      mountHostedButton(node);
+    } else {
+      mountDonateLink(node);
+    }
+  }
+}
+
+function mountDonateLink(node) {
+  if (node.dataset.paypalRendered === 'donate-link') return;
+  node.dataset.paypalRendered = 'donate-link';
+  node.innerHTML = `
+    <a class="support-coffee-button" href="${PAYPAL_DONATE_URL}" target="_blank" rel="noopener noreferrer">
+      Buy me a coffee with PayPal
+    </a>
+  `;
+}
+
+function mountHostedButton(node) {
+  const mode = `hosted:${PAYPAL_HOSTED_BUTTON_ID}`;
+  if (node.dataset.paypalRendered === mode) return;
+  node.dataset.paypalRendered = mode;
+  node.innerHTML = '';
+
+  const containerId = `paypal-container-${PAYPAL_HOSTED_BUTTON_ID}`;
+  // PayPal requires a stable container id matching the embed pattern.
+  let container = document.getElementById(containerId);
+  if (!container) {
+    container = document.createElement('div');
+    container.id = containerId;
+    container.className = 'paypal-hosted-button';
+    node.append(container);
+  } else if (!node.contains(container)) {
+    node.append(container);
+  }
+
   ensurePaypalSdk()
     .then((paypal) => {
-      for (const node of nodes) {
-        renderPaypalButton(paypal, node);
+      if (!paypal?.HostedButtons) {
+        mountDonateLink(node);
+        return;
       }
+      return paypal
+        .HostedButtons({ hostedButtonId: PAYPAL_HOSTED_BUTTON_ID })
+        .render(`#${containerId}`);
     })
     .catch(() => {
-      for (const node of nodes) {
-        node.innerHTML =
-          '<p class="support-fallback">PayPal is temporarily unavailable. Please try again later.</p>';
-      }
+      mountDonateLink(node);
     });
 }
 
 function ensurePaypalSdk() {
-  if (window.paypal?.Buttons || window.paypal?.HostedButtons) {
-    return Promise.resolve(window.paypal);
-  }
+  if (window.paypal?.HostedButtons) return Promise.resolve(window.paypal);
   if (sdkPromise) return sdkPromise;
 
   sdkPromise = new Promise((resolve, reject) => {
@@ -56,7 +98,7 @@ function ensurePaypalSdk() {
       existing.addEventListener('error', () => reject(new Error('PayPal SDK failed to load.')), {
         once: true
       });
-      if (window.paypal) resolve(window.paypal);
+      if (window.paypal?.HostedButtons) resolve(window.paypal);
       return;
     }
 
@@ -71,70 +113,4 @@ function ensurePaypalSdk() {
   });
 
   return sdkPromise;
-}
-
-function renderPaypalButton(paypal, node) {
-  const mode = PAYPAL_HOSTED_BUTTON_ID ? `hosted:${PAYPAL_HOSTED_BUTTON_ID}` : 'coffee-buttons';
-  if (node.dataset.paypalRendered === mode) return;
-
-  node.innerHTML = '';
-  node.dataset.paypalRendered = mode;
-
-  if (PAYPAL_HOSTED_BUTTON_ID && paypal.HostedButtons) {
-    const containerId = `paypal-container-${PAYPAL_HOSTED_BUTTON_ID}-${Math.random()
-      .toString(36)
-      .slice(2, 8)}`;
-    const container = document.createElement('div');
-    container.id = containerId;
-    container.className = 'paypal-hosted-button';
-    node.append(container);
-    paypal
-      .HostedButtons({ hostedButtonId: PAYPAL_HOSTED_BUTTON_ID })
-      .render(`#${containerId}`)
-      .catch(() => renderCoffeeButtons(paypal, node));
-    return;
-  }
-
-  renderCoffeeButtons(paypal, node);
-}
-
-function renderCoffeeButtons(paypal, node) {
-  if (!paypal?.Buttons) {
-    node.innerHTML =
-      '<p class="support-fallback">PayPal button could not load. Please check back shortly.</p>';
-    return;
-  }
-
-  const container = document.createElement('div');
-  container.className = 'paypal-hosted-button';
-  node.append(container);
-
-  paypal
-    .Buttons({
-      style: {
-        shape: 'rect',
-        color: 'gold',
-        layout: 'vertical',
-        label: 'paypal',
-        height: 42
-      },
-      createOrder(_data, actions) {
-        return actions.order.create({
-          purchase_units: [
-            {
-              description: 'Buy QuickRoom a coffee',
-              amount: {
-                currency_code: 'USD',
-                value: '5.00'
-              }
-            }
-          ]
-        });
-      }
-    })
-    .render(container)
-    .catch(() => {
-      node.innerHTML =
-        '<p class="support-fallback">Unable to load the PayPal button right now.</p>';
-    });
 }

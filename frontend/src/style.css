@@ -163,6 +163,27 @@ button:disabled {
   margin: 4px auto 0;
 }
 
+.support-coffee-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  width: 100%;
+  padding: 0 16px;
+  border: 1px solid #ffc439;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #ffd76a 0%, #ffc439 100%);
+  color: #111111;
+  font-size: 14px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+
+.support-coffee-button:hover {
+  filter: brightness(0.98);
+}
+
 .support-dialog .support-block {
   margin: 0;
   border: 0;
