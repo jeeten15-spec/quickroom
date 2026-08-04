@@ -1,9 +1,10 @@
 const PAYPAL_CLIENT_ID =
   'BAAY-NrgK6PrSduATvNMOG5HYyMLDG61OTFS_BHzyAAjJcz-1fBRRwMXmemDx03BojVXz_T_Xj9or7i3QU';
 
-// From PayPal embed step 2: hostedButtonId / #paypal-container-XXXX
-// Build with VITE_PAYPAL_HOSTED_BUTTON_ID=<id> once you copy that id from PayPal.
-const PAYPAL_HOSTED_BUTTON_ID = (import.meta.env.VITE_PAYPAL_HOSTED_BUTTON_ID || '').trim();
+// PayPal embed step 2 hostedButtonId.
+const PAYPAL_HOSTED_BUTTON_ID = (
+  import.meta.env.VITE_PAYPAL_HOSTED_BUTTON_ID || 'VDXNJQQS7ZNBN'
+).trim();
 
 // India-friendly Buy Now checkout (not Donate). Used only when hostedButtonId is missing.
 const PAYPAL_BUY_NOW_URL =
