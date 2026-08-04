@@ -1,18 +1,27 @@
 const PAYPAL_CLIENT_ID =
   'BAAY-NrgK6PrSduATvNMOG5HYyMLDG61OTFS_BHzyAAjJcz-1fBRRwMXmemDx03BojVXz_T_Xj9or7i3QU';
 
-// Second half of PayPal's embed code: hostedButtonId / paypal-container-XXXX.
-// Set with VITE_PAYPAL_HOSTED_BUTTON_ID at build time when available.
+// From PayPal embed step 2: hostedButtonId / #paypal-container-XXXX
+// Build with VITE_PAYPAL_HOSTED_BUTTON_ID=<id> once you copy that id from PayPal.
 const PAYPAL_HOSTED_BUTTON_ID = (import.meta.env.VITE_PAYPAL_HOSTED_BUTTON_ID || '').trim();
 
-// Reliable no-popup fallback while the hosted button id is not configured.
-// Opens PayPal Donate in a new tab (hosted-buttons client ids cannot use Buttons.createOrder).
-const PAYPAL_DONATE_URL =
-  'https://www.paypal.com/donate/?business=Jeeten15%40gmail.com&no_recurring=0&item_name=Buy%20QuickRoom%20a%20coffee&currency_code=USD';
+// India-friendly Buy Now checkout (not Donate). Used only when hostedButtonId is missing.
+const PAYPAL_BUY_NOW_URL =
+  'https://www.paypal.com/cgi-bin/webscr?cmd=_xclick' +
+  '&business=' +
+  encodeURIComponent('Jeeten15@gmail.com') +
+  '&item_name=' +
+  encodeURIComponent('Buy QuickRoom a coffee') +
+  '&amount=5.00' +
+  '&currency_code=USD' +
+  '&button_subtype=services' +
+  '&no_note=1' +
+  '&no_shipping=1';
 
-const SDK_SRC = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(
-  PAYPAL_CLIENT_ID
-)}&components=hosted-buttons&disable-funding=venmo&currency=USD`;
+// Exact SDK URL from the merchant embed (hosted-buttons only).
+const SDK_SRC =
+  `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(PAYPAL_CLIENT_ID)}` +
+  '&components=hosted-buttons&disable-funding=venmo&currency=USD';
 
 let sdkPromise;
 
@@ -39,16 +48,16 @@ export function mountPaypalSupport(root = document) {
     if (PAYPAL_HOSTED_BUTTON_ID) {
       mountHostedButton(node);
     } else {
-      mountDonateLink(node);
+      mountBuyNowButton(node);
     }
   }
 }
 
-function mountDonateLink(node) {
-  if (node.dataset.paypalRendered === 'donate-link') return;
-  node.dataset.paypalRendered = 'donate-link';
+function mountBuyNowButton(node) {
+  if (node.dataset.paypalRendered === 'buy-now') return;
+  node.dataset.paypalRendered = 'buy-now';
   node.innerHTML = `
-    <a class="support-coffee-button" href="${PAYPAL_DONATE_URL}" target="_blank" rel="noopener noreferrer">
+    <a class="support-coffee-button" href="${PAYPAL_BUY_NOW_URL}" target="_blank" rel="noopener noreferrer">
       Buy me a coffee with PayPal
     </a>
   `;
@@ -60,22 +69,18 @@ function mountHostedButton(node) {
   node.dataset.paypalRendered = mode;
   node.innerHTML = '';
 
-  const containerId = `paypal-container-${PAYPAL_HOSTED_BUTTON_ID}`;
-  // PayPal requires a stable container id matching the embed pattern.
-  let container = document.getElementById(containerId);
-  if (!container) {
-    container = document.createElement('div');
-    container.id = containerId;
-    container.className = 'paypal-hosted-button';
-    node.append(container);
-  } else if (!node.contains(container)) {
-    node.append(container);
-  }
+  const containerId = `paypal-container-${PAYPAL_HOSTED_BUTTON_ID}-${Math.random()
+    .toString(36)
+    .slice(2, 8)}`;
+  const container = document.createElement('div');
+  container.id = containerId;
+  container.className = 'paypal-hosted-button';
+  node.append(container);
 
   ensurePaypalSdk()
     .then((paypal) => {
       if (!paypal?.HostedButtons) {
-        mountDonateLink(node);
+        mountBuyNowButton(node);
         return;
       }
       return paypal
@@ -83,7 +88,7 @@ function mountHostedButton(node) {
         .render(`#${containerId}`);
     })
     .catch(() => {
-      mountDonateLink(node);
+      mountBuyNowButton(node);
     });
 }
 
