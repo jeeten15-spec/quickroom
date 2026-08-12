@@ -52,6 +52,7 @@ const state = {
 };
 
 function getInitialView() {
+  normalizePathname();
   const pathname = window.location.pathname;
   const slug = pathname.replace(/^\//, '');
   return /^\/room\/[A-Za-z0-9_-]{16,64}$/.test(pathname)
@@ -65,6 +66,14 @@ function getInitialView() {
           : (useCasePages[slug] || guides[slug] || articles[slug])
             ? slug
             : 'landing';
+}
+
+function normalizePathname() {
+  const { pathname, search, hash } = window.location;
+  if (pathname.length > 1 && pathname.endsWith('/')) {
+    const normalized = pathname.replace(/\/+$/, '') || '/';
+    window.history.replaceState({}, '', `${normalized}${search}${hash}`);
+  }
 }
 
 function createInitialRoomState() {
@@ -765,7 +774,9 @@ function updateDocumentMetadata() {
     canonical.rel = 'canonical';
     document.head.append(canonical);
   }
-  canonical.href = `https://quickroom.org${window.location.pathname}`;
+  canonical.href = `https://quickroom.org${
+    window.location.pathname === '/' ? '/' : window.location.pathname.replace(/\/+$/, '')
+  }`;
 }
 
 function renderContactForm() {
