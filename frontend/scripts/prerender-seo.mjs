@@ -11,6 +11,9 @@ const { useCasePages, coordinationJobs } = await import(
 );
 const { guides } = await import(pathToFileURL(path.join(root, 'src/guides.js')).href);
 const { articles } = await import(pathToFileURL(path.join(root, 'src/articles.js')).href);
+const { renderExtrasHtml, defaultFaq } = await import(
+  pathToFileURL(path.join(root, 'src/page-copy.js')).href
+);
 
 function escapeHtml(value) {
   return String(value)
@@ -59,8 +62,10 @@ function bodyUseCase(slug, page) {
       <p class="eyebrow">QuickRoom use case</p>
       <h1>${escapeHtml(page.title)}</h1>
       <p class="use-case-intro">${escapeHtml(page.intro)}</p>
+      <p>${escapeHtml(page.description)}</p>
       <p><a href="/">Create a temporary room on QuickRoom</a> — no signup, app, or phone number required.</p>
       ${renderSections(page.sections)}
+      ${renderExtrasHtml(page.title, { escapeHtml })}
       ${relatedLinks(`/${slug}`)}
     </article>`;
 }
@@ -71,7 +76,9 @@ function bodyGuide(slug, page) {
       <p class="eyebrow">Practical guide</p>
       <h1>${escapeHtml(page.title)}</h1>
       <p class="use-case-intro">${escapeHtml(page.intro)}</p>
+      <p>${escapeHtml(page.description)}</p>
       ${renderSections(page.sections, { orderedLists: true })}
+      ${renderExtrasHtml(page.title, { escapeHtml, orderedHowTo: true })}
       <p><a href="/">Open QuickRoom</a> to create a room when you are ready.</p>
       ${relatedLinks(`/${slug}`)}
     </article>`;
@@ -84,7 +91,9 @@ function bodyArticle(slug, page) {
       <h1>${escapeHtml(page.title)}</h1>
       <p class="article-date">${escapeHtml(page.publishedAt)}</p>
       <p class="use-case-intro">${escapeHtml(page.intro)}</p>
+      <p>${escapeHtml(page.description)}</p>
       ${renderSections(page.sections)}
+      ${renderExtrasHtml('a QuickRoom temporary chat', { escapeHtml })}
       <p><a href="/">Create a private temporary room</a></p>
       ${relatedLinks(`/${slug}`)}
     </article>`;
@@ -96,9 +105,12 @@ function bodyAbout() {
       <h1>About QuickRoom</h1>
       <p>QuickRoom was created with a simple belief: <strong>technology should remove friction—not create it.</strong></p>
       <p>Every day, people need a quick place to collaborate, ask questions, solve problems, or talk. Most tools still ask for accounts, phone verification, app installs, and permanent groups before the conversation begins.</p>
-      <p>QuickRoom makes starting a conversation as simple as opening a web page: create a temporary private room, share a room code, and talk in the browser.</p>
+      <p>QuickRoom makes starting a conversation as simple as opening a web page: create a temporary private room, share a room code, and talk in the browser without handing over a phone number or email address.</p>
       <h2>Our mission</h2>
-      <p>Build the simplest, fastest, and most respectful collaboration platform on the web—no unnecessary barriers, no complicated setup, just meaningful conversations.</p>
+      <p>Build the simplest, fastest, and most respectful collaboration platform on the web—no unnecessary barriers, no complicated setup, just meaningful conversations that can end when the moment ends.</p>
+      <h2>Our story</h2>
+      <p>QuickRoom began with a practical observation: a five-minute coordination thread should not require a permanent workspace. Students, families, event volunteers, freelancers, and short-term teams kept creating groups they did not want to keep forever.</p>
+      <p>We built a browser-first room that can expire after an hour, a day, a week, or up to three months—so the tool matches the lifespan of the work.</p>
       <h2>Our principles</h2>
       <ul>
         <li><strong>Simplicity</strong> — prefer one step over five.</li>
@@ -106,30 +118,42 @@ function bodyAbout() {
         <li><strong>Respect</strong> — keep the product welcoming and intentional.</li>
         <li><strong>Accessibility</strong> — keep the core experience free and lightweight in the browser.</li>
       </ul>
+      <h2>What you can use QuickRoom for</h2>
+      <p>Study groups, hackathon teams, interview panels, book clubs, classroom backchannels, travel planning, freelance client handoffs, workshop Q&amp;A, meetup organiser chat, and other short-lived coordination jobs.</p>
       <h2>Looking ahead</h2>
-      <p>QuickRoom starts with temporary chat and is growing into a browser-first collaboration toolkit for study, events, client handoffs, and short-lived teamwork.</p>
+      <p>QuickRoom starts with temporary chat and is growing into a browser-first collaboration toolkit for study, events, client handoffs, and short-lived teamwork—without turning every conversation into another permanent account.</p>
+      ${renderExtrasHtml('QuickRoom', { escapeHtml })}
       ${relatedLinks('/about')}
     </article>`;
 }
 
 function bodyBlog() {
   const guideLinks = Object.entries(guides)
-    .map(([slug, page]) => `<li><a href="/${escapeHtml(slug)}">${escapeHtml(page.title)}</a></li>`)
+    .map(([slug, page]) => `<li><a href="/${escapeHtml(slug)}">${escapeHtml(page.title)}</a> — ${escapeHtml(page.description)}</li>`)
     .join('');
   const articleLinks = Object.entries(articles)
+    .map(([slug, page]) => `<li><a href="/${escapeHtml(slug)}">${escapeHtml(page.title)}</a> — ${escapeHtml(page.description)}</li>`)
+    .join('');
+  const useCaseLinks = Object.entries(useCasePages)
+    .slice(0, 10)
     .map(([slug, page]) => `<li><a href="/${escapeHtml(slug)}">${escapeHtml(page.title)}</a></li>`)
     .join('');
   return `<article class="info-page">
       <a class="back-link" href="/">QuickRoom</a>
-      <h1>QuickRoom is Here: Create a Private Chat Room in Seconds. No App. No Login. No Clutter.</h1>
+      <h1>QuickRoom Blog — Private Temporary Chat Rooms</h1>
       <p>Starting a simple private conversation should not require a permanent account, phone number, or another app install. QuickRoom is a temporary browser-based chat room you can create in seconds and share with a room code.</p>
       <h2>What is QuickRoom?</h2>
       <p>QuickRoom is the fastest way to create a private chat room: no registration, no phone number, no email, and no app. Create a room, share the link or code, and start talking. Rooms expire after the duration you choose.</p>
+      <h2>Why temporary rooms matter</h2>
+      <p>WhatsApp groups, Discord servers, and Slack workspaces are useful—but they often outlive the conversation. A temporary room is better when the discussion has a natural end: an assignment, a sprint, an event shift, a trip, or a one-off client handoff.</p>
       <h2>Built for temporary collaboration</h2>
       <p>Use QuickRoom for study groups, exam preparation, coding help, project discussions, book clubs, family planning, event coordination, interview panels, and short support conversations.</p>
       <h2>Practical guides</h2>
       <ul>${guideLinks}${articleLinks}</ul>
-      <p><a href="/">Create a room on QuickRoom</a></p>
+      <h2>Popular use cases</h2>
+      <ul>${useCaseLinks}</ul>
+      <p><a href="/">Create a room on QuickRoom</a> · <a href="/about">About QuickRoom</a></p>
+      ${renderExtrasHtml('QuickRoom', { escapeHtml })}
       ${relatedLinks('/blog')}
     </article>`;
 }
@@ -202,21 +226,24 @@ const pages = [
     file: `${slug}.html`,
     title: page.seoTitle,
     description: page.description,
-    body: bodyUseCase(slug, page)
+    body: bodyUseCase(slug, page),
+    faq: defaultFaq(page.title)
   })),
   ...Object.entries(guides).map(([slug, page]) => ({
     route: `/${slug}`,
     file: `${slug}.html`,
     title: page.seoTitle,
     description: page.description,
-    body: bodyGuide(slug, page)
+    body: bodyGuide(slug, page),
+    faq: defaultFaq(page.title)
   })),
   ...Object.entries(articles).map(([slug, page]) => ({
     route: `/${slug}`,
     file: `${slug}.html`,
     title: page.seoTitle,
     description: page.description,
-    body: bodyArticle(slug, page)
+    body: bodyArticle(slug, page),
+    faq: defaultFaq('a QuickRoom temporary chat')
   }))
 ];
 
@@ -236,14 +263,26 @@ const assetTags = [
 function renderHtml(page, { noindex = false } = {}) {
   const canonical = `${SITE}${page.route === '/' ? '/' : page.route}`;
   const robots = noindex ? 'noindex, follow' : 'index, follow';
-  const schema = {
-    '@context': 'https://schema.org',
-    '@type': 'WebPage',
-    name: page.title,
-    description: page.description,
-    url: canonical,
-    isPartOf: { '@type': 'WebSite', name: 'QuickRoom', url: SITE }
-  };
+  const graph = [
+    {
+      '@type': 'WebPage',
+      name: page.title,
+      description: page.description,
+      url: canonical,
+      isPartOf: { '@type': 'WebSite', name: 'QuickRoom', url: SITE }
+    }
+  ];
+  if (page.faq?.length) {
+    graph.push({
+      '@type': 'FAQPage',
+      mainEntity: page.faq.map((item) => ({
+        '@type': 'Question',
+        name: item.q,
+        acceptedAnswer: { '@type': 'Answer', text: item.a }
+      }))
+    });
+  }
+  const schema = { '@context': 'https://schema.org', '@graph': graph };
 
   return `<!doctype html>
 <html lang="en">

@@ -6,6 +6,7 @@ import { coordinationJobs, useCasePages } from './use-cases';
 import { guides } from './guides';
 import { articles } from './articles';
 import { mountPaypalSupport, renderSupportBlock } from './support';
+import { renderExtrasDomString } from './page-copy';
 import './style.css';
 
 const GITHUB_URL = 'https://github.com/jeeten15-spec/quickroom';
@@ -527,6 +528,33 @@ function renderAbout() {
   `;
 }
 
+function renderSeoExtras(pageTitle) {
+  const { privacy, steps, faq } = renderExtrasDomString(pageTitle);
+  return `
+    <section>
+      <h2>How to start</h2>
+      <ol>${steps.map((s) => `<li>${escapeHtml(s)}</li>`).join('')}</ol>
+    </section>
+    <section>
+      <h2>Privacy and access</h2>
+      ${privacy.map((p) => `<p>${escapeHtml(p)}</p>`).join('')}
+    </section>
+    <section>
+      <h2>Frequently asked questions</h2>
+      ${faq
+        .map(
+          (item) => `
+            <div>
+              <h3>${escapeHtml(item.q)}</h3>
+              <p>${escapeHtml(item.a)}</p>
+            </div>
+          `
+        )
+        .join('')}
+    </section>
+  `;
+}
+
 function renderUseCase(slug) {
   const page = useCasePages[slug];
   return `
@@ -535,6 +563,7 @@ function renderUseCase(slug) {
       <p class="eyebrow">QuickRoom use case</p>
       <h1>${escapeHtml(page.title)}</h1>
       <p class="use-case-intro">${escapeHtml(page.intro)}</p>
+      <p>${escapeHtml(page.description)}</p>
       <button class="button button-primary use-case-cta" type="button" data-action="open-create">Create a room</button>
       ${page.sections
         .map(
@@ -555,6 +584,7 @@ function renderUseCase(slug) {
           `
         )
         .join('')}
+      ${renderSeoExtras(page.title)}
       <button class="button button-primary use-case-cta" type="button" data-action="open-create">Create a room</button>
       ${renderSupportBlock({ compact: true })}
     </article>
@@ -569,6 +599,7 @@ function renderGuide(slug) {
       <p class="eyebrow">Practical guide</p>
       <h1>${escapeHtml(guide.title)}</h1>
       <p class="use-case-intro">${escapeHtml(guide.intro)}</p>
+      <p>${escapeHtml(guide.description)}</p>
       ${guide.sections
         .map(
           (section) => `
@@ -588,6 +619,7 @@ function renderGuide(slug) {
           `
         )
         .join('')}
+      ${renderSeoExtras(guide.title)}
       <button class="button button-primary use-case-cta" type="button" data-action="open-create">Create a room</button>
       ${renderSupportBlock({ compact: true })}
     </article>
@@ -603,6 +635,7 @@ function renderArticle(slug) {
       <h1>${escapeHtml(article.title)}</h1>
       <p class="article-date">${escapeHtml(article.publishedAt)}</p>
       <p class="use-case-intro">${escapeHtml(article.intro)}</p>
+      <p>${escapeHtml(article.description)}</p>
       ${article.sections
         .map(
           (section) => `
@@ -622,6 +655,7 @@ function renderArticle(slug) {
           `
         )
         .join('')}
+      ${renderSeoExtras('a QuickRoom temporary chat')}
       <button class="button button-primary use-case-cta" type="button" data-action="open-create">Create a room</button>
       ${renderSupportBlock({ compact: true })}
     </article>
@@ -632,7 +666,7 @@ function renderBlog() {
   return `
     <article class="info-page">
       <a class="back-link" href="/" data-action="navigate">QuickRoom</a>
-      <h1>QuickRoom is Here: Create a Private Chat Room in Seconds. No App. No Login. No Clutter.</h1>
+      <h1>QuickRoom Blog — Private Temporary Chat Rooms</h1>
       <h2>The Internet Made Starting a Conversation Surprisingly Difficult</h2>
       <p>It sounds strange, but in 2026, starting a simple private conversation with a group of people has become harder than it should be.</p>
       <p>Need to discuss tomorrow's assignment with classmates?</p>
