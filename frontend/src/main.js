@@ -130,8 +130,8 @@ function renderLanding() {
     <section class="landing" aria-labelledby="quickroom-title">
       <div class="landing-content">
         <h1 id="quickroom-title">QuickRoom</h1>
-        <p class="tagline">Temporary rooms for private coordination—events, study groups, client handoffs, travel plans.</p>
-        <p class="landing-support">Create a room. Share a link, code, or QR. Talk. Let it expire.</p>
+        <p class="tagline">Free private chat rooms for temporary coordination—study groups, events, clients, travel. No signup.</p>
+        <p class="landing-support">Create an online chat room. Share a link, code, or QR. Chat online free. Let it expire.</p>
         <button class="button button-primary" type="button" data-action="open-create">
           Create private room
         </button>
@@ -146,7 +146,7 @@ function renderLanding() {
         ${renderCoordinationJobs()}
       </div>
       <footer>
-        <p class="footer-welcome">Built for private coordination first. No app. No account. No phone number.</p>
+        <p class="footer-welcome">Private chat room / free chat rooms / online chat—no app, no account, no phone number.</p>
         ${renderSupportBlock()}
         <p class="footer-links">
           <a href="/blog" data-action="navigate">Blog</a> <span>·</span>
@@ -163,8 +163,8 @@ function renderLanding() {
 function renderCoordinationJobs() {
   return `
     <section class="job-links" aria-labelledby="jobs-title">
-      <h2 id="jobs-title">Private coordination</h2>
-      <p class="job-links-intro">Exact jobs QuickRoom is built for.</p>
+      <h2 id="jobs-title">Exact jobs QuickRoom is built for</h2>
+      <p class="job-links-intro">Private chat rooms, free chat rooms, online chat rooms, group chat, and temporary chatrooms—without signup.</p>
       <div class="job-link-list">
         ${coordinationJobs
           .map(
@@ -663,10 +663,21 @@ function renderArticle(slug) {
 }
 
 function renderBlog() {
+  const articleLinks = Object.entries(articles)
+    .map(
+      ([slug, page]) =>
+        `<li><a href="/${escapeHtml(slug)}" data-action="navigate">${escapeHtml(page.title)}</a> — ${escapeHtml(page.description)}</li>`
+    )
+    .join('');
   return `
     <article class="info-page">
       <a class="back-link" href="/" data-action="navigate">QuickRoom</a>
-      <h1>QuickRoom Blog — Private Temporary Chat Rooms</h1>
+      <h1>QuickRoom Blog — Free Chat Rooms & Private Temporary Chat</h1>
+      <p>Looking for <strong>free chat rooms</strong>, <strong>online chat rooms</strong>, a <strong>private chat room without signup</strong>, <strong>anonymous chat</strong>, <strong>group chat</strong>, a <strong>temporary chat room</strong>, <strong>chatroom</strong>, <strong>text chat</strong>, <strong>live chat</strong>, or a way to <strong>chat online free</strong> without another app? QuickRoom is a browser-based temporary room: create it, share a code, talk, let it expire.</p>
+
+      <h2>Articles</h2>
+      <ul>${articleLinks}</ul>
+
       <h2>The Internet Made Starting a Conversation Surprisingly Difficult</h2>
       <p>It sounds strange, but in 2026, starting a simple private conversation with a group of people has become harder than it should be.</p>
       <p>Need to discuss tomorrow's assignment with classmates?</p>
@@ -682,9 +693,9 @@ function renderBlog() {
       <p>Today, we're excited to launch <strong>QuickRoom</strong>.</p>
 
       <h2>What is QuickRoom?</h2>
-      <p>QuickRoom is the fastest way to create a private chat room.</p>
+      <p>QuickRoom is the fastest way to create a <strong>private chat room</strong>—including <strong>free chat rooms</strong> and <strong>online chat rooms</strong> for short-lived work.</p>
       <p>No registration.</p><p>No phone number.</p><p>No email.</p><p>No app to install.</p><p>No complicated setup.</p>
-      <p>Just create a room, share the link, and start talking.</p>
+      <p>Just create a room, share the link, and start talking—<strong>chat online free</strong> as <strong>text chat</strong> / <strong>live chat</strong> / <strong>group chat</strong> / <strong>webchat</strong> in the browser.</p>
       <p>Whether you're studying for an exam, solving a coding problem, planning an event, helping a friend, or simply having a short discussion, QuickRoom lets you create a temporary collaboration space in seconds.</p>
 
       <h2>Why We Built QuickRoom</h2>
@@ -693,7 +704,7 @@ function renderBlog() {
       <p>The web has become incredibly powerful, yet many everyday interactions have become unnecessarily complicated.</p>
       <p>We wanted to build something that feels like the early Internet—simple, fast, lightweight, and open—but with modern security, privacy, and thoughtful design.</p>
       <p>QuickRoom is our attempt to remove friction.</p>
-      <p>You shouldn't have to hand over your personal information just to have a conversation.</p>
+      <p>You shouldn't have to hand over your personal information just to have a conversation—whether you call it <strong>anonymous chat</strong>, a <strong>temporary chat room</strong>, or a simple <strong>chatroom</strong>.</p>
 
       <h2>Designed for Temporary Collaboration</h2>
       <p>QuickRoom isn't trying to replace your favorite messaging app.</p>
@@ -743,7 +754,7 @@ function renderBlog() {
         <li><a href="/short-lived-event-backchannel" data-action="navigate">How to run a short-lived event backchannel</a></li>
       </ul>
 
-      <h2>Private coordination jobs</h2>
+      <h2>Exact jobs QuickRoom is built for</h2>
       <ul>
         ${coordinationJobs
           .map(
@@ -752,9 +763,6 @@ function renderBlog() {
           )
           .join('')}
       </ul>
-
-      <h2>Latest Article</h2>
-      <p><a href="/blog/private-chat-room-no-signup-global-guide" data-action="navigate">Private Chat Rooms Without Signup: A Practical Global Guide</a></p>
 
       <h2>We'd Love Your Feedback</h2>
       <p>QuickRoom is just getting started.</p>
@@ -774,15 +782,17 @@ function updateDocumentMetadata() {
   const metadata =
     page
       ? { title: page.seoTitle, description: page.description }
-      : state.view === 'about'
+        : state.view === 'about'
         ? {
-            title: 'About QuickRoom — Private Temporary Collaboration',
-            description: 'Learn why QuickRoom exists and how it keeps temporary collaboration simple and respectful.'
+            title: 'About QuickRoom — Private Temporary Chat Rooms, No Signup',
+            description:
+              'Why QuickRoom exists: free private chat rooms, temporary chat rooms, and online chat without accounts, apps, or phone numbers.'
           }
         : state.view === 'blog'
           ? {
-              title: 'QuickRoom Blog — Private Chat Rooms Without the Clutter',
-              description: 'Read about private, temporary browser-based collaboration with QuickRoom.'
+              title: 'QuickRoom Blog — Free Chat Rooms, Anonymous Chat, No Signup',
+              description:
+                'Guides to private chat rooms without signup, free online chat rooms, anonymous group chat, and temporary chatrooms on QuickRoom.'
             }
           : state.view === 'dashboard'
             ? {
@@ -790,9 +800,9 @@ function updateDocumentMetadata() {
                 description: 'Operator metrics for QuickRoom room creation, joining, and sharing.'
               }
           : {
-              title: 'QuickRoom — Temporary Rooms for Private Coordination',
+              title: 'QuickRoom — Free Private Chat Rooms Online, No Signup',
               description:
-                'Create a temporary private chat room for events, study groups, client handoffs, and travel plans—no signup, app, or phone number.'
+                'Create a free private chat room or temporary online chat room without signup. Group chat, text chat, and live chat in the browser—no app or phone number.'
             };
   document.title = metadata.title;
   let description = document.querySelector('meta[name="description"]');

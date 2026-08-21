@@ -1,9 +1,9 @@
 export const useCasePages = {
   'temporary-chat-room': {
     title: 'Temporary Chat Room',
-    seoTitle: 'Temporary Chat Room — Create One Without Signing Up | QuickRoom',
+    seoTitle: 'Temporary Chat Room Free — Online Chat Rooms, No Signup | QuickRoom',
     description:
-      'Create a temporary chat room in seconds. Share a room code, talk with your group, and let the room expire when the moment is over.',
+      'Create a temporary chat room or free chat room online in seconds. Chat online free in the browser—share a room code, talk, and let the chatroom expire. No signup.',
     intro:
       'A temporary chat room is useful when a conversation matters now, but does not need to become another permanent group, account, or notification stream.',
     sections: [
@@ -34,9 +34,9 @@ export const useCasePages = {
   },
   'private-chat-room-no-signup': {
     title: 'Private Chat Room Without Signup',
-    seoTitle: 'Private Chat Room Without Signup or Phone Number | QuickRoom',
+    seoTitle: 'Private Chat Room Without Signup — Anonymous Chat Online Free | QuickRoom',
     description:
-      'Start a private chat room without signup, email, phone number, or app installation. Share a room code and choose when it expires.',
+      'Start a private chat room without signup, email, or phone number. Anonymous chat and free private chat rooms in your browser—share a code, chat online free, no app.',
     intro:
       'Sometimes the fastest way to start a private conversation is to avoid making everyone create an account first.',
     sections: [
@@ -67,9 +67,9 @@ export const useCasePages = {
   },
   'study-group-chat': {
     title: 'Study Group Chat',
-    seoTitle: 'Study Group Chat — Start a Focused Room in Seconds | QuickRoom',
+    seoTitle: 'Study Group Chat Free — Online Chat Rooms for Revision | QuickRoom',
     description:
-      'Create a temporary study group chat without accounts or apps. Share a room code for revision, homework, tutoring, and exam preparation.',
+      'Create a temporary study group chat or free chat room for revision, homework, and exams. Group chat and text chat online—no accounts or apps.',
     intro:
       'Study groups work best when they are easy to start and easy to leave once the assignment, revision session, or exam is over.',
     sections: [
@@ -594,53 +594,111 @@ export const useCasePages = {
 /** Homepage job links — private coordination first, then broader use cases. */
 export const coordinationJobs = [
   {
-    href: '/chat-for-event-volunteers',
-    label: 'Event volunteers',
-    blurb: 'Coordinate staff with a private room and QR card.'
+    href: '/private-chat-room-no-signup',
+    label: 'Private chat room without signup',
+    blurb:
+      'Free private chat room / anonymous chat with no account, no phone number, no app—share a room code and talk online.'
+  },
+  {
+    href: '/temporary-chat-room',
+    label: 'Temporary chat room / free chat rooms',
+    blurb:
+      'Create a temporary chat room or free chat room online. Chat online free in the browser, then let the room expire.'
   },
   {
     href: '/study-group-chat-no-whatsapp',
-    label: 'Study group',
-    blurb: 'Revise together without WhatsApp or phone numbers.'
+    label: 'Study group chat / group chat no WhatsApp',
+    blurb:
+      'Online chat rooms for revision and homework—group chat and text chat without WhatsApp or phone numbers.'
   },
   {
-    href: '/temporary-client-chat-share-images',
-    label: 'Client image chat',
-    blurb: 'Share mockups and screenshots for one engagement.'
+    href: '/chat-for-event-volunteers',
+    label: 'Event volunteer live chat',
+    blurb:
+      'Coordinate staff with a private live chat room, join link, and QR—webchat for the shift, then it ends.'
   },
   {
     href: '/classroom-backchannel',
-    label: 'Classroom backchannel',
-    blurb: 'Collect questions during a lesson or workshop.'
-  },
-  {
-    href: '/travel-planning-chat',
-    label: 'Travel planning',
-    blurb: 'One trip, one room, then it expires.'
-  },
-  {
-    href: '/freelance-client-handoff',
-    label: 'Freelance handoff',
-    blurb: 'Delivery notes and revisions in a finite room.'
+    label: 'Classroom backchannel / chat room',
+    blurb:
+      'Collect questions in a free chat room during class—online chatting without another permanent group.'
   },
   {
     href: '/workshop-qa-room',
-    label: 'Workshop Q&A',
-    blurb: 'Audience questions via join link or QR.'
+    label: 'Workshop Q&A chat online',
+    blurb:
+      'Audience questions via chat online free: join link or QR into a short-lived chatroom.'
   },
   {
     href: '/meetup-organizer-chat',
-    label: 'Meetup organisers',
-    blurb: 'Backstage logistics for hosts and speakers.'
+    label: 'Meetup organiser group chat',
+    blurb:
+      'Backstage logistics in a private group chat / chat room for hosts and speakers—no signup wall.'
+  },
+  {
+    href: '/event-backchannel',
+    label: 'Event backchannel chat rooms',
+    blurb:
+      'Short-lived online chat rooms for attendees and staff—chat now, expire when the event ends.'
+  },
+  {
+    href: '/travel-planning-chat',
+    label: 'Travel planning group chat',
+    blurb:
+      'One trip, one free chat room for plans and photos—temporary group chat that expires after travel.'
+  },
+  {
+    href: '/family-planning-chat',
+    label: 'Family planning chat online',
+    blurb:
+      'Family text chat and live chat without forcing everyone onto the same messaging app.'
+  },
+  {
+    href: '/temporary-client-chat-share-images',
+    label: 'Client image chat / private chat',
+    blurb:
+      'Share mockups in a private chat room without signup—browser webchat for one engagement.'
+  },
+  {
+    href: '/freelance-client-handoff',
+    label: 'Freelance handoff chat room',
+    blurb:
+      'Delivery notes in a temporary chat room—chat free online, then the room closes.'
   },
   {
     href: '/remote-interview-prep-chat',
-    label: 'Interview prep',
-    blurb: 'Short-lived prep for candidates or panels.'
+    label: 'Interview prep chat online',
+    blurb:
+      'Short-lived chat room for candidates or panels—online chat without permanent accounts.'
   },
   {
     href: '/temporary-support-chat',
-    label: 'Temporary support',
-    blurb: 'Launch-day or office-hour help without accounts.'
+    label: 'Temporary support live chat',
+    blurb:
+      'Launch-day or office-hour live chat / free chat rooms—help people chat online free, no signup.'
+  },
+  {
+    href: '/hackathon-chat-room',
+    label: 'Hackathon team chatroom',
+    blurb:
+      'Sprint coordination in a temporary chatroom—group chat and text chat for the event only.'
+  },
+  {
+    href: '/book-club-chat',
+    label: 'Book club online chat rooms',
+    blurb:
+      'Discuss chapters in a free chat room online—private chatting that ends when the club wraps.'
+  },
+  {
+    href: '/interview-panel-chat',
+    label: 'Interview panel private chat',
+    blurb:
+      'Panel coordination in an anonymous-friendly private chat room—no phone numbers required.'
+  },
+  {
+    href: '/study-group-chat',
+    label: 'Study group free chat rooms',
+    blurb:
+      'Exam prep in free chat rooms and online chat rooms—create a room, share the code, revise together.'
   }
 ];

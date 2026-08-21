@@ -140,16 +140,23 @@ function bodyBlog() {
     .join('');
   return `<article class="info-page">
       <a class="back-link" href="/">QuickRoom</a>
-      <h1>QuickRoom Blog — Private Temporary Chat Rooms</h1>
-      <p>Starting a simple private conversation should not require a permanent account, phone number, or another app install. QuickRoom is a temporary browser-based chat room you can create in seconds and share with a room code.</p>
+      <h1>QuickRoom Blog — Free Chat Rooms & Private Temporary Chat</h1>
+      <p>Looking for free chat rooms, online chat rooms, a private chat room without signup, anonymous chat, group chat, a temporary chat room, chatroom, text chat, live chat, or a way to chat online free without another app? QuickRoom is a browser-based temporary room: create it, share a code, talk, let it expire.</p>
       <h2>What is QuickRoom?</h2>
       <p>QuickRoom is the fastest way to create a private chat room: no registration, no phone number, no email, and no app. Create a room, share the link or code, and start talking. Rooms expire after the duration you choose.</p>
       <h2>Why temporary rooms matter</h2>
       <p>WhatsApp groups, Discord servers, and Slack workspaces are useful—but they often outlive the conversation. A temporary room is better when the discussion has a natural end: an assignment, a sprint, an event shift, a trip, or a one-off client handoff.</p>
       <h2>Built for temporary collaboration</h2>
-      <p>Use QuickRoom for study groups, exam preparation, coding help, project discussions, book clubs, family planning, event coordination, interview panels, and short support conversations.</p>
-      <h2>Practical guides</h2>
-      <ul>${guideLinks}${articleLinks}</ul>
+      <p>Use QuickRoom for study groups, exam preparation, coding help, project discussions, book clubs, family planning, event coordination, interview panels, and short support conversations—free chat rooms and online chat rooms that do not require signup.</p>
+      <h2>Articles &amp; practical guides</h2>
+      <ul>${articleLinks}${guideLinks}</ul>
+      <h2>Exact jobs QuickRoom is built for</h2>
+      <ul>${(coordinationJobs || [])
+        .map(
+          (job) =>
+            `<li><a href="${escapeHtml(job.href)}">${escapeHtml(job.label)}</a> — ${escapeHtml(job.blurb)}</li>`
+        )
+        .join('')}</ul>
       <h2>Popular use cases</h2>
       <ul>${useCaseLinks}</ul>
       <p><a href="/">Create a room on QuickRoom</a> · <a href="/about">About QuickRoom</a></p>
@@ -186,11 +193,12 @@ function bodyHome() {
     .join('');
 
   return `<main>
-      <h1>QuickRoom — Temporary Rooms for Private Coordination</h1>
-      <p>Create a temporary private chat room for events, study groups, client handoffs, and travel plans—no signup, app, or phone number.</p>
-      <p>Share a room code, talk in the browser, and let the room expire when the moment is over.</p>
+      <h1>QuickRoom</h1>
+      <p>Free private chat rooms for temporary coordination—study groups, events, clients, travel. No signup.</p>
+      <p>Create an online chat room. Share a room code, link, or QR. Chat online free as text chat / live chat / group chat in the browser, then let the chatroom expire.</p>
+      <p>Searches we built for: private chat room without signup, free chat rooms, online chat rooms, anonymous chat, temporary chat room, chatroom, chat online free, webchat.</p>
       <p><a href="/about">About QuickRoom</a> · <a href="/blog">Blog</a></p>
-      ${jobs ? `<h2>Popular coordination jobs</h2><ul>${jobs}</ul>` : ''}
+      ${jobs ? `<h2>Exact jobs QuickRoom is built for</h2><p>Private chat rooms, free chat rooms, online chat rooms, group chat, and temporary chatrooms—without signup.</p><ul>${jobs}</ul>` : ''}
       <h2>Use cases</h2>
       <ul>${useCaseList}</ul>
       <h2>Guides</h2>
@@ -202,23 +210,25 @@ const pages = [
   {
     route: '/',
     file: 'index.html',
-    title: 'QuickRoom — Temporary Rooms for Private Coordination',
+    title: 'QuickRoom — Free Private Chat Rooms Online, No Signup',
     description:
-      'Create a temporary private chat room for events, study groups, client handoffs, and travel plans—no signup, app, or phone number.',
+      'Create a free private chat room or temporary online chat room without signup. Group chat, text chat, and live chat in the browser—no app or phone number.',
     body: bodyHome()
   },
   {
     route: '/about',
     file: 'about.html',
-    title: 'About QuickRoom — Private Temporary Collaboration',
-    description: 'Learn why QuickRoom exists and how it keeps temporary collaboration simple and respectful.',
+    title: 'About QuickRoom — Private Temporary Chat Rooms, No Signup',
+    description:
+      'Why QuickRoom exists: free private chat rooms, temporary chat rooms, and online chat without accounts, apps, or phone numbers.',
     body: bodyAbout()
   },
   {
     route: '/blog',
     file: 'blog.html',
-    title: 'QuickRoom Blog — Private Chat Rooms Without the Clutter',
-    description: 'Read about private, temporary browser-based collaboration with QuickRoom.',
+    title: 'QuickRoom Blog — Free Chat Rooms, Anonymous Chat, No Signup',
+    description:
+      'Guides to private chat rooms without signup, free online chat rooms, anonymous group chat, and temporary chatrooms on QuickRoom.',
     body: bodyBlog()
   },
   ...Object.entries(useCasePages).map(([slug, page]) => ({
@@ -339,9 +349,9 @@ for (const page of pages) {
 const spaShell = renderHtml(
   {
     route: '/',
-    title: 'QuickRoom — Temporary Rooms for Private Coordination',
+    title: 'QuickRoom — Free Private Chat Rooms Online, No Signup',
     description:
-      'Create a temporary private chat room for events, study groups, client handoffs, and travel plans—no signup, app, or phone number.',
+      'Create a free private chat room or temporary online chat room without signup. Group chat, text chat, and live chat in the browser—no app or phone number.',
     body: bodyHome()
   },
   { noindex: false }
