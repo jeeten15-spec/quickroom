@@ -774,9 +774,18 @@ function updateDocumentMetadata() {
     canonical.rel = 'canonical';
     document.head.append(canonical);
   }
-  canonical.href = `https://quickroom.org${
-    window.location.pathname === '/' ? '/' : window.location.pathname.replace(/\/+$/, '')
-  }`;
+  const cleanPath =
+    window.location.pathname === '/' ? '/' : window.location.pathname.replace(/\/+$/, '');
+  canonical.href = `https://quickroom.org${cleanPath}`;
+
+  let robots = document.querySelector('meta[name="robots"]');
+  if (!robots) {
+    robots = document.createElement('meta');
+    robots.name = 'robots';
+    document.head.append(robots);
+  }
+  const isAppSurface = state.view === 'room-placeholder' || state.view === 'dashboard';
+  robots.content = isAppSurface ? 'noindex, nofollow' : 'index, follow';
 }
 
 function renderContactForm() {

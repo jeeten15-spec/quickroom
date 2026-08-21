@@ -1,5 +1,10 @@
 User-agent: *
 Allow: /
 
+# Ephemeral app surfaces — do not spend crawl budget here.
+Disallow: /room/
+Disallow: /dashboard
+Disallow: /dashboard/
+
 Host: https://quickroom.org
 Sitemap: https://quickroom.org/sitemap.xml
