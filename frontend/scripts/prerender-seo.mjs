@@ -284,14 +284,10 @@ for (const page of pages) {
 }
 
 redirectLines.push('');
-redirectLines.push('# App routes: SPA shell for rooms; dedicated noindex shell for dashboard.');
-redirectLines.push('/room/* /index.html 200');
-redirectLines.push('/dashboard /dashboard.html 200');
+redirectLines.push('# App routes: SPA shell for rooms.');
+redirectLines.push('# Do NOT rewrite /dashboard -> dashboard.html: that fights Pages pretty URLs and 308-loops.');
+redirectLines.push('/room/:id /index.html 200');
 redirectLines.push('/dashboard/ /dashboard 301');
-redirectLines.push('');
-redirectLines.push('# Unknown paths should not soft-200 as the homepage.');
-redirectLines.push('/404 /404.html 404');
-
 await writeFile(path.join(distDir, '_redirects'), `${redirectLines.join('\n')}\n`);
 
 for (const page of pages) {
