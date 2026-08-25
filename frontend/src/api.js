@@ -1,6 +1,8 @@
 import { getAnonymousIdToken } from './auth';
 
-const workerUrl = import.meta.env.VITE_WORKER_URL?.replace(/\/$/, '') ?? '';
+const workerUrl = (
+  import.meta.env.VITE_WORKER_URL || 'https://quickroom-api.jeeten15.workers.dev'
+).replace(/\/$/, '');
 
 export async function apiRequest(path, body) {
   return request(path, {
