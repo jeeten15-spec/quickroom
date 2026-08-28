@@ -1,0 +1,119 @@
+@import "tailwindcss";
+
+:root {
+  --ivory: #f6f1e8;
+  --sand: #e8dfd0;
+  --charcoal: #1c1917;
+  --muted: #57534e;
+  --emerald: #1b5c46;
+  --forest: #0f3d30;
+  --gold: #b0892e;
+  --line: #d6ccbc;
+  --background: var(--ivory);
+  --foreground: var(--charcoal);
+}
+
+@theme inline {
+  --color-ivory: var(--ivory);
+  --color-sand: var(--sand);
+  --color-charcoal: var(--charcoal);
+  --color-muted: var(--muted);
+  --color-emerald: var(--emerald);
+  --color-forest: var(--forest);
+  --color-gold: var(--gold);
+  --color-line: var(--line);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-outfit);
+  --font-serif: var(--font-cormorant);
+}
+
+* {
+  border-color: var(--line);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+body {
+  background: var(--ivory);
+  color: var(--charcoal);
+  font-family: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+}
+
+h1,
+h2,
+h3,
+.serif {
+  font-family: var(--font-cormorant), ui-serif, Georgia, serif;
+}
+
+:focus-visible {
+  outline: 2px solid var(--emerald);
+  outline-offset: 3px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background 150ms ease, color 150ms ease, transform 150ms ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn-primary {
+  background: var(--forest);
+  color: var(--ivory);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--forest);
+  box-shadow: inset 0 0 0 1px var(--forest);
+}
+
+.btn-gold {
+  background: var(--gold);
+  color: var(--charcoal);
+}
+
+.input {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: white;
+  border-radius: 0.75rem;
+  padding: 0.7rem 0.9rem;
+  color: var(--charcoal);
+}
+
+.section {
+  padding: 4.5rem 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .section {
+    padding: 6rem 1.5rem;
+  }
+}
