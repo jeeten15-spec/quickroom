@@ -1,0 +1,268 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model ProjectRecord {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  location  String
+  status    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Salesperson {
+  id                    String         @id @default(cuid())
+  name                  String
+  phone                 String
+  email                 String         @unique
+  status                String         @default("ACTIVE")
+  areas                 String         @default("[]")
+  workingHoursStart     String         @default("10:00")
+  workingHoursEnd       String         @default("18:00")
+  maxAppointmentsPerDay Int            @default(6)
+  lastAssignedAt        DateTime?
+  leads                 Lead[]
+  appointments          Appointment[]
+  notifications         Notification[]
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+}
+
+model Lead {
+  id                   String                 @id @default(cuid())
+  name                 String
+  phone                String
+  phoneNormalized      String
+  email                String?
+  requirement          String?
+  stage                String                 @default("NEW")
+  temperature          String                 @default("WARM")
+  score                Int                    @default(0)
+  scoreReasons         String                 @default("[]")
+  source               String?
+  utmSource            String?
+  utmMedium            String?
+  utmCampaign          String?
+  utmTerm              String?
+  utmContent           String?
+  referrer             String?
+  preferredContact     String?
+  buyingTimeline       String?
+  budgetBand           String?
+  purpose              String?
+  locationPreference   String?
+  propertyType         String?
+  specialRequirements  String?
+  wantsSiteVisit       String?
+  lostReason           String?
+  followUpAt           DateTime?
+  assignedToId         String?
+  assignedTo           Salesperson?           @relation(fields: [assignedToId], references: [id])
+  duplicateOfId        String?
+  consentAt            DateTime?
+  consentWhatsapp      Boolean                @default(false)
+  consentCall          Boolean                @default(false)
+  consentEmail         Boolean                @default(false)
+  communicationPref    String?
+  firstRespondedAt     DateTime?
+  abandonedAt          DateTime?
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  qualifications       QualificationAnswer[]
+  appointments         Appointment[]
+  conversations        Conversation[]
+  notes                InternalNote[]
+  activities           Activity[]
+  consents             Consent[]
+  notifications        Notification[]
+
+  @@index([phoneNormalized])
+  @@index([stage])
+  @@index([temperature])
+  @@index([createdAt])
+}
+
+model QualificationAnswer {
+  id        String   @id @default(cuid())
+  leadId    String
+  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  step      Int
+  question  String
+  answer    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([leadId, step])
+}
+
+model Appointment {
+  id                 String         @id @default(cuid())
+  reference          String         @unique
+  leadId             String
+  lead               Lead           @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  salespersonId      String?
+  salesperson        Salesperson?   @relation(fields: [salespersonId], references: [id])
+  startAt            DateTime
+  endAt              DateTime
+  timezone           String         @default("Asia/Kolkata")
+  status             String         @default("SCHEDULED")
+  attendees          Int            @default(1)
+  pickupRequired     Boolean        @default(false)
+  pickupLocation     String?
+  accessibilityNotes String?
+  meetingPoint       String?
+  calendarEventId    String?
+  visitFeedback      String?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  reminders          Reminder[]
+  notifications      Notification[]
+  availabilitySlots  AvailabilitySlot[]
+
+  @@index([startAt])
+  @@index([status])
+}
+
+model AvailabilitySlot {
+  id            String        @id @default(cuid())
+  startAt       DateTime
+  endAt         DateTime
+  capacity      Int           @default(1)
+  bookedCount   Int           @default(0)
+  blocked       Boolean       @default(false)
+  appointmentId String?
+  appointment   Appointment?  @relation(fields: [appointmentId], references: [id])
+  createdAt     DateTime      @default(now())
+
+  @@index([startAt])
+}
+
+model Conversation {
+  id        String    @id @default(cuid())
+  leadId    String
+  lead      Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  channel   String    @default("WEB_CHAT")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  messages  Message[]
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  direction      String
+  body           String
+  simulated      Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+}
+
+model Notification {
+  id            String        @id @default(cuid())
+  leadId        String?
+  lead          Lead?         @relation(fields: [leadId], references: [id])
+  appointmentId String?
+  appointment   Appointment?  @relation(fields: [appointmentId], references: [id])
+  salespersonId String?
+  salesperson   Salesperson?  @relation(fields: [salespersonId], references: [id])
+  channel       String
+  templateKey   String
+  recipient     String
+  subject       String?
+  body          String
+  status        String        @default("PENDING")
+  simulated     Boolean       @default(true)
+  error         String?
+  sentAt        DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model Reminder {
+  id            String       @id @default(cuid())
+  appointmentId String?
+  appointment   Appointment? @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  leadId        String?
+  kind          String
+  dueAt         DateTime
+  status        String       @default("PENDING")
+  notificationId String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([dueAt, status])
+}
+
+model InternalNote {
+  id        String   @id @default(cuid())
+  leadId    String
+  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  body      String
+  author    String
+  createdAt DateTime @default(now())
+}
+
+model Activity {
+  id        String   @id @default(cuid())
+  leadId    String?
+  lead      Lead?    @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  type      String
+  detail    String
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+model Consent {
+  id        String   @id @default(cuid())
+  leadId    String
+  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  kind      String
+  granted   Boolean
+  timestamp DateTime @default(now())
+  source    String?
+}
+
+model MessageTemplate {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  name      String
+  channel   String
+  body      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OutreachTouch {
+  id          String   @id @default(cuid())
+  firmName    String
+  contactName String?
+  phone       String?
+  area        String?
+  channel     String
+  status      String   @default("PLANNED")
+  notes       String?
+  touchedAt   DateTime?
+  createdAt   DateTime @default(now())
+}
+
+model CalendarEvent {
+  id          String   @id @default(cuid())
+  provider    String   @default("local")
+  externalId  String   @unique
+  title       String
+  startAt     DateTime
+  endAt       DateTime
+  timezone    String   @default("Asia/Kolkata")
+  status      String   @default("CONFIRMED")
+  metadata    String   @default("{}")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
