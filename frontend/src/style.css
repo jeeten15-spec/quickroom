@@ -1208,8 +1208,104 @@ code {
   color: #555555;
 }
 
-@media (min-width: 640px) {
-  .chat-page { padding: 28px; }
+.related-pages {
+  text-align: left;
+  margin: 28px 0 12px;
+  padding: 16px;
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.related-pages h2 {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+
+.related-pages p {
+  margin: 0 0 10px;
+  color: #555;
+  font-size: 14px;
+}
+
+.consent-banner {
+  position: sticky;
+  bottom: 0;
+  z-index: 40;
+  display: grid;
+  gap: 12px;
+  padding: 16px 20px;
+  border-top: 1px solid #e5e5e5;
+  background: #ffffff;
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.06);
+}
+
+.consent-copy h2 {
+  margin: 0 0 6px;
+  font-size: 16px;
+}
+
+.consent-copy p {
+  margin: 0;
+  color: #444;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.consent-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ad-slot {
+  min-height: 0;
+  margin: 8px auto 4px;
+  max-width: 100%;
+}
+
+.ad-label {
+  margin: 0;
+  color: #999;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.privacy-choice-actions {
+  display: grid;
+  gap: 8px;
+  margin: 16px 0 24px;
+}
+
+.metrics-tables {
+  display: grid;
+  gap: 16px;
+  overflow: auto;
+  margin: 12px 0 20px;
+}
+
+.metrics-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.metrics-table th,
+.metrics-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+
+@media (min-width: 720px) {
+  .metrics-tables {
+    grid-template-columns: 1fr 1fr;
+  }
+  .consent-banner {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
 }
 
 @media (min-width: 860px) {

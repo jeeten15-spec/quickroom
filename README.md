@@ -341,3 +341,12 @@ depends on this Miniflare/Sharp chain. `npm audit fix` cannot resolve it without
 forcing an incompatible dependency override. These packages are used only for
 local Worker development and dry-run deployment; they are not bundled into the
 deployed Worker. No override was added to avoid risking Wrangler compatibility.
+
+## Search Console, country analytics, ads, and EU consent
+
+1. **Google Search Console.** Add `https://quickroom.org` as a URL-prefix property. Choose **HTML tag**, copy the `content` value, and set `VITE_GOOGLE_SITE_VERIFICATION` on the Pages build. Redeploy, then verify. Submit `https://quickroom.org/sitemap.xml` (the build regenerates it). Prefer the US, UK, Australia, Canada, France, and Germany country filters in performance reports.
+2. **Country pageviews.** Content pages call `POST /api/pageview`. Country is taken from Cloudflare (`CF-IPCountry`). Open `/dashboard` with `METRICS_ADMIN_TOKEN` to see 14-day country and path tables. Optionally set `VITE_CF_WEB_ANALYTICS_TOKEN` for Cloudflare Web Analytics (also has country reports).
+3. **AdSense.** Ads render on landing, articles, and use cases only — never in rooms. Set `VITE_ADSENSE_CLIENT` (and optional `VITE_ADSENSE_SLOT`) after approval. In AdSense, enable **Privacy & messaging** for GDPR and US states. Then you may set `VITE_GOOGLE_FUNDING_CHOICES=true` so Google’s certified CMP is the EU banner.
+4. **Until Funding Choices is on,** visitors in the EEA, UK, and Switzerland see QuickRoom’s consent banner; AdSense/GA do not load until they accept. `/privacy`, `/cookies`, and `/privacy-choices` are linked in the footer.
+5. **French pages:** `/fr` plus `/fr/chat-prive-sans-inscription`, `/fr/salle-de-discussion-temporaire`, `/fr/groupe-etude-sans-whatsapp`, `/fr/chat-hackathon`.
+6. Organiser emails and four short posts: `docs/distribution-us-uk.md`.

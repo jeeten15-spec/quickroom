@@ -215,6 +215,49 @@ export async function trackEvent(
   return { ok: true };
 }
 
+export async function recordPageview(
+  body: unknown,
+  request: Request,
+  env: Env
+): Promise<{ ok: true }> {
+  const input = expectRecord(body);
+  const path = validatePagePath(input.path);
+  const ip =
+    request.headers.get('CF-Connecting-IP') || request.headers.get('X-Forwarded-For') || 'unknown';
+  enforceRateLimit(`pageview:${ip}`, 1_500);
+  const country = String(
+    (request as Request & { cf?: { country?: string } }).cf?.country ||
+      request.headers.get('CF-IPCountry') ||
+      'XX'
+  )
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, '')
+    .slice(0, 4) || 'XX';
+  const day = new Date().toISOString().slice(0, 10);
+  const pathKey = path.replace(/\//g, '_').slice(0, 80) || 'home';
+  const geoPath = `metrics/geoDaily/${day}/${country}`;
+  const pagePath = `metrics/pathDaily/${day}/${pathKey}`;
+  const geoCount = (await databaseGet<number>(env, geoPath)) || 0;
+  const pathRecord = (await databaseGet<Record<string, number>>(env, pagePath)) || {};
+  await databasePatch(env, '/', {
+    [geoPath]: geoCount + 1,
+    [pagePath]: { ...pathRecord, [country]: (pathRecord[country] || 0) + 1 }
+  });
+  return { ok: true };
+}
+
+function validatePagePath(value: unknown): string {
+  if (typeof value !== 'string') throw new ValidationError('path is required.');
+  const path = value.trim();
+  if (path.length > 120 || !/^\/[A-Za-z0-9/_-]*$/.test(path)) {
+    throw new ValidationError('path is invalid.');
+  }
+  if (path.startsWith('/room') || path.startsWith('/api') || path.startsWith('/dashboard')) {
+    throw new ValidationError('path is not counted.');
+  }
+  return path === '' ? '/' : path;
+}
+
 export async function getMetrics(
   adminToken: string | null,
   env: Env
@@ -240,6 +283,38 @@ export async function getMetrics(
   const creatorIds = [...new Set(weekRooms.map((room) => room.createdBy))];
   const returnCreators = creatorIds.filter((uid) => (creators[uid]?.roomCount || 0) >= 2).length;
 
+  const geoDaily =
+    (await databaseGet<Record<string, Record<string, number>>>(env, 'metrics/geoDaily')) ?? {};
+  const pathDaily =
+    (await databaseGet<Record<string, Record<string, Record<string, number>>>>(
+      env,
+      'metrics/pathDaily'
+    )) ?? {};
+  const countryTotals: Record<string, number> = {};
+  const pathTotals: Record<string, number> = {};
+  const cutoff = new Date(now - 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  for (const [day, countries] of Object.entries(geoDaily)) {
+    if (day < cutoff || !countries || typeof countries !== 'object') continue;
+    for (const [country, count] of Object.entries(countries)) {
+      countryTotals[country] = (countryTotals[country] || 0) + Number(count || 0);
+    }
+  }
+  for (const [day, paths] of Object.entries(pathDaily)) {
+    if (day < cutoff || !paths || typeof paths !== 'object') continue;
+    for (const [pathKey, byCountry] of Object.entries(paths)) {
+      const sum = Object.values(byCountry || {}).reduce((n, value) => n + Number(value || 0), 0);
+      pathTotals[pathKey] = (pathTotals[pathKey] || 0) + sum;
+    }
+  }
+  const pageviewsByCountry = Object.entries(countryTotals)
+    .sort((left, right) => right[1] - left[1])
+    .slice(0, 40)
+    .map(([country, views]) => ({ country, views }));
+  const pageviewsByPath = Object.entries(pathTotals)
+    .sort((left, right) => right[1] - left[1])
+    .slice(0, 25)
+    .map(([path, views]) => ({ path: path.replace(/_/g, '/') || '/', views }));
+
   return {
     generatedAt: now,
     roomsCreatedWeek,
@@ -248,7 +323,10 @@ export async function getMetrics(
     shareClickRate: percent(roomsWithShare, roomsCreatedWeek),
     returnCreators,
     creatorsThisWeek: creatorIds.length,
-    returnCreatorsPct: percent(returnCreators, creatorIds.length)
+    returnCreatorsPct: percent(returnCreators, creatorIds.length),
+    pageviews14d: pageviewsByCountry.reduce((n, row) => n + row.views, 0),
+    pageviewsByCountry,
+    pageviewsByPath
   };
 }
 

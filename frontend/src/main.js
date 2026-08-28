@@ -5,8 +5,30 @@ import { registerPwa } from './pwa';
 import { coordinationJobs, useCasePages } from './use-cases';
 import { guides } from './guides';
 import { articles } from './articles';
+import { legalPages } from './legal';
+import { frPages } from './fr-pages';
+import { renderRelatedHtml } from './related';
 import { mountPaypalSupport, renderSupportBlock } from './support';
 import { renderExtrasDomString } from './page-copy';
+import {
+  applyConsentMode,
+  canLoadAds,
+  getConsent,
+  initGeo,
+  installConsentDefaults,
+  isMonetizedView,
+  loadAdSense,
+  loadCloudflareAnalytics,
+  loadGoogleAnalytics,
+  pushAdSense,
+  renderAdSlot,
+  renderConsentBanner,
+  saveConsent,
+  setUsAdsOptOut,
+  shouldShowConsentBanner,
+  trackPageview,
+  usAdsOptedOut
+} from './monetization';
 import './style.css';
 
 const GITHUB_URL = 'https://github.com/jeeten15-spec/quickroom';
@@ -64,9 +86,13 @@ function getInitialView() {
         ? 'blog'
         : pathname === '/dashboard'
           ? 'dashboard'
-          : (useCasePages[slug] || guides[slug] || articles[slug])
+          : legalPages[slug]
             ? slug
-            : 'landing';
+            : frPages[slug]
+              ? slug
+              : (useCasePages[slug] || guides[slug] || articles[slug])
+                ? slug
+                : 'landing';
 }
 
 function normalizePathname() {
@@ -100,11 +126,14 @@ function render() {
       ${state.view === 'about' ? renderAbout() : ''}
       ${state.view === 'blog' ? renderBlog() : ''}
       ${state.view === 'dashboard' ? renderDashboard() : ''}
+      ${legalPages[state.view] ? renderLegal(state.view) : ''}
+      ${frPages[state.view] ? renderFrench(state.view) : ''}
       ${useCasePages[state.view] ? renderUseCase(state.view) : ''}
       ${guides[state.view] ? renderGuide(state.view) : ''}
       ${articles[state.view] ? renderArticle(state.view) : ''}
     </main>
     ${state.ageConfirmed ? '' : renderAgeGate()}
+    ${state.ageConfirmed && shouldShowConsentBanner(state.view) ? renderConsentBanner() : ''}
     ${state.contactOpen ? renderContactForm() : ''}
   `;
 
@@ -123,6 +152,7 @@ function render() {
   }
 
   mountPaypalSupport(app);
+  afterRender();
 }
 
 function renderLanding() {
@@ -142,18 +172,14 @@ function renderLanding() {
               : `<button class="text-link" type="button" data-action="open-join">Join with code or link</button>`
           }
         </div>
+        ${renderAdSlot()}
         ${renderPublicRooms()}
         ${renderCoordinationJobs()}
       </div>
       <footer>
         <p class="footer-welcome">Private chat room / free chat rooms / online chat—no app, no account, no phone number.</p>
         ${renderSupportBlock()}
-        <p class="footer-links">
-          <a href="/blog" data-action="navigate">Blog</a> <span>·</span>
-          <a href="/about" data-action="navigate">About Us</a> <span>·</span>
-          <button type="button" data-action="open-contact">Contact Us</button> <span>·</span>
-          <a href="${GITHUB_URL}" target="_blank" rel="noopener noreferrer">GitHub</a>
-        </p>
+        ${renderSiteFooter()}
         <p>18+ only <span>·</span> Temporary rooms</p>
       </footer>
     </section>
@@ -226,6 +252,40 @@ function renderPublicRooms() {
   `;
 }
 
+function renderSiteFooter() {
+  return `
+        <p class="footer-links">
+          <a href="/blog" data-action="navigate">Blog</a> <span>·</span>
+          <a href="/about" data-action="navigate">About</a> <span>·</span>
+          <a href="/privacy" data-action="navigate">Privacy</a> <span>·</span>
+          <a href="/cookies" data-action="navigate">Cookies</a> <span>·</span>
+          <a href="/privacy-choices" data-action="navigate">Privacy choices</a> <span>·</span>
+          <a href="/fr" data-action="navigate" hreflang="fr">Français</a> <span>·</span>
+          <button type="button" data-action="open-contact">Contact</button> <span>·</span>
+          <a href="${GITHUB_URL}" target="_blank" rel="noopener noreferrer">GitHub</a>
+        </p>`;
+}
+
+function afterRender() {
+  const verification = String(import.meta.env.VITE_GOOGLE_SITE_VERIFICATION || '').trim();
+  if (verification && !document.querySelector('meta[name="google-site-verification"]')) {
+    const meta = document.createElement('meta');
+    meta.name = 'google-site-verification';
+    meta.content = verification;
+    document.head.append(meta);
+  }
+  loadCloudflareAnalytics();
+  if (canLoadAds(state.view)) {
+    loadAdSense(state.view);
+    queueMicrotask(pushAdSense);
+  }
+  loadGoogleAnalytics();
+  if (state.ageConfirmed && isMonetizedView(state.view)) {
+    const path = window.location.pathname === '/' ? '/' : window.location.pathname.replace(/\/+$/, '');
+    trackPageview(path);
+  }
+}
+
 function renderGithubTrust() {
   return `
     <p class="trust-github">
@@ -233,6 +293,147 @@ function renderGithubTrust() {
       <a href="${GITHUB_URL}" target="_blank" rel="noopener noreferrer">GitHub</a>
       — inspect the code, follow development, and help build trust.
     </p>
+  `;
+}
+
+function renderCountryPageviews(m) {
+  const rows = Array.isArray(m.pageviewsByCountry) ? m.pageviewsByCountry : [];
+  const paths = Array.isArray(m.pageviewsByPath) ? m.pageviewsByPath : [];
+  if (!rows.length && !paths.length) {
+    return `<p class="metric-note">Country pageviews will appear here after visitors load content pages.</p>`;
+  }
+  return `
+    <h2>Content pageviews (14 days)</h2>
+    <p class="use-case-intro">${escapeHtml(String(m.pageviews14d || 0))} counted views on landing, articles, and use cases. Country comes from Cloudflare. Rooms are not counted.</p>
+    <div class="metrics-tables">
+      <table class="metrics-table">
+        <thead><tr><th>Country</th><th>Views</th></tr></thead>
+        <tbody>
+          ${rows
+            .map(
+              (row) =>
+                `<tr><td>${escapeHtml(row.country)}</td><td>${escapeHtml(String(row.views))}</td></tr>`
+            )
+            .join('')}
+        </tbody>
+      </table>
+      <table class="metrics-table">
+        <thead><tr><th>Path</th><th>Views</th></tr></thead>
+        <tbody>
+          ${paths
+            .map(
+              (row) =>
+                `<tr><td>${escapeHtml(row.path)}</td><td>${escapeHtml(String(row.views))}</td></tr>`
+            )
+            .join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderLegal(slug) {
+  const page = legalPages[slug];
+  const choices =
+    slug === 'privacy-choices'
+      ? `<div class="privacy-choice-actions">
+          <p>Current US ads opt-out: <strong>${usAdsOptedOut() ? 'on' : 'off'}</strong>. EU consent: <strong>${
+            getConsent() ? (getConsent().ads ? 'ads allowed' : 'optional cookies rejected') : 'not set'
+          }</strong>.</p>
+          <button class="button button-secondary" type="button" data-action="us-opt-out">US: do not sell/share</button>
+          <button class="button button-secondary" type="button" data-action="us-opt-in">US: allow ads</button>
+          <button class="button button-secondary" type="button" data-action="consent-reject">EU: reject optional</button>
+          <button class="button button-primary" type="button" data-action="consent-accept">EU: accept ads &amp; analytics</button>
+        </div>`
+      : '';
+  return `
+    <article class="info-page legal-page">
+      <a class="back-link" href="/" data-action="navigate">QuickRoom</a>
+      <p class="eyebrow">Legal</p>
+      <h1>${escapeHtml(page.title)}</h1>
+      <p class="use-case-intro">${escapeHtml(page.description)}</p>
+      <p class="article-date">Last updated 28 August 2026</p>
+      ${choices}
+      ${page.sections
+        .map(
+          (section) => `
+            <section>
+              <h2>${escapeHtml(section.heading)}</h2>
+              ${(section.paragraphs || []).map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join('')}
+            </section>
+          `
+        )
+        .join('')}
+      ${renderSupportBlock({ compact: true })}
+      ${renderSiteFooter()}
+    </article>
+  `;
+}
+
+function renderFrench(slug) {
+  const page = frPages[slug];
+  if (page.isLanding) {
+    return `
+      <section class="landing fr-landing" lang="fr" aria-labelledby="quickroom-title-fr">
+        <div class="landing-content">
+          <p class="eyebrow">Français</p>
+          <h1 id="quickroom-title-fr">QuickRoom</h1>
+          <p class="tagline">${escapeHtml(page.intro)}</p>
+          <p class="landing-support">${escapeHtml(page.description)}</p>
+          <button class="button button-primary" type="button" data-action="open-create">Créer une salle privée</button>
+          ${renderAdSlot()}
+          <section class="job-links">
+            <h2>Usages</h2>
+            <div class="job-link-list">
+              ${page.jobs
+                .map(
+                  (job) => `
+                    <a class="job-link" href="${escapeHtml(job.href)}" data-action="navigate">
+                      <strong>${escapeHtml(job.label)}</strong>
+                      <span>${escapeHtml(job.blurb)}</span>
+                    </a>`
+                )
+                .join('')}
+            </div>
+          </section>
+          <p><a href="/" data-action="navigate">English home</a></p>
+        </div>
+        <footer>
+          ${renderRelatedHtml('/fr', { escapeHtml })}
+          ${renderSiteFooter()}
+          <p>18+ uniquement</p>
+        </footer>
+      </section>
+    `;
+  }
+  return `
+    <article class="info-page use-case-page" lang="fr">
+      <a class="back-link" href="/fr" data-action="navigate">QuickRoom FR</a>
+      <p class="eyebrow">Usage QuickRoom</p>
+      <h1>${escapeHtml(page.title)}</h1>
+      <p class="use-case-intro">${escapeHtml(page.intro)}</p>
+      <p>${escapeHtml(page.description)}</p>
+      <button class="button button-primary use-case-cta" type="button" data-action="open-create">Créer une salle</button>
+      ${renderAdSlot()}
+      ${page.sections
+        .map(
+          (section) => `
+            <section>
+              <h2>${escapeHtml(section.heading)}</h2>
+              ${(section.paragraphs || []).map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join('')}
+              ${
+                section.list
+                  ? `<ul>${section.list.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>`
+                  : ''
+              }
+            </section>
+          `
+        )
+        .join('')}
+      ${renderRelatedHtml(`/${slug}`, { escapeHtml })}
+      <button class="button button-primary use-case-cta" type="button" data-action="open-create">Créer une salle</button>
+      ${renderSiteFooter()}
+    </article>
   `;
 }
 
@@ -289,7 +490,8 @@ function renderDashboardMetrics() {
         <p class="metric-note">${escapeHtml(String(m.returnCreators))} of ${escapeHtml(String(m.creatorsThisWeek))} creators this week</p>
       </div>
     </div>
-    <p class="dashboard-updated">Window: last 7 days · Updated ${escapeHtml(new Date(m.generatedAt).toLocaleString())}</p>
+    <p class="dashboard-updated">Window: last 7 days for rooms · last 14 days for country pageviews · Updated ${escapeHtml(new Date(m.generatedAt).toLocaleString())}</p>
+    ${renderCountryPageviews(m)}
     <div class="form-actions">
       <button class="button button-secondary" type="button" data-action="refresh-metrics">Refresh</button>
       <button class="button button-secondary" type="button" data-action="clear-metrics">Sign out</button>
@@ -524,6 +726,7 @@ function renderAbout() {
       <p>We're glad you're here.</p>
       ${renderGithubTrust()}
       ${renderSupportBlock()}
+      ${renderSiteFooter()}
     </article>
   `;
 }
@@ -585,8 +788,11 @@ function renderUseCase(slug) {
         )
         .join('')}
       ${renderSeoExtras(page.title)}
+      ${renderAdSlot()}
+      ${renderRelatedHtml(`/${slug}`, { escapeHtml })}
       <button class="button button-primary use-case-cta" type="button" data-action="open-create">Create a room</button>
       ${renderSupportBlock({ compact: true })}
+      ${renderSiteFooter()}
     </article>
   `;
 }
@@ -620,8 +826,11 @@ function renderGuide(slug) {
         )
         .join('')}
       ${renderSeoExtras(guide.title)}
+      ${renderAdSlot()}
+      ${renderRelatedHtml(`/${slug}`, { escapeHtml })}
       <button class="button button-primary use-case-cta" type="button" data-action="open-create">Create a room</button>
       ${renderSupportBlock({ compact: true })}
+      ${renderSiteFooter()}
     </article>
   `;
 }
@@ -656,8 +865,11 @@ function renderArticle(slug) {
         )
         .join('')}
       ${renderSeoExtras('a QuickRoom temporary chat')}
+      ${renderAdSlot()}
+      ${renderRelatedHtml(`/${slug}`, { escapeHtml })}
       <button class="button button-primary use-case-cta" type="button" data-action="open-create">Create a room</button>
       ${renderSupportBlock({ compact: true })}
+      ${renderSiteFooter()}
     </article>
   `;
 }
@@ -773,38 +985,49 @@ function renderBlog() {
       <p>Create a room.</p><p>Share a link.</p><p>Start talking.</p>
       ${renderGithubTrust()}
       ${renderSupportBlock()}
+      ${renderSiteFooter()}
     </article>
   `;
 }
 
 function updateDocumentMetadata() {
-  const page = useCasePages[state.view] || guides[state.view] || articles[state.view];
+  const page =
+    useCasePages[state.view] ||
+    guides[state.view] ||
+    articles[state.view] ||
+    legalPages[state.view] ||
+    frPages[state.view];
   const metadata =
     page
-      ? { title: page.seoTitle, description: page.description }
+      ? { title: page.seoTitle || page.title, description: page.description, lang: page.htmlLang || 'en' }
         : state.view === 'about'
         ? {
             title: 'About QuickRoom — Private Temporary Chat Rooms, No Signup',
             description:
-              'Why QuickRoom exists: free private chat rooms, temporary chat rooms, and online chat without accounts, apps, or phone numbers.'
+              'Why QuickRoom exists: free private chat rooms, temporary chat rooms, and online chat without accounts, apps, or phone numbers.',
+            lang: 'en'
           }
         : state.view === 'blog'
           ? {
               title: 'QuickRoom Blog — Free Chat Rooms, Anonymous Chat, No Signup',
               description:
-                'Guides to private chat rooms without signup, free online chat rooms, anonymous group chat, and temporary chatrooms on QuickRoom.'
+                'Guides to private chat rooms without signup, free online chat rooms, anonymous group chat, and temporary chatrooms on QuickRoom.',
+              lang: 'en'
             }
           : state.view === 'dashboard'
             ? {
                 title: 'QuickRoom Dashboard — Growth Metrics',
-                description: 'Operator metrics for QuickRoom room creation, joining, and sharing.'
+                description: 'Operator metrics for QuickRoom room creation, joining, and sharing.',
+                lang: 'en'
               }
           : {
               title: 'QuickRoom — Free Private Chat Rooms Online, No Signup',
               description:
-                'Create a free private chat room or temporary online chat room without signup. Group chat, text chat, and live chat in the browser—no app or phone number.'
+                'Create a free private chat room or temporary online chat room without signup. Group chat, text chat, and live chat in the browser—no app or phone number.',
+              lang: 'en'
             };
   document.title = metadata.title;
+  document.documentElement.lang = metadata.lang || 'en';
   let description = document.querySelector('meta[name="description"]');
   if (!description) {
     description = document.createElement('meta');
@@ -821,6 +1044,7 @@ function updateDocumentMetadata() {
   const cleanPath =
     window.location.pathname === '/' ? '/' : window.location.pathname.replace(/\/+$/, '');
   canonical.href = `https://quickroom.org${cleanPath}`;
+  syncHrefLang(cleanPath);
 
   let robots = document.querySelector('meta[name="robots"]');
   if (!robots) {
@@ -830,6 +1054,22 @@ function updateDocumentMetadata() {
   }
   const isAppSurface = state.view === 'room-placeholder' || state.view === 'dashboard';
   robots.content = isAppSurface ? 'noindex, nofollow' : 'index, follow';
+}
+
+function syncHrefLang(cleanPath) {
+  document.querySelectorAll('link[rel="alternate"][hreflang]').forEach((node) => node.remove());
+  const pairs = [];
+  if (cleanPath === '/' || cleanPath === '/fr') {
+    pairs.push(['en', 'https://quickroom.org/'], ['fr', 'https://quickroom.org/fr']);
+  }
+  pairs.push(['x-default', 'https://quickroom.org/']);
+  for (const [lang, href] of pairs) {
+    const link = document.createElement('link');
+    link.rel = 'alternate';
+    link.hreflang = lang;
+    link.href = href;
+    document.head.append(link);
+  }
 }
 
 function renderContactForm() {
@@ -897,6 +1137,26 @@ app.addEventListener('click', async (event) => {
     if (state.view === 'landing') {
       state.publicRoomsLoaded = false;
     }
+    render();
+    return;
+  }
+  if (action === 'consent-accept') {
+    saveConsent({ ads: true, analytics: true });
+    render();
+    return;
+  }
+  if (action === 'consent-reject') {
+    saveConsent({ ads: false, analytics: false });
+    render();
+    return;
+  }
+  if (action === 'us-opt-out') {
+    setUsAdsOptOut(true);
+    render();
+    return;
+  }
+  if (action === 'us-opt-in') {
+    setUsAdsOptOut(false);
     render();
     return;
   }
@@ -1185,3 +1445,9 @@ window.addEventListener('popstate', () => {
 
 render();
 registerPwa();
+installConsentDefaults();
+initGeo().then(() => {
+  const consent = getConsent();
+  if (consent) applyConsentMode(consent);
+  render();
+});

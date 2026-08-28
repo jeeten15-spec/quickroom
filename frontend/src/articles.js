@@ -152,5 +152,203 @@ export const articles = {
         ]
       }
     ]
+  },
+
+  'blog/quickroom-vs-discord-whatsapp-slack': {
+    title: 'QuickRoom vs Discord vs WhatsApp vs Slack for a One-Off Group',
+    seoTitle:
+      'QuickRoom vs Discord vs WhatsApp vs Slack — Temporary Group Chat | US, UK, AU',
+    description:
+      'Compare QuickRoom with Discord, WhatsApp, and Slack when a US, UK, or Australian group only needs a short-lived chat—no server, phone numbers, or workspace.',
+    publishedAt: 'August 28, 2026',
+    intro:
+      'Most groups in the United States, United Kingdom, and Australia already have Discord, WhatsApp, iMessage, or Slack. Those tools are excellent for ongoing communities. They are slow when the job is one assignment, one interview panel, or one hackathon weekend.',
+    sections: [
+      {
+        heading: 'The job, not the brand',
+        paragraphs: [
+          'If the conversation should still be there in a year, use the app the group already lives in. If the conversation should end when the deadline ends, a temporary browser room is usually the better default.',
+          'QuickRoom is a private room with a code, nicknames, and an expiry. It is not a Discord replacement, not WhatsApp, and not a random video-chat site.'
+        ]
+      },
+      {
+        heading: 'WhatsApp and iMessage',
+        paragraphs: [
+          'WhatsApp is the default in the UK, much of Europe, and Australia. It requires phone numbers. A group for one university project then sits on everyone’s home screen until someone is willing to delete it.',
+          'In the US, iMessage and GroupMe have the same leftover-group problem, and mixed Android/iPhone groups still fall back to SMS. A room code avoids collecting numbers from classmates you only need for this module.'
+        ]
+      },
+      {
+        heading: 'Discord',
+        paragraphs: [
+          'Discord is the right call for a society, game community, or hackathon that already runs on it. Creating a new server for a five-person project still means accounts, permissions, and a space that rarely gets archived.',
+          'Use QuickRoom when some people do not have Discord yet, or when you want the channel to disappear after the event without a server owner.'
+        ]
+      },
+      {
+        heading: 'Slack',
+        paragraphs: [
+          'Slack is built for organisations. Guest accounts, workspace approval, and IT policy make it a poor fit for an interview panel that lasts two hours or a freelance handoff that lasts a week.',
+          'Keep official hiring records in the ATS. Use a temporary room only for live coordination among authorised panelists.'
+        ]
+      },
+      {
+        heading: 'When to pick QuickRoom',
+        list: [
+          'The group is 18+ and already knows who should be in the room',
+          'You do not want to collect phone numbers',
+          'You can name an end date: assignment, weekend, interview day',
+          'People can open a browser; they should not have to install another app'
+        ]
+      }
+    ]
+  },
+
+  'blog/study-group-chat-without-whatsapp-or-groupme': {
+    title: 'How to Run a Study Group Without WhatsApp, GroupMe, or Phone Numbers',
+    seoTitle:
+      'Study Group Chat Without WhatsApp or GroupMe | US, UK, Australia | QuickRoom',
+    description:
+      'Set up an 18+ study group chat for university in the US, UK, or Australia without WhatsApp, GroupMe, or sharing phone numbers. Browser room, code, expiry.',
+    publishedAt: 'August 28, 2026',
+    intro:
+      'US, UK, and Australian students still default to WhatsApp, GroupMe, iMessage, or Discord for a single coursework deadline. The chat outlives the module. A temporary room keeps the revision thread aligned with the assignment.',
+    sections: [
+      {
+        heading: 'Who this is for',
+        paragraphs: [
+          'Adult university and college groups (18+). QuickRoom is not for K–12 classes or anyone under 18.',
+          'Typical searches: study group without WhatsApp, group chat without phone number, university project chat UK, college groupme alternative, assignment chat Australia.'
+        ]
+      },
+      {
+        heading: 'A setup that takes a minute',
+        list: [
+          'One person creates a Study room named after the module or assignment.',
+          'Set expiry to the deadline plus a day (24 hours or 7 days).',
+          'Choose Private. Share the code in the existing cohort channel—not on a public story.',
+          'Ask people to use a recognisable nickname (first name is enough).',
+          'Keep grades and submissions in Canvas, Moodle, Blackboard, or the university portal.'
+        ]
+      },
+      {
+        heading: 'US vs UK vs Australia',
+        paragraphs: [
+          'In the UK and Australia, WhatsApp is the social default; the pitch is “no numbers, no leftover group.”',
+          'In the US, GroupMe and iMessage are common on campus. The same pitch works: a mixed-phone group should not depend on who has iMessage.',
+          'Share a QR on a seminar slide if the group is meeting in a room; otherwise paste the code in the cohort Teams/Slack/Discord that already exists.'
+        ]
+      },
+      {
+        heading: 'What not to put in the room',
+        paragraphs: [
+          'Student IDs, unpaid invoices, exam papers you are not allowed to circulate, or anyone’s personal contact list. The room is a discussion layer, not the official record.',
+          'If a classmate is under 18, do not use QuickRoom. Use the school-approved tool.'
+        ]
+      }
+    ]
+  },
+
+  'blog/interview-panel-chat-without-slack': {
+    title: 'Interview Panel Chat Without Opening a Slack Workspace',
+    seoTitle: 'Interview Panel Chat Without Slack — Temporary Hiring Room | QuickRoom',
+    description:
+      'Coordinate a live interview panel in the US or UK without a new Slack workspace or guest accounts. Short-lived private room for authorised interviewers.',
+    publishedAt: 'August 28, 2026',
+    intro:
+      'A hiring panel often needs a quiet backchannel for timing, “we’re running long,” and who asks the next question. Opening a Slack workspace—or adding guests to the company Slack—is more process than the hour requires.',
+    sections: [
+      {
+        heading: 'Use it for coordination, not the official file',
+        paragraphs: [
+          'Scorecards, equal-opportunity records, and candidate PII belong in the ATS (Greenhouse, Lever, Workday, Beamery). QuickRoom is only for authorised panelists during the session.',
+          'Name the room after the interview slot, not the candidate’s full identity. Set expiry to the end of the interview day.'
+        ]
+      },
+      {
+        heading: 'Suggested run-of-show',
+        list: [
+          'Create an Interview room 15 minutes before the panel.',
+          'Private or Invite Only. Share the code in the calendar invite or a 1:1 message—not in a public Slack channel.',
+          'Use the group room for time checks; optional one-to-one chat for a narrow question if you enabled it.',
+          'After the session, copy any decision that must persist into the ATS, then let the room expire.'
+        ]
+      },
+      {
+        heading: 'US and UK hiring context',
+        paragraphs: [
+          'In the US, mixed-company panels (agency + hiring manager + skip-level) often cannot all join the same Slack. A browser link is the lowest common denominator.',
+          'In the UK, the same pattern shows up with external chairs and community interviewers. Do not put special-category data or right-to-work documents in the room.'
+        ]
+      }
+    ]
+  },
+
+  'blog/university-group-project-chat-us-uk-australia': {
+    title: 'A University Group-Project Chat That Ends With the Semester',
+    seoTitle:
+      'University Group Project Chat — US, UK, Australia | Temporary Room | QuickRoom',
+    description:
+      'Run an 18+ university group-project chat in the US, UK, or Australia that expires with the semester. No Discord server, WhatsApp group, or phone-number list.',
+    publishedAt: 'August 28, 2026',
+    intro:
+      'Group projects cluster at the start of term (August–October in the US, September in the UK, February/July in Australia) and again before finals. The chat tool should match that calendar.',
+    sections: [
+      {
+        heading: 'Pick an expiry that matches the brief',
+        paragraphs: [
+          'A one-week sprint can use a 7-day room. A project that lasts the teaching block can use three months. Either way, someone should be able to walk away when the grade is in.',
+          'Create the room from the Study template. Put the assessment name in the room title so late joiners know they are in the right place.'
+        ]
+      },
+      {
+        heading: 'How groups actually share the code',
+        paragraphs: [
+          'US: paste into the Canvas/GroupMe thread that already exists, then move discussion into the room.',
+          'UK: share in the Microsoft Teams module channel or the society Discord, not on Instagram.',
+          'Australia: same as the UK for WhatsApp-heavy cohorts—code in the existing chat, work in the room that can die later.'
+        ]
+      },
+      {
+        heading: 'Adults only',
+        paragraphs: [
+          'This is for university, college, TA discussion among adults, and adult education. It is not a tool to roll out to a secondary-school class.'
+        ]
+      }
+    ]
+  },
+
+  'blog/temporary-team-chat-without-phone-numbers-europe': {
+    title: 'Temporary Team Chat in Europe Without Collecting Phone Numbers',
+    seoTitle: 'Temporary Team Chat Europe — No Phone Number, GDPR-Aware | QuickRoom',
+    description:
+      'A GDPR-aware temporary team chat for European groups that do not want WhatsApp numbers or a new Slack. Browser rooms for adults, with an end date.',
+    publishedAt: 'August 28, 2026',
+    intro:
+      'European teams often default to WhatsApp because it is already on the phone. That quietly builds a phone-number graph for a workshop that lasts one afternoon. A room code is a smaller request.',
+    sections: [
+      {
+        heading: 'Why this ranks as a real job in the EU',
+        paragraphs: [
+          'Workshops, Erasmus project groups, meetup organisers, and freelance handoffs all need a thread that can end. Slack guest access is heavy. WhatsApp is personal-device infrastructure.',
+          'QuickRoom is 18+. It uses nicknames and Firebase anonymous IDs, not marketing profiles. Advertising, if enabled, appears on articles—not in the room—and requires consent in the EEA, UK, and Switzerland.'
+        ]
+      },
+      {
+        heading: 'A practical EU setup',
+        list: [
+          'Create a Private room named after the workshop or work package.',
+          'Expiry: end of day, or one week for follow-up questions.',
+          'Share the code in the existing email thread or event page for attendees who already registered.',
+          'Keep contracts, invoices, and special-category data in the tools that are already under your organisation’s DPA.'
+        ]
+      },
+      {
+        heading: 'French-speaking teams',
+        paragraphs: [
+          'A French landing and use-case pages exist at /fr, including chat privé sans inscription and salle de discussion temporaire. The product UI for creating a room is still English in this version; the room itself is just text.'
+        ]
+      }
+    ]
   }
 };

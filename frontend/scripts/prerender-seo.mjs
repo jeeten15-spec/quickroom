@@ -11,6 +11,9 @@ const { useCasePages, coordinationJobs } = await import(
 );
 const { guides } = await import(pathToFileURL(path.join(root, 'src/guides.js')).href);
 const { articles } = await import(pathToFileURL(path.join(root, 'src/articles.js')).href);
+const { legalPages } = await import(pathToFileURL(path.join(root, 'src/legal.js')).href);
+const { frPages } = await import(pathToFileURL(path.join(root, 'src/fr-pages.js')).href);
+const { renderRelatedHtml } = await import(pathToFileURL(path.join(root, 'src/related.js')).href);
 const { renderExtrasHtml, defaultFaq } = await import(
   pathToFileURL(path.join(root, 'src/page-copy.js')).href
 );
@@ -39,21 +42,7 @@ function renderSections(sections, { orderedLists = false } = {}) {
 }
 
 function relatedLinks(currentRoute) {
-  const links = [
-    ...Object.keys(useCasePages).map((slug) => ({ href: `/${slug}`, label: useCasePages[slug].title })),
-    ...Object.keys(guides).map((slug) => ({ href: `/${slug}`, label: guides[slug].title })),
-    ...Object.keys(articles).map((slug) => ({
-      href: `/${slug}`,
-      label: articles[slug].title
-    })),
-    { href: '/about', label: 'About QuickRoom' },
-    { href: '/blog', label: 'QuickRoom Blog' }
-  ].filter((item) => item.href !== currentRoute);
-
-  return `<nav aria-label="Related QuickRoom pages"><h2>Explore more</h2><ul>${links
-    .slice(0, 12)
-    .map((item) => `<li><a href="${escapeHtml(item.href)}">${escapeHtml(item.label)}</a></li>`)
-    .join('')}</ul></nav>`;
+  return renderRelatedHtml(currentRoute, { escapeHtml, navigate: false });
 }
 
 function bodyUseCase(slug, page) {
@@ -66,6 +55,53 @@ function bodyUseCase(slug, page) {
       <p><a href="/">Create a temporary room on QuickRoom</a> — no signup, app, or phone number required.</p>
       ${renderSections(page.sections)}
       ${renderExtrasHtml(page.title, { escapeHtml })}
+      ${relatedLinks(`/${slug}`)}
+    </article>`;
+}
+
+function bodyLegal(slug, page) {
+  return `<article class="info-page legal-page">
+      <a class="back-link" href="/">QuickRoom</a>
+      <p class="eyebrow">Legal</p>
+      <h1>${escapeHtml(page.title)}</h1>
+      <p class="use-case-intro">${escapeHtml(page.description)}</p>
+      <p>Last updated 28 August 2026</p>
+      ${page.sections
+        .map(
+          (section) =>
+            `<section><h2>${escapeHtml(section.heading)}</h2>${(section.paragraphs || [])
+              .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`)
+              .join('')}</section>`
+        )
+        .join('')}
+      <p><a href="/cookies">Cookies</a> · <a href="/privacy-choices">Privacy choices</a> · <a href="/">QuickRoom</a></p>
+    </article>`;
+}
+
+function bodyFrench(slug, page) {
+  if (page.isLanding) {
+    return `<section lang="fr">
+      <h1>QuickRoom</h1>
+      <p>${escapeHtml(page.intro)}</p>
+      <p>${escapeHtml(page.description)}</p>
+      <p><a href="/">Créer une salle</a> · <a href="/">English</a></p>
+      <h2>Usages</h2>
+      <ul>${page.jobs
+        .map(
+          (job) =>
+            `<li><a href="${escapeHtml(job.href)}">${escapeHtml(job.label)}</a> — ${escapeHtml(job.blurb)}</li>`
+        )
+        .join('')}</ul>
+      ${relatedLinks('/fr')}
+    </section>`;
+  }
+  return `<article class="info-page use-case-page" lang="fr">
+      <a class="back-link" href="/fr">QuickRoom FR</a>
+      <h1>${escapeHtml(page.title)}</h1>
+      <p class="use-case-intro">${escapeHtml(page.intro)}</p>
+      <p>${escapeHtml(page.description)}</p>
+      <p><a href="/">Créer une salle</a></p>
+      ${renderSections(page.sections)}
       ${relatedLinks(`/${slug}`)}
     </article>`;
 }
@@ -253,7 +289,24 @@ const pages = [
     title: page.seoTitle,
     description: page.description,
     body: bodyArticle(slug, page),
-    faq: defaultFaq('a QuickRoom temporary chat')
+    faq: defaultFaq('a QuickRoom temporary chat'),
+    lang: 'en'
+  })),
+  ...Object.entries(legalPages).map(([slug, page]) => ({
+    route: `/${slug}`,
+    file: `${slug}.html`,
+    title: page.seoTitle,
+    description: page.description,
+    body: bodyLegal(slug, page),
+    lang: page.htmlLang || 'en'
+  })),
+  ...Object.entries(frPages).map(([slug, page]) => ({
+    route: `/${slug}`,
+    file: `${slug}.html`,
+    title: page.seoTitle || page.title,
+    description: page.description,
+    body: bodyFrench(slug, page),
+    lang: 'fr'
   }))
 ];
 
@@ -269,6 +322,19 @@ const assetTags = [
   ...cssMatches.map((match) => `<link rel="stylesheet" crossorigin href="${match[1]}">`),
   `<script type="module" crossorigin src="${scriptMatch[1]}"></script>`
 ].join('\n    ');
+
+function gscMeta() {
+  const token = process.env.VITE_GOOGLE_SITE_VERIFICATION || '';
+  if (!token) return '';
+  return `<meta name="google-site-verification" content="${escapeHtml(token)}" />`;
+}
+
+function hreflangTags(route) {
+  if (route !== '/' && route !== '/fr') return '';
+  return `<link rel="alternate" hreflang="en" href="${SITE}/" />
+    <link rel="alternate" hreflang="fr" href="${SITE}/fr" />
+    <link rel="alternate" hreflang="x-default" href="${SITE}/" />`;
+}
 
 function renderHtml(page, { noindex = false } = {}) {
   const canonical = `${SITE}${page.route === '/' ? '/' : page.route}`;
@@ -295,7 +361,7 @@ function renderHtml(page, { noindex = false } = {}) {
   const schema = { '@context': 'https://schema.org', '@graph': graph };
 
   return `<!doctype html>
-<html lang="en">
+<html lang="${escapeHtml(page.lang || 'en')}">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -303,7 +369,9 @@ function renderHtml(page, { noindex = false } = {}) {
     <title>${escapeHtml(page.title)}</title>
     <meta name="description" content="${escapeHtml(page.description)}" />
     <meta name="robots" content="${robots}" />
+    ${gscMeta()}
     <link rel="canonical" href="${escapeHtml(canonical)}" />
+    ${hreflangTags(page.route)}
     <meta property="og:title" content="${escapeHtml(page.title)}" />
     <meta property="og:description" content="${escapeHtml(page.description)}" />
     <meta property="og:url" content="${escapeHtml(canonical)}" />
@@ -411,4 +479,37 @@ await writeFile(
 `
 );
 
-console.log(`Prerendered ${pages.length} SEO HTML files, dashboard/404 shells, _redirects, and _headers.`);
+const lastmod = new Date().toISOString().slice(0, 10);
+const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+${pages
+  .map((page) => {
+    const loc = `${SITE}${page.route === '/' ? '/' : page.route}`;
+    const xhtml =
+      page.route === '/' || page.route === '/fr'
+        ? `      <xhtml:link rel="alternate" hreflang="en" href="${SITE}/" />
+      <xhtml:link rel="alternate" hreflang="fr" href="${SITE}/fr" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="${SITE}/" />`
+        : '';
+    return `  <url>
+    <loc>${loc}</loc>
+    <lastmod>${lastmod}</lastmod>
+${xhtml}
+  </url>`;
+  })
+  .join('\n')}
+</urlset>
+`;
+await writeFile(path.join(distDir, 'sitemap.xml'), sitemap);
+await writeFile(path.join(root, 'public/sitemap.xml'), sitemap);
+
+const adsense = process.env.VITE_ADSENSE_CLIENT || '';
+const pub = adsense.replace(/^ca-pub-/, '');
+if (pub) {
+  await writeFile(
+    path.join(distDir, 'ads.txt'),
+    `google.com, pub-${pub.replace(/^pub-/, '')}, DIRECT, f08c47fec0942fa0\n`
+  );
+}
+
+console.log(`Prerendered ${pages.length} SEO HTML files, sitemap, dashboard/404 shells, _redirects, and _headers.`);

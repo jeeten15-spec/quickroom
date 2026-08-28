@@ -15,6 +15,7 @@ import {
   getRoom,
   joinRoom,
   leaveRoom,
+  recordPageview,
   reportMessage,
   sendMessage,
   trackEvent,
@@ -35,9 +36,19 @@ export default {
     }
 
     try {
-      assertFirebaseConfiguration(env);
-      const user = await verifyFirebaseIdToken(request.headers.get('Authorization'), env);
       const url = new URL(request.url);
+
+      if (request.method === 'GET' && url.pathname === '/api/geo') {
+        return json(geoFromRequest(request), 200, corsHeaders);
+      }
+
+      assertFirebaseConfiguration(env);
+
+      if (request.method === 'POST' && url.pathname === '/api/pageview') {
+        return json(await recordPageview(await readJson(request), request, env), 200, corsHeaders);
+      }
+
+      const user = await verifyFirebaseIdToken(request.headers.get('Authorization'), env);
 
       if (request.method === 'POST' && url.pathname === '/api/createRoom') {
         return json(await createRoom(await readJson(request), user, env), 201, corsHeaders);
@@ -119,6 +130,7 @@ async function readJson(request: Request): Promise<unknown> {
 }
 
 function isAllowedOrigin(origin: string, env: Env): boolean {
+  if (/^https:\/\/[a-z0-9-]+\.quickroom\.pages\.dev$/.test(origin)) return true;
   return env.ALLOWED_ORIGINS.split(',').some((allowedOrigin) => allowedOrigin.trim() === origin);
 }
 
@@ -146,4 +158,21 @@ function errorResponse(error: unknown, headers: HeadersInit): Response {
 
 function json(body: unknown, status: number, headers: HeadersInit): Response {
   return new Response(JSON.stringify(body), { status, headers });
+}
+
+const EEA_UK_CH = new Set(
+  'AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE IS LI NO GB CH'.split(
+    ' '
+  )
+);
+
+function geoFromRequest(request: Request): { country: string; region: 'eea' | 'us' | 'other' } {
+  const country = String(
+    (request as Request & { cf?: { country?: string } }).cf?.country ||
+      request.headers.get('CF-IPCountry') ||
+      ''
+  ).toUpperCase();
+  if (EEA_UK_CH.has(country)) return { country, region: 'eea' };
+  if (country === 'US') return { country, region: 'us' };
+  return { country: country || 'XX', region: 'other' };
 }
