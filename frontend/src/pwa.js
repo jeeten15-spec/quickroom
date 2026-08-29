@@ -3,6 +3,19 @@ export function registerPwa() {
 
   window.addEventListener('load', async () => {
     try {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(
+        registrations
+          .filter((registration) => {
+            const script =
+              registration.active?.scriptURL ||
+              registration.waiting?.scriptURL ||
+              registration.installing?.scriptURL ||
+              '';
+            return script.endsWith('/sw.js');
+          })
+          .map((registration) => registration.unregister())
+      );
       await navigator.serviceWorker.register('/service-worker.js', { scope: '/room/' });
       const registration = await navigator.serviceWorker.ready;
       const appAssets = performance
