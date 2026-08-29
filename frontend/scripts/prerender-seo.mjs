@@ -405,6 +405,7 @@ function renderHtml(page, { noindex = false } = {}) {
     <meta property="og:site_name" content="QuickRoom" />
     <link rel="manifest" href="/manifest.webmanifest" />
     ${adsenseHeadHtml()}
+    <script>if (new URLSearchParams(location.search).get('room')) document.documentElement.classList.add('chat-boot');</script>
     ${page.noMonetag ? '' : monetagHeadHtml()}
     <script type="application/ld+json">${JSON.stringify(schema)}</script>
     ${assetTags}

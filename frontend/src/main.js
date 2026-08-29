@@ -125,6 +125,7 @@ function render() {
   const showAds = isMonetizedView(state.view);
   const rails = adRailCount(state.view);
   const path = window.location.pathname;
+  document.documentElement.classList.toggle('chat-boot', isChat);
   activeChat?.destroy();
   activeChat = null;
   app.innerHTML = `

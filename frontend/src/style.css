@@ -9,11 +9,10 @@
   box-sizing: border-box;
 }
 
-body {
-  min-width: 320px;
-  min-height: 100vh;
-  margin: 0;
-  background: #fafafa;
+html.chat-boot .iab-slot,
+html.chat-boot .iab-rail,
+html.chat-boot .iab-row {
+  display: none !important;
 }
 
 .lang-toggle {
