@@ -9,12 +9,7 @@ export default defineConfig({
         const extra = gsc
           ? `<meta name="google-site-verification" content="${gsc.replace(/"/g, '')}" />`
           : '';
-        const tag =
-          '<script src="https://quge5.com/88/tag.min.js" data-zone="274291" async data-cfasync="false"></script>';
-        let next = html.includes('quge5.com/88/tag.min.js')
-          ? html
-          : html.replace('<head>', `<head>\n    ${tag}`);
-        return next.replace('</head>', `    ${extra}\n  </head>`);
+        return html.replace('</head>', `    ${extra}\n  </head>`);
       }
     }
   ],

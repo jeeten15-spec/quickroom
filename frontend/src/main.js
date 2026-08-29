@@ -20,7 +20,6 @@ import {
   loadAdSense,
   loadCloudflareAnalytics,
   loadGoogleAnalytics,
-  registerMonetagWorker,
   pushAdSense,
   renderAdSlot,
   renderConsentBanner,
@@ -276,7 +275,6 @@ function afterRender() {
     document.head.append(meta);
   }
   loadCloudflareAnalytics();
-  registerMonetagWorker(state.view);
   if (canLoadAds(state.view)) {
     loadAdSense(state.view);
     queueMicrotask(pushAdSense);
