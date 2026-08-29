@@ -1,4 +1,4 @@
-import { cp, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { cp, mkdir, readFile, unlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -14,7 +14,7 @@ const { articles } = await import(pathToFileURL(path.join(root, 'src/articles.js
 const { legalPages } = await import(pathToFileURL(path.join(root, 'src/legal.js')).href);
 const { frPages } = await import(pathToFileURL(path.join(root, 'src/fr-pages.js')).href);
 const { renderRelatedHtml } = await import(pathToFileURL(path.join(root, 'src/related.js')).href);
-const { monetagHeadHtml, stripMonetagHtml, renderAdFooter, renderAdLeaderboard, renderAdSkyscraper } = await import(
+const { monetagHeadHtml, renderAdFooter, renderAdLeaderboard, renderAdSkyscraper } = await import(
   pathToFileURL(path.join(root, 'src/monetag-tags.js')).href
 );
 const { renderLangToggle, hreflangPairs } = await import(
@@ -405,6 +405,8 @@ function renderHtml(page, { noindex = false } = {}) {
 }
 
 const redirectLines = [
+  '/room/:id /index.html 200',
+  '/room/* /index.html 200',
   '# Canonical host is also handled in Cloudflare Redirect Rules (www -> apex).',
   '# Trailing-slash SEO pages -> extensionless paths.',
   '# .html pretty-URL aliases -> extensionless canonicals.'
@@ -417,8 +419,6 @@ for (const page of pages) {
 }
 
 redirectLines.push('');
-redirectLines.push('# App routes. Rewrite to index.html (not *.html pretty URLs) so /room/:id is not 308ed.');
-redirectLines.push('/room/* /index.html 200');
 redirectLines.push('/dashboard/ /dashboard 301');
 await writeFile(path.join(distDir, '_redirects'), `${redirectLines.join('\n')}\n`);
 
@@ -532,5 +532,8 @@ if (pub) {
 }
 
 await cp(path.join(root, 'functions'), path.join(distDir, 'functions'), { recursive: true });
+for (const leftover of ['room.html', 'chat-shell.html', '_routes.json']) {
+  await unlink(path.join(distDir, leftover)).catch(() => {});
+}
 
 console.log(`Prerendered ${pages.length} SEO HTML files, sitemap, dashboard/404 shells, _redirects, and _headers.`);

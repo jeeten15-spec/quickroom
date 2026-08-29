@@ -1,4 +1,3 @@
-# Rewrite /room/* to the SPA index. Do not target a dedicated *.html file:
-# Pages pretty URLs 308 /room/:id onto that file's extensionless path and drop the id.
+/room/:id /index.html 200
 /room/* /index.html 200
 /dashboard/ /dashboard 301
