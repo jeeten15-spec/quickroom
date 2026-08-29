@@ -23,9 +23,11 @@ import {
   pushAdSense,
   renderAdSlot,
   renderConsentBanner,
+  renderSponsoredLink,
   saveConsent,
   setUsAdsOptOut,
   shouldShowConsentBanner,
+  syncMonetag,
   trackPageview,
   usAdsOptedOut
 } from './monetization';
@@ -275,6 +277,7 @@ function afterRender() {
     document.head.append(meta);
   }
   loadCloudflareAnalytics();
+  syncMonetag(state.view);
   if (canLoadAds(state.view)) {
     loadAdSense(state.view);
     queueMicrotask(pushAdSense);
@@ -432,6 +435,7 @@ function renderFrench(slug) {
         .join('')}
       ${renderRelatedHtml(`/${slug}`, { escapeHtml })}
       <button class="button button-primary use-case-cta" type="button" data-action="open-create">Créer une salle</button>
+      ${renderSponsoredLink()}
       ${renderSiteFooter()}
     </article>
   `;
@@ -791,6 +795,7 @@ function renderUseCase(slug) {
       ${renderAdSlot()}
       ${renderRelatedHtml(`/${slug}`, { escapeHtml })}
       <button class="button button-primary use-case-cta" type="button" data-action="open-create">Create a room</button>
+      ${renderSponsoredLink()}
       ${renderSupportBlock({ compact: true })}
       ${renderSiteFooter()}
     </article>
@@ -829,6 +834,7 @@ function renderGuide(slug) {
       ${renderAdSlot()}
       ${renderRelatedHtml(`/${slug}`, { escapeHtml })}
       <button class="button button-primary use-case-cta" type="button" data-action="open-create">Create a room</button>
+      ${renderSponsoredLink()}
       ${renderSupportBlock({ compact: true })}
       ${renderSiteFooter()}
     </article>
@@ -868,6 +874,7 @@ function renderArticle(slug) {
       ${renderAdSlot()}
       ${renderRelatedHtml(`/${slug}`, { escapeHtml })}
       <button class="button button-primary use-case-cta" type="button" data-action="open-create">Create a room</button>
+      ${renderSponsoredLink()}
       ${renderSupportBlock({ compact: true })}
       ${renderSiteFooter()}
     </article>
@@ -982,6 +989,7 @@ function renderBlog() {
       <p>Together, we hope to build something that's useful, simple, and enjoyable for millions of people around the world.</p>
       <p>Welcome to QuickRoom.</p>
       <p>Create a room.</p><p>Share a link.</p><p>Start talking.</p>
+      ${renderSponsoredLink()}
       ${renderGithubTrust()}
       ${renderSupportBlock()}
       ${renderSiteFooter()}

@@ -15,6 +15,33 @@ export function isMonetizedView(view) {
   return view !== 'room-placeholder' && view !== 'dashboard' && view !== 'create';
 }
 
+const PRODUCT_SURFACES = new Set([
+  'landing',
+  'create',
+  'room-placeholder',
+  'dashboard',
+  'about',
+  'privacy',
+  'cookies',
+  'privacy-choices',
+  'fr'
+]);
+
+/** Articles, use cases, guides, blog — not Create/Join/room/home. */
+export function isLongContentView(view) {
+  return Boolean(view) && !PRODUCT_SURFACES.has(view) && isMonetizedView(view);
+}
+
+export function adsConsentOk() {
+  if (geo.region === 'unknown') return false;
+  if (usAdsOptedOut()) return false;
+  if (regionNeedsCmp()) {
+    if (useGoogleFundingChoices()) return true;
+    return Boolean(getConsent()?.ads);
+  }
+  return true;
+}
+
 export function getConsent() {
   try {
     const raw = JSON.parse(localStorage.getItem(CONSENT_KEY) || 'null');
@@ -135,13 +162,7 @@ export function shouldShowConsentBanner(view) {
 export function canLoadAds(view) {
   if (!isMonetizedView(view)) return false;
   if (!adsenseClient()) return false;
-  if (geo.region === 'unknown') return false;
-  if (usAdsOptedOut()) return false;
-  if (regionNeedsCmp()) {
-    if (useGoogleFundingChoices()) return true;
-    return Boolean(getConsent()?.ads);
-  }
-  return true;
+  return adsConsentOk();
 }
 
 export function canLoadGa() {
@@ -249,4 +270,58 @@ export async function trackPageview(path) {
 
 function escapeAttr(value) {
   return String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+}
+
+export const MONETAG_DIRECT_LINK = 'https://omg10.com/4/11680015';
+
+let lastView = '';
+let vignetteTimer = 0;
+let vignetteInjected = false;
+let inpagePushInjected = false;
+
+function injectMonetagZone(zone, src) {
+  if (document.querySelector(`script[data-zone="${zone}"]`)) return;
+  const host = [document.documentElement, document.body].filter(Boolean).pop();
+  if (!host) return;
+  const script = host.appendChild(document.createElement('script'));
+  script.dataset.zone = zone;
+  script.src = src;
+  script.async = true;
+  script.setAttribute('data-cfasync', 'false');
+}
+
+/**
+ * Vignette + in-page push only on long articles/use cases.
+ * Never on landing, Create, Join, or inside a room — those formats overlay
+ * or intercept the next click.
+ */
+export function syncMonetag(view) {
+  lastView = view;
+  if (vignetteTimer) {
+    window.clearTimeout(vignetteTimer);
+    vignetteTimer = 0;
+  }
+  if (!isLongContentView(view) || !adsConsentOk()) return;
+
+  if (!inpagePushInjected) {
+    inpagePushInjected = true;
+    injectMonetagZone('11680018', 'https://nap5k.com/tag.min.js');
+  }
+
+  if (vignetteInjected || sessionStorage.getItem('quickroom.vignette') === '1') return;
+  vignetteTimer = window.setTimeout(() => {
+    vignetteTimer = 0;
+    if (!isLongContentView(lastView) || !adsConsentOk()) return;
+    vignetteInjected = true;
+    sessionStorage.setItem('quickroom.vignette', '1');
+    injectMonetagZone('11680014', 'https://n6wxm.com/vignette.min.js');
+  }, 12_000);
+}
+
+export function renderSponsoredLink() {
+  if (!adsConsentOk()) return '';
+  return `<p class="sponsored-link">
+    <a href="${MONETAG_DIRECT_LINK}" target="_blank" rel="sponsored nofollow noopener">Sponsored offer</a>
+    <span> — optional, not required to create or join a room.</span>
+  </p>`;
 }

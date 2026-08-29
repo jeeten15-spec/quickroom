@@ -32,9 +32,9 @@ export const legalPages = {
       {
         heading: 'Advertising (content pages only)',
         paragraphs: [
-          'Ads may appear on the landing page, long articles, and use-case pages. Ads are not placed inside live chat rooms.',
-          'Google AdSense may show display ads on the landing page, long articles, and use-case pages. Ads are not placed inside live chat rooms, and we do not use click-under / pop-under tags that intercept Create room or join links.',
-          'A Monetag service worker file may be hosted at /sw.js for verification. Intrusive Monetag OnClick formats are not loaded on this site.',
+          'Display ads (Google AdSense) may appear on the landing page and on long articles and use-case pages. They are not placed inside live chat rooms.',
+          'On long articles, guides, and use-case pages only, Monetag may show an in-page push notice and, after a delay, a vignette overlay. A labelled sponsored/direct-link offer may appear in the footer of those pages. These scripts are not loaded on the homepage Create/Join flow or inside a room, and they do not wrap Create room or join links.',
+          'We do not use Monetag OnClick or pop-under tags, because those intercept the next click (including opening a room).',
           'In the European Economic Area, the United Kingdom, and Switzerland, advertising cookies and personalized ads are off until you accept them in the consent message. We use Google Consent Mode where Google tags are present. After AdSense approval, Google’s certified Privacy & messaging / Funding Choices message should also be turned on in the AdSense dashboard—that is the IAB TCF 2.2 CMP Google requires for publishers.',
           'In the United States, you can use Privacy choices to opt out of the sale/sharing of personal information for advertising. We also honour the Global Privacy Control (GPC) signal where present.',
           'Google, Monetag, and their advertising partners may process data as described in their advertising privacy documentation. We do not control their full vendor list; the consent tools show partners when they are active.'

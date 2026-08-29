@@ -1298,6 +1298,17 @@ code {
   text-align: left;
 }
 
+.sponsored-link {
+  margin: 16px 0 8px;
+  color: #777;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.sponsored-link a {
+  color: #555;
+}
+
 @media (min-width: 720px) {
   .metrics-tables {
     grid-template-columns: 1fr 1fr;
