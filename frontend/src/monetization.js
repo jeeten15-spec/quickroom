@@ -255,7 +255,11 @@ export function renderConsentBanner() {
 }
 
 export async function trackPageview(path) {
-  if (path.startsWith('/room/') || path.startsWith('/dashboard')) return;
+  const onRoom =
+    path.startsWith('/room/') ||
+    path.startsWith('/dashboard') ||
+    (path === '/' && Boolean(new URLSearchParams(window.location.search).get('room')));
+  if (onRoom) return;
   const workerUrl = (import.meta.env.VITE_WORKER_URL || 'https://quickroom-api.jeeten15.workers.dev').replace(
     /\/$/,
     ''

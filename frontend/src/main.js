@@ -80,23 +80,22 @@ const state = {
 
 function getInitialView() {
   normalizePathname();
+  if (roomIdFromLocation()) return 'room-placeholder';
   const pathname = window.location.pathname;
   const slug = pathname.replace(/^\//, '');
-  return /^\/room\/[A-Za-z0-9_-]{16,64}$/.test(pathname)
-    ? 'room-placeholder'
-    : pathname === '/about'
-      ? 'about'
-      : pathname === '/blog'
-        ? 'blog'
-        : pathname === '/dashboard'
-          ? 'dashboard'
-          : legalPages[slug]
+  return pathname === '/about'
+    ? 'about'
+    : pathname === '/blog'
+      ? 'blog'
+      : pathname === '/dashboard'
+        ? 'dashboard'
+        : legalPages[slug]
+          ? slug
+          : frPages[slug]
             ? slug
-            : frPages[slug]
+            : useCasePages[slug] || guides[slug] || articles[slug]
               ? slug
-              : (useCasePages[slug] || guides[slug] || articles[slug])
-                ? slug
-                : 'landing';
+              : 'landing';
 }
 
 function normalizePathname() {
@@ -155,11 +154,16 @@ function render() {
   `;
 
   if (state.ageConfirmed && state.view === 'room-placeholder') {
-    const roomId = window.location.pathname.split('/').pop();
-    activeChat = new ChatRoom(document.querySelector('#chat-root'), roomId, {
-      onLeave: leaveRoomView
-    });
-    activeChat.mount();
+    const roomId = roomIdFromLocation();
+    if (!roomId) {
+      window.history.replaceState({}, '', '/');
+      state.view = 'landing';
+    } else {
+      activeChat = new ChatRoom(document.querySelector('#chat-root'), roomId, {
+        onLeave: leaveRoomView
+      });
+      activeChat.mount();
+    }
   }
 
   updateDocumentMetadata();
@@ -229,7 +233,7 @@ function renderJoinForm() {
     <form class="join-form" data-form="join">
       <label for="join-room">Room code or join link</label>
       <input id="join-room" name="room" type="text" autocomplete="off" required
-        placeholder="Code or https://quickroom.org/room/…" value="${escapeHtml(state.joinCode)}" />
+        placeholder="Code or https://quickroom.org/?room=…" value="${escapeHtml(state.joinCode)}" />
       <label for="join-nickname">Nickname</label>
       <input id="join-nickname" name="nickname" type="text" minlength="3" maxlength="20"
         value="${escapeHtml(state.joinNickname)}" required />
@@ -1412,11 +1416,19 @@ async function loadMetrics() {
 
 function navigateToRoom(roomId) {
   sessionStorage.setItem('quickroom.current-room', roomId);
-  window.history.pushState({}, '', `/room/${roomId}`);
+  window.history.pushState({}, '', `/?room=${encodeURIComponent(roomId)}`);
   state.view = 'room-placeholder';
   state.busy = false;
   state.error = '';
   render();
+}
+
+function roomIdFromLocation() {
+  const params = new URLSearchParams(window.location.search);
+  const fromQuery = params.get('room') || params.get('id');
+  if (fromQuery && /^[A-Za-z0-9_-]{16,64}$/.test(fromQuery)) return fromQuery;
+  const fromPath = /^\/room\/([A-Za-z0-9_-]{16,64})$/.exec(window.location.pathname);
+  return fromPath ? fromPath[1] : '';
 }
 
 function leaveRoomView() {
@@ -1431,8 +1443,10 @@ function leaveRoomView() {
 function roomIdFromInput(value) {
   if (typeof value !== 'string') throw new Error('Enter a room code or join link.');
   const trimmed = value.trim();
-  const fromUrl = /\/room\/([A-Za-z0-9_-]{16,64})(?:[/?#]|$)/.exec(trimmed);
-  const roomId = fromUrl ? fromUrl[1] : trimmed;
+  const fromUrl = /(?:\/room\/([A-Za-z0-9_-]{16,64})|[?&](?:room|id)=([A-Za-z0-9_-]{16,64}))/.exec(
+    trimmed
+  );
+  const roomId = fromUrl ? fromUrl[1] || fromUrl[2] : trimmed;
 
   if (!/^[A-Za-z0-9_-]{16,64}$/.test(roomId)) {
     throw new Error('Enter a valid room code or join link.');

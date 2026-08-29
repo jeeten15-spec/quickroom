@@ -1,3 +1,2 @@
-/room/:id /index.html 200
-/room/* /index.html 200
+/room/:id /?room=:id 302
 /dashboard/ /dashboard 301

@@ -405,8 +405,8 @@ function renderHtml(page, { noindex = false } = {}) {
 }
 
 const redirectLines = [
-  '/room/:id /index.html 200',
-  '/room/* /index.html 200',
+  '/room/:id /?room=:id 302',
+  '/room/* /?room=:splat 302',
   '# Canonical host is also handled in Cloudflare Redirect Rules (www -> apex).',
   '# Trailing-slash SEO pages -> extensionless paths.',
   '# .html pretty-URL aliases -> extensionless canonicals.'
@@ -531,7 +531,11 @@ if (pub) {
   );
 }
 
-await cp(path.join(root, 'functions'), path.join(distDir, 'functions'), { recursive: true });
+try {
+  await cp(path.join(root, 'functions'), path.join(distDir, 'functions'), { recursive: true });
+} catch {
+  /* no Pages Functions in this build */
+}
 for (const leftover of ['room.html', 'chat-shell.html', '_routes.json']) {
   await unlink(path.join(distDir, leftover)).catch(() => {});
 }

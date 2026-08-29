@@ -16,7 +16,7 @@ export function registerPwa() {
           })
           .map((registration) => registration.unregister())
       );
-      await navigator.serviceWorker.register('/service-worker.js', { scope: '/room/' });
+      await navigator.serviceWorker.register('/service-worker.js', { scope: '/' });
       const registration = await navigator.serviceWorker.ready;
       const appAssets = performance
         .getEntriesByType('resource')

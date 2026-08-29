@@ -9,7 +9,7 @@ const MESSAGE_INTERVAL_MS = 1_000;
 const HEARTBEAT_INTERVAL_MS = 5_000;
 
 function roomShareUrl(roomId) {
-  return `https://quickroom.org/room/${roomId}`;
+  return `https://quickroom.org/?room=${encodeURIComponent(roomId)}`;
 }
 
 export class ChatRoom {

@@ -145,7 +145,7 @@ export async function createRoom(
   return {
     roomId,
     room,
-    shareUrl: `https://quickroom.org/room/${roomId}`
+    shareUrl: `https://quickroom.org/?room=${roomId}`
   };
 }
 
