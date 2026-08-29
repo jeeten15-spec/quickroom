@@ -405,7 +405,6 @@ function renderHtml(page, { noindex = false } = {}) {
 }
 
 const redirectLines = [
-  '/room/* /?room=:splat 302',
   '# Canonical host is also handled in Cloudflare Redirect Rules (www -> apex).',
   '# Trailing-slash SEO pages -> extensionless paths.',
   '# .html pretty-URL aliases -> extensionless canonicals.'
