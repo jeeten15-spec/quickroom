@@ -465,6 +465,11 @@ await writeFile(
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
 
+/sw.js
+  Content-Type: application/javascript; charset=utf-8
+  Cache-Control: no-cache
+  Service-Worker-Allowed: /
+
 /dashboard
   X-Robots-Tag: noindex, nofollow
 

@@ -32,10 +32,11 @@ export const legalPages = {
       {
         heading: 'Advertising (content pages only)',
         paragraphs: [
-          'If Google AdSense is enabled, ads may appear on the landing page, long articles, and use-case pages. Ads are not placed inside live chat rooms.',
-          'In the European Economic Area, the United Kingdom, and Switzerland, advertising cookies and personalized ads are off until you accept them in the consent message. We use Google Consent Mode. After AdSense approval, Google’s certified Privacy & messaging / Funding Choices message should also be turned on in the AdSense dashboard—that is the IAB TCF 2.2 CMP Google requires for publishers.',
+          'Ads may appear on the landing page, long articles, and use-case pages. Ads are not placed inside live chat rooms.',
+          'Google AdSense and Monetag (including a root service worker at /sw.js that loads scripts from 3nbf4.com) may be used to show those ads.',
+          'In the European Economic Area, the United Kingdom, and Switzerland, advertising cookies and personalized ads are off until you accept them in the consent message. We use Google Consent Mode where Google tags are present. After AdSense approval, Google’s certified Privacy & messaging / Funding Choices message should also be turned on in the AdSense dashboard—that is the IAB TCF 2.2 CMP Google requires for publishers.',
           'In the United States, you can use Privacy choices to opt out of the sale/sharing of personal information for advertising. We also honour the Global Privacy Control (GPC) signal where present.',
-          'Google and its advertising partners may process data as described in Google’s advertising privacy documentation. We do not control their full vendor list; the AdSense CMP shows partners when it is active.'
+          'Google, Monetag, and their advertising partners may process data as described in their advertising privacy documentation. We do not control their full vendor list; the consent tools show partners when they are active.'
         ]
       },
       {
@@ -72,7 +73,7 @@ export const legalPages = {
     title: 'Cookies and similar technologies',
     seoTitle: 'Cookies Policy | QuickRoom',
     description:
-      'Cookies, local storage, and similar technologies used by QuickRoom, Firebase, Cloudflare, analytics, and Google AdSense.',
+      'Cookies, local storage, and similar technologies used by QuickRoom, Firebase, Cloudflare, analytics, Google AdSense, and Monetag.',
     htmlLang: 'en',
     sections: [
       {
@@ -84,7 +85,7 @@ export const legalPages = {
       {
         heading: 'Advertising and analytics cookies',
         paragraphs: [
-          'Google AdSense and (if enabled) Google Analytics set cookies only after you allow them in Europe, or according to US privacy choices. Cloudflare Web Analytics, when enabled, is designed to operate without advertising cookies.',
+          'Google AdSense, Monetag, and (if enabled) Google Analytics set cookies only after you allow them in Europe, or according to US privacy choices. Cloudflare Web Analytics, when enabled, is designed to operate without advertising cookies.',
           'You can change your mind on Privacy choices or by clearing site data for quickroom.org.'
         ]
       }

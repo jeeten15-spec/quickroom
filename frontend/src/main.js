@@ -20,6 +20,7 @@ import {
   loadAdSense,
   loadCloudflareAnalytics,
   loadGoogleAnalytics,
+  registerMonetagWorker,
   pushAdSense,
   renderAdSlot,
   renderConsentBanner,
@@ -275,6 +276,7 @@ function afterRender() {
     document.head.append(meta);
   }
   loadCloudflareAnalytics();
+  registerMonetagWorker(state.view);
   if (canLoadAds(state.view)) {
     loadAdSense(state.view);
     queueMicrotask(pushAdSense);
@@ -713,7 +715,7 @@ function renderAbout() {
       <p>No unnecessary features.</p>
       <p>No endless distractions.</p>
       <p>As the platform grows, we'll continue to focus on thoughtful improvements rather than feature overload.</p>
-      <p>If advertising is ever introduced, it will be carefully designed so that it never interrupts conversations or compromises the user experience.</p>
+      <p>Ads may appear on the landing page, articles, and use-case pages. Live chat rooms do not show ads, so the conversation stays the focus.</p>
       <p>Our users are not the product.</p>
       <p>They're the reason the product exists.</p>
 
@@ -935,12 +937,11 @@ function renderBlog() {
       <p>We believe conversations don't always need to live forever.</p>
 
       <h2>Clean by Design</h2>
-      <p>The modern web is full of distractions.</p>
-      <p>Autoplay videos.</p><p>Pop-ups.</p><p>Cookie banners.</p><p>Floating chat widgets.</p><p>Endless notifications.</p>
-      <p>QuickRoom is intentionally different.</p>
+      <p>The modern web is full of distractions: autoplay videos, floating chat widgets, and endless notifications.</p>
+      <p>QuickRoom is intentionally different inside the room.</p>
       <p>Our design philosophy is simple:</p>
-      <p><strong>Every pixel should have a purpose.</strong></p>
-      <p>We want the interface to disappear so your conversation becomes the focus.</p>
+      <p><strong>Every pixel in the conversation should have a purpose.</strong></p>
+      <p>Ads may appear on the landing page, articles, and use-case pages. They are not placed inside live chat rooms.</p>
 
       <h2>Where We're Going</h2>
       <p>This is only Phase One.</p>
@@ -954,9 +955,9 @@ function renderBlog() {
 
       <h2>Keeping QuickRoom Accessible</h2>
       <p>We're committed to keeping QuickRoom accessible to everyone.</p>
-      <p>Our goal is to keep the core experience free.</p>
+      <p>Our goal is to keep creating and joining a room free.</p>
       <p>If we ever introduce premium features, they'll enhance the experience rather than restrict basic collaboration.</p>
-      <p>Should we introduce advertising in the future, it will always be respectful, minimal, and never interfere with conversations.</p>
+      <p>Advertising on landing pages, articles, and use cases helps keep rooms free to use. Ads are not shown inside the chat.</p>
       <p>Users come first.</p><p>Always.</p>
 
       <h2>Practical Guides</h2>

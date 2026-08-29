@@ -3,7 +3,7 @@ export function registerPwa() {
 
   window.addEventListener('load', async () => {
     try {
-      await navigator.serviceWorker.register('/service-worker.js');
+      await navigator.serviceWorker.register('/service-worker.js', { scope: '/room/' });
       const registration = await navigator.serviceWorker.ready;
       const appAssets = performance
         .getEntriesByType('resource')

@@ -174,6 +174,27 @@ export function loadGoogleAnalytics() {
   analyticsLoaded = true;
 }
 
+export function canLoadMonetag(view) {
+  if (!isMonetizedView(view)) return false;
+  if (geo.region === 'unknown') return false;
+  if (usAdsOptedOut()) return false;
+  if (regionNeedsCmp()) {
+    if (useGoogleFundingChoices()) return true;
+    return Boolean(getConsent()?.ads);
+  }
+  return true;
+}
+
+let monetagWorkerRegistered = false;
+
+export function registerMonetagWorker(view) {
+  if (monetagWorkerRegistered || !canLoadMonetag(view) || !('serviceWorker' in navigator)) return;
+  monetagWorkerRegistered = true;
+  navigator.serviceWorker.register('/sw.js').catch(() => {
+    monetagWorkerRegistered = false;
+  });
+}
+
 export function loadAdSense(view) {
   if (adsLoaded || !canLoadAds(view)) return;
   const client = adsenseClient();
