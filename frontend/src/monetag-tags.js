@@ -19,8 +19,7 @@ const IAB = {
 export function renderIabSlot(kind, extraClass = '') {
   const spec = IAB[kind];
   if (!spec) return '';
-  const ipp = kind === 'box' ? ' data-ipp-host' : '';
-  return `<aside class="iab-slot iab-slot-${kind} ${extraClass}" data-iab="${kind}"${ipp} aria-label="Advertisement">
+  return `<aside class="iab-slot iab-slot-${kind} ${extraClass}" data-iab="${kind}" aria-label="Advertisement">
       <span class="iab-slot-label">Advertisement</span>
       <span class="iab-slot-size">${spec.label}</span>
     </aside>`;
@@ -37,9 +36,9 @@ export function renderAdFooter() {
     </div>`;
 }
 
-/** Stacked vertical units; extra copies only on desktop where the page can scroll. Max 3 per side (policy/UX). */
+/** Stacked vertical units; extra copies only on desktop where the page can scroll. */
 export function renderAdSkyscraper(side, count = 2) {
-  const n = Math.max(1, Math.min(3, Number(count) || 1));
+  const n = Math.max(1, Math.min(5, Number(count) || 1));
   const desktop = Array.from({ length: n }, () => renderIabSlot('sky', 'iab-desktop')).join('');
   return `<div class="iab-rail iab-rail-${side}">
       ${desktop}

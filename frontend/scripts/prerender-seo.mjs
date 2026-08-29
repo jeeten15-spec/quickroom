@@ -14,7 +14,7 @@ const { articles } = await import(pathToFileURL(path.join(root, 'src/articles.js
 const { legalPages } = await import(pathToFileURL(path.join(root, 'src/legal.js')).href);
 const { frPages } = await import(pathToFileURL(path.join(root, 'src/fr-pages.js')).href);
 const { renderRelatedHtml } = await import(pathToFileURL(path.join(root, 'src/related.js')).href);
-const { monetagHeadHtml, renderAdFooter, renderAdLeaderboard, renderAdSkyscraper, renderIabSlot } =
+const { monetagHeadHtml, renderAdFooter, renderAdLeaderboard, renderAdSkyscraper, renderIabSlot, MONETAG_DIRECT_LINK } =
   await import(pathToFileURL(path.join(root, 'src/monetag-tags.js')).href);
 const { adsenseHeadHtml, ADSENSE_ADS_TXT } = await import(
   pathToFileURL(path.join(root, 'src/adsense.js')).href
@@ -155,7 +155,6 @@ function bodyAbout() {
       <p>QuickRoom was created with a simple belief: <strong>technology should remove friction—not create it.</strong></p>
       <p>Every day, people need a quick place to collaborate, ask questions, solve problems, or talk. Most tools still ask for accounts, phone verification, app installs, and permanent groups before the conversation begins.</p>
       <p>QuickRoom makes starting a conversation as simple as opening a web page: create a temporary private room, share a room code, and talk in the browser without handing over a phone number or email address.</p>
-      ${renderIabSlot('box')}
       <h2>Our mission</h2>
       <p>Build the simplest, fastest, and most respectful collaboration platform on the web—no unnecessary barriers, no complicated setup, just meaningful conversations that can end when the moment ends.</p>
       <h2>Our story</h2>
@@ -173,6 +172,7 @@ function bodyAbout() {
       <h2>Looking ahead</h2>
       <p>QuickRoom starts with temporary chat and is growing into a browser-first collaboration toolkit for study, events, client handoffs, and short-lived teamwork—without turning every conversation into another permanent account.</p>
       ${renderExtrasHtml('QuickRoom', { escapeHtml })}
+      <p class="sponsored-link"><a href="${MONETAG_DIRECT_LINK}" rel="sponsored nofollow noopener">Sponsored offer</a> — optional, not required to create or join a room.</p>
       ${relatedLinks('/about')}
     </article>`;
 }
@@ -273,7 +273,9 @@ const pages = [
     title: 'About QuickRoom — Private Temporary Chat Rooms, No Signup',
     description:
       'Why QuickRoom exists: free private chat rooms, temporary chat rooms, and online chat without accounts, apps, or phone numbers.',
-    body: bodyAbout()
+    body: bodyAbout(),
+    noAds: true,
+    noAdSense: true
   },
   {
     route: '/blog',
@@ -281,7 +283,8 @@ const pages = [
     title: 'QuickRoom Blog — Free Chat Rooms, Anonymous Chat, No Signup',
     description:
       'Guides to private chat rooms without signup, free online chat rooms, anonymous group chat, and temporary chatrooms on QuickRoom.',
-    body: bodyBlog()
+    body: bodyBlog(),
+    railCount: 5
   },
   ...Object.entries(useCasePages).map(([slug, page]) => ({
     route: `/${slug}`,
@@ -289,7 +292,8 @@ const pages = [
     title: page.seoTitle,
     description: page.description,
     body: bodyUseCase(slug, page),
-    faq: defaultFaq(page.title)
+    faq: defaultFaq(page.title),
+    railCount: 4
   })),
   ...Object.entries(guides).map(([slug, page]) => ({
     route: `/${slug}`,
@@ -404,7 +408,7 @@ function renderHtml(page, { noindex = false } = {}) {
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="QuickRoom" />
     <link rel="manifest" href="/manifest.webmanifest" />
-    ${adsenseHeadHtml()}
+    ${page.noAdSense ? '' : adsenseHeadHtml()}
     <script>if (new URLSearchParams(location.search).get('room')) document.documentElement.classList.add('chat-boot');</script>
     ${page.noMonetag ? '' : monetagHeadHtml()}
     <script type="application/ld+json">${JSON.stringify(schema)}</script>

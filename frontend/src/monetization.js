@@ -1,4 +1,5 @@
 import { adsenseClientId } from './adsense.js';
+import { useCasePages } from './use-cases.js';
 import {
   MONETAG_DIRECT_LINK,
   MONETAG_IPP_SRC,
@@ -25,6 +26,16 @@ let analyticsLoaded = false;
 
 export function isMonetizedView(view) {
   return view !== 'room-placeholder' && view !== 'dashboard' && view !== 'create';
+}
+
+/** AdSense IAB units — never on About (Monetag only), chat, Create, or dashboard. */
+export function isAdSenseView(view) {
+  return isMonetizedView(view) && view !== 'about';
+}
+
+/** Monetag vignette / IPP / direct link — About only, so they never sit on AdSense URLs. */
+export function isMonetagView(view) {
+  return view === 'about';
 }
 
 const PRODUCT_SURFACES = new Set([
@@ -161,16 +172,10 @@ function adsenseClient() {
 }
 
 export function adRailCount(view) {
-  if (!isMonetizedView(view)) return 0;
-  if (
-    view === 'landing' ||
-    view === 'about' ||
-    view === 'blog' ||
-    view === 'fr' ||
-    isLongContentView(view)
-  ) {
-    return 3;
-  }
+  if (!isAdSenseView(view)) return 0;
+  if (view === 'blog') return 5;
+  if (useCasePages[view]) return 4;
+  if (view === 'landing' || view === 'fr' || isLongContentView(view)) return 3;
   return 2;
 }
 
@@ -186,7 +191,7 @@ export function shouldShowConsentBanner(view) {
 }
 
 export function canLoadAds(view) {
-  if (!isMonetizedView(view)) return false;
+  if (!isAdSenseView(view)) return false;
   if (!adsenseClient()) return false;
   return adsConsentOk();
 }
@@ -258,7 +263,7 @@ export function renderConsentBanner() {
   return `<div class="consent-banner" role="dialog" aria-labelledby="consent-title">
     <div class="consent-copy">
       <h2 id="consent-title">Cookies and ads in Europe</h2>
-      <p>We use cookies for optional ads on articles and landing pages (not in chat rooms) and, if enabled, analytics. Rooms work without this. Read the <a href="/privacy" data-action="navigate">privacy policy</a> and <a href="/cookies" data-action="navigate">cookies</a> pages. After AdSense approval, also turn on Google Privacy &amp; messaging (GDPR + US) in AdSense.</p>
+      <p>We use cookies for optional ads (Google AdSense on most public pages; Monetag only on About) and, if enabled, analytics. Rooms work without this. Read the <a href="/privacy" data-action="navigate">privacy policy</a> and <a href="/cookies" data-action="navigate">cookies</a> pages. After AdSense approval, also turn on Google Privacy &amp; messaging (GDPR + US) in AdSense.</p>
     </div>
     <div class="consent-actions">
       <button class="button button-secondary" type="button" data-action="consent-reject">Reject optional</button>
@@ -298,8 +303,8 @@ let vignetteTimer = 0;
 let ippTimer = 0;
 
 /**
- * Monetag vignette / in-page push cannot be clipped to IAB boxes (they overlay).
- * Load them only on long articles/use cases, after a delay, not on Home/Create/chat.
+ * Monetag overlays only on /about (no AdSense on that URL).
+ * Skip if the visitor is no longer on About when the timer fires.
  */
 export function syncMonetag(view) {
   lastView = view;
@@ -312,13 +317,13 @@ export function syncMonetag(view) {
     ippTimer = 0;
   }
 
-  const allowOverlay = isLongContentView(view) && adsConsentOk() && !usAdsOptedOut();
+  const allowOverlay = isMonetagView(view) && adsConsentOk() && !usAdsOptedOut();
   if (!allowOverlay) return;
 
   if (!document.querySelector(`script[data-zone="${MONETAG_IPP_ZONE}"]`)) {
     ippTimer = window.setTimeout(() => {
       ippTimer = 0;
-      if (!isLongContentView(lastView)) return;
+      if (!isMonetagView(lastView)) return;
       const host = document.querySelector('[data-ipp-host]') || document.body;
       const script = host.appendChild(document.createElement('script'));
       script.dataset.zone = MONETAG_IPP_ZONE;
@@ -333,7 +338,7 @@ export function syncMonetag(view) {
 
   vignetteTimer = window.setTimeout(() => {
     vignetteTimer = 0;
-    if (!isLongContentView(lastView) || !adsConsentOk()) return;
+    if (!isMonetagView(lastView) || !adsConsentOk()) return;
     sessionStorage.setItem('quickroom.vignette-session', '1');
     const script = document.body.appendChild(document.createElement('script'));
     script.dataset.zone = MONETAG_VIGNETTE_ZONE;

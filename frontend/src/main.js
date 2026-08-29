@@ -20,6 +20,7 @@ import {
   getConsent,
   initGeo,
   installConsentDefaults,
+  isAdSenseView,
   isMonetizedView,
   loadAdSense,
   loadCloudflareAnalytics,
@@ -122,7 +123,7 @@ function createInitialRoomState() {
 
 function render() {
   const isChat = state.view === 'room-placeholder';
-  const showAds = isMonetizedView(state.view);
+  const showAds = isAdSenseView(state.view);
   const rails = adRailCount(state.view);
   const path = window.location.pathname;
   document.documentElement.classList.toggle('chat-boot', isChat);
@@ -458,7 +459,6 @@ function renderFrench(slug) {
         .join('')}
       ${renderRelatedHtml(`/${slug}`, { escapeHtml })}
       <button class="button button-primary use-case-cta" type="button" data-action="open-create">Créer une salle</button>
-      ${renderSponsoredLink()}
       ${renderSiteFooter()}
     </article>
   `;
@@ -684,7 +684,7 @@ function renderSegment(group, value, label) {
 
 function renderAbout() {
   return `
-    <article class="info-page">
+    <article class="info-page" data-ipp-host>
       <a class="back-link" href="/" data-action="navigate">QuickRoom</a>
       <h1>About QuickRoom</h1>
       <p>QuickRoom was created with a simple belief:</p>
@@ -702,7 +702,6 @@ function renderAbout() {
       <p>We wondered:</p>
       <p><strong>What if starting a conversation could be as simple as creating a document or opening a web page?</strong></p>
       <p>That question became QuickRoom.</p>
-      ${renderAdSlot()}
 
       <h2>Our Mission</h2>
       <p>Our mission is to build the simplest, fastest, and most respectful collaboration platform on the web.</p>
@@ -752,6 +751,7 @@ function renderAbout() {
       <p>We're taking small steps, listening carefully to our community, and improving continuously.</p>
       <p>Thank you for being part of the journey.</p>
       <p>We're glad you're here.</p>
+      ${renderSponsoredLink()}
       ${renderGithubTrust()}
       ${renderSupportBlock()}
       ${renderSiteFooter()}
@@ -819,7 +819,6 @@ function renderUseCase(slug) {
       ${renderAdSlot()}
       ${renderRelatedHtml(`/${slug}`, { escapeHtml })}
       <button class="button button-primary use-case-cta" type="button" data-action="open-create">Create a room</button>
-      ${renderSponsoredLink()}
       ${renderSupportBlock({ compact: true })}
       ${renderSiteFooter()}
     </article>
@@ -858,7 +857,6 @@ function renderGuide(slug) {
       ${renderAdSlot()}
       ${renderRelatedHtml(`/${slug}`, { escapeHtml })}
       <button class="button button-primary use-case-cta" type="button" data-action="open-create">Create a room</button>
-      ${renderSponsoredLink()}
       ${renderSupportBlock({ compact: true })}
       ${renderSiteFooter()}
     </article>
@@ -898,7 +896,6 @@ function renderArticle(slug) {
       ${renderAdSlot()}
       ${renderRelatedHtml(`/${slug}`, { escapeHtml })}
       <button class="button button-primary use-case-cta" type="button" data-action="open-create">Create a room</button>
-      ${renderSponsoredLink()}
       ${renderSupportBlock({ compact: true })}
       ${renderSiteFooter()}
     </article>
@@ -1014,7 +1011,6 @@ function renderBlog() {
       <p>Together, we hope to build something that's useful, simple, and enjoyable for millions of people around the world.</p>
       <p>Welcome to QuickRoom.</p>
       <p>Create a room.</p><p>Share a link.</p><p>Start talking.</p>
-      ${renderSponsoredLink()}
       ${renderGithubTrust()}
       ${renderSupportBlock()}
       ${renderSiteFooter()}
