@@ -146,10 +146,11 @@ button:disabled {
 }
 
 @media (min-width: 960px) {
-  .ads-page-row {
+  .ads-page-row.has-ad-rails {
     grid-template-columns: 176px minmax(0, 1fr) 176px;
   }
-  .ads-page-row-chat {
+  .ads-page-row-chat,
+  .ads-page-row:not(.has-ad-rails) {
     grid-template-columns: minmax(0, 1fr);
   }
   .iab-desktop {

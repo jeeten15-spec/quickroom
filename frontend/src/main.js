@@ -135,7 +135,7 @@ function render() {
     </div>
     ${showAds ? renderAdLeaderboard() : ''}
     <main class="page-shell">
-      <div class="ads-page-row${isChat ? ' ads-page-row-chat' : ''}">
+      <div class="ads-page-row${showAds ? ' has-ad-rails' : ''}${isChat ? ' ads-page-row-chat' : ''}">
         ${showAds ? renderAdSkyscraper('left', rails) : ''}
         <div class="ads-page-main">
           ${state.view === 'landing' ? renderLanding() : ''}
