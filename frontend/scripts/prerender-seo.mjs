@@ -317,13 +317,6 @@ const pages = [
 ];
 
 const indexHtml = await readFile(path.join(distDir, 'index.html'), 'utf8');
-await writeFile(
-  path.join(distDir, 'chat-shell.html'),
-  stripMonetagHtml(indexHtml).replace(
-    '</head>',
-    '    <meta name="robots" content="noindex, nofollow" />\n  </head>'
-  )
-);
 const scriptMatch = indexHtml.match(/<script type="module" crossorigin src="([^"]+)"><\/script>/);
 const cssMatches = [...indexHtml.matchAll(/<link rel="stylesheet"[^>]*href="([^"]+)"[^>]*>/g)];
 
@@ -424,8 +417,8 @@ for (const page of pages) {
 }
 
 redirectLines.push('');
-redirectLines.push('# App routes: SPA shell for rooms. chat-shell.html avoids pretty-URL /room 308s.');
-redirectLines.push('/room/:id /chat-shell.html 200');
+redirectLines.push('# App routes. Rewrite to index.html (not *.html pretty URLs) so /room/:id is not 308ed.');
+redirectLines.push('/room/* /index.html 200');
 redirectLines.push('/dashboard/ /dashboard 301');
 await writeFile(path.join(distDir, '_redirects'), `${redirectLines.join('\n')}\n`);
 

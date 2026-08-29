@@ -1,4 +1,4 @@
-# Source of truth is generated at build time by scripts/prerender-seo.mjs.
-# chat-shell.html (not room.html) avoids Cloudflare Pages pretty-URL 308 /room/:id → /room.
-/room/:id /chat-shell.html 200
+# Rewrite /room/* to the SPA index. Do not target a dedicated *.html file:
+# Pages pretty URLs 308 /room/:id onto that file's extensionless path and drop the id.
+/room/* /index.html 200
 /dashboard/ /dashboard 301
