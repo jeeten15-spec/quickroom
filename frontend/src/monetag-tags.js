@@ -1,20 +1,8 @@
-/** Exact Monetag snippets (verification crawlers look for these in HTML). */
-export const MONETAG_VIGNETTE_SCRIPT =
-  "(function(s){s.dataset.zone='11680014',s.src='https://n6wxm.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))";
-
-export const MONETAG_INPAGE_PUSH_SCRIPT =
-  "(function(s){s.dataset.zone='11680018',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))";
-
+/** Direct-link only. Vignette and in-page push overlays intercept clicks and are not used. */
 export const MONETAG_DIRECT_LINK = 'https://omg10.com/4/11680015';
 
-/** In-page push immediately; vignette IIFE is in the HTML but runs after 1s. */
 export function monetagHeadHtml() {
-  return `    <script data-cfasync="false">${MONETAG_INPAGE_PUSH_SCRIPT}</script>
-    <script data-cfasync="false">setTimeout(function(){${MONETAG_VIGNETTE_SCRIPT}},1000)</script>`;
-}
-
-export function monetagInpagePushHtml() {
-  return `<script data-cfasync="false">${MONETAG_INPAGE_PUSH_SCRIPT}</script>`;
+  return '';
 }
 
 export function stripMonetagHtml(html) {

@@ -276,57 +276,20 @@ function escapeAttr(value) {
   return String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 }
 
-let lastView = '';
-let vignetteTimer = 0;
-let vignetteInjected = false;
-let inpagePushInjected = false;
-
-function injectMonetagZone(zone, src) {
-  if (document.querySelector(`script[data-zone="${zone}"]`)) return;
-  const host = [document.documentElement, document.body].filter(Boolean).pop();
-  if (!host) return;
-  const script = host.appendChild(document.createElement('script'));
-  script.dataset.zone = zone;
-  script.src = src;
-  script.async = true;
-  script.setAttribute('data-cfasync', 'false');
-}
-
 /**
- * In-page push on landing + long content. Vignette after 1s on those pages.
- * Room / create / dashboard stay without extra injection (rooms use room.html).
+ * Direct-link ads only. Strip leftover vignette / in-page push tags from older HTML.
  */
-export function syncMonetag(view) {
-  lastView = view;
-  if (vignetteTimer) {
-    window.clearTimeout(vignetteTimer);
-    vignetteTimer = 0;
-  }
-  const allow =
-    view !== 'room-placeholder' && view !== 'dashboard' && view !== 'create' && adsConsentOk();
-  if (!allow) return;
-
-  if (!inpagePushInjected) {
-    inpagePushInjected = true;
-    injectMonetagZone('11680018', 'https://nap5k.com/tag.min.js');
-  }
-
-  if (vignetteInjected || document.querySelector('script[data-zone="11680014"]')) {
-    vignetteInjected = true;
-    return;
-  }
-  vignetteTimer = window.setTimeout(() => {
-    vignetteTimer = 0;
-    if (lastView === 'room-placeholder' || lastView === 'dashboard' || lastView === 'create') return;
-    if (!adsConsentOk()) return;
-    vignetteInjected = true;
-    injectMonetagZone('11680014', 'https://n6wxm.com/vignette.min.js');
-  }, 1_000);
+export function syncMonetag() {
+  document
+    .querySelectorAll(
+      'script[data-zone="11680014"], script[data-zone="11680018"], script[src*="n6wxm.com"], script[src*="nap5k.com"]'
+    )
+    .forEach((node) => node.remove());
 }
 
 export function renderSponsoredLink() {
   if (usAdsOptedOut()) return '';
-  if (geo.region === 'eea' && !getConsent()?.ads && !document.querySelector('script[data-zone="11680018"]')) {
+  if (geo.region === 'eea' && !getConsent()?.ads) {
     return '';
   }
   return `<p class="sponsored-link">

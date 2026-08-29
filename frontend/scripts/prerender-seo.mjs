@@ -17,6 +17,9 @@ const { renderRelatedHtml } = await import(pathToFileURL(path.join(root, 'src/re
 const { monetagHeadHtml, stripMonetagHtml, renderSkyscraperRail } = await import(
   pathToFileURL(path.join(root, 'src/monetag-tags.js')).href
 );
+const { renderLangToggle, hreflangPairs } = await import(
+  pathToFileURL(path.join(root, 'src/lang.js')).href
+);
 const { renderExtrasHtml, defaultFaq } = await import(
   pathToFileURL(path.join(root, 'src/page-copy.js')).href
 );
@@ -83,11 +86,13 @@ function bodyLegal(slug, page) {
 
 function bodyFrench(slug, page) {
   if (page.isLanding) {
-    return `<section lang="fr">
+    return `<div class="home-layout">
+      ${renderSkyscraperRail('left')}
+      <section lang="fr">
       <h1>QuickRoom</h1>
       <p>${escapeHtml(page.intro)}</p>
       <p>${escapeHtml(page.description)}</p>
-      <p><a href="/">Créer une salle</a> · <a href="/">English</a></p>
+      <p><a href="/">Créer une salle</a></p>
       <h2>Usages</h2>
       <ul>${page.jobs
         .map(
@@ -96,7 +101,9 @@ function bodyFrench(slug, page) {
         )
         .join('')}</ul>
       ${relatedLinks('/fr')}
-    </section>`;
+    </section>
+      ${renderSkyscraperRail('right')}
+    </div>`;
   }
   return `<article class="info-page use-case-page" lang="fr">
       <a class="back-link" href="/fr">QuickRoom FR</a>
@@ -344,10 +351,9 @@ function gscMeta() {
 }
 
 function hreflangTags(route) {
-  if (route !== '/' && route !== '/fr') return '';
-  return `<link rel="alternate" hreflang="en" href="${SITE}/" />
-    <link rel="alternate" hreflang="fr" href="${SITE}/fr" />
-    <link rel="alternate" hreflang="x-default" href="${SITE}/" />`;
+  return hreflangPairs(route)
+    .map(([lang, href]) => `<link rel="alternate" hreflang="${escapeHtml(lang)}" href="${escapeHtml(href)}" />`)
+    .join('\n    ');
 }
 
 function renderHtml(page, { noindex = false } = {}) {
@@ -397,7 +403,7 @@ function renderHtml(page, { noindex = false } = {}) {
     ${assetTags}
   </head>
   <body>
-    <div id="app">${page.body || ''}</div>
+    <div id="app">${renderLangToggle(page.route)}${page.body || ''}</div>
   </body>
 </html>
 `;
@@ -507,12 +513,9 @@ const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 ${pages
   .map((page) => {
     const loc = `${SITE}${page.route === '/' ? '/' : page.route}`;
-    const xhtml =
-      page.route === '/' || page.route === '/fr'
-        ? `      <xhtml:link rel="alternate" hreflang="en" href="${SITE}/" />
-      <xhtml:link rel="alternate" hreflang="fr" href="${SITE}/fr" />
-      <xhtml:link rel="alternate" hreflang="x-default" href="${SITE}/" />`
-        : '';
+    const xhtml = hreflangPairs(page.route)
+      .map(([lang, href]) => `      <xhtml:link rel="alternate" hreflang="${lang}" href="${href}" />`)
+      .join('\n');
     return `  <url>
     <loc>${loc}</loc>
     <lastmod>${lastmod}</lastmod>

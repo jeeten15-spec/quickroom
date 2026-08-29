@@ -11,6 +11,7 @@ import { renderRelatedHtml } from './related';
 import { mountPaypalSupport, renderSupportBlock } from './support';
 import { renderExtrasDomString } from './page-copy';
 import { renderSkyscraperRail } from './monetag-tags';
+import { hreflangPairs, renderLangToggle } from './lang';
 import {
   applyConsentMode,
   canLoadAds,
@@ -122,6 +123,7 @@ function render() {
   activeChat?.destroy();
   activeChat = null;
   app.innerHTML = `
+    ${state.view === 'room-placeholder' ? '' : renderLangToggle(window.location.pathname)}
     <main class="page-shell">
       ${state.view === 'landing' ? renderLanding() : ''}
       ${state.view === 'create' ? renderCreateRoom() : ''}
@@ -267,7 +269,7 @@ function renderSiteFooter() {
           <a href="/privacy" data-action="navigate">Privacy</a> <span>·</span>
           <a href="/cookies" data-action="navigate">Cookies</a> <span>·</span>
           <a href="/privacy-choices" data-action="navigate">Privacy choices</a> <span>·</span>
-          <a href="/fr" data-action="navigate" hreflang="fr">Français</a> <span>·</span>
+          <a href="/fr" hreflang="fr">Français</a> <span>·</span>
           <button type="button" data-action="open-contact">Contact</button> <span>·</span>
           <a href="${GITHUB_URL}" target="_blank" rel="noopener noreferrer">GitHub</a>
         </p>`;
@@ -282,7 +284,7 @@ function afterRender() {
     document.head.append(meta);
   }
   loadCloudflareAnalytics();
-  syncMonetag(state.view);
+  syncMonetag();
   if (canLoadAds(state.view)) {
     loadAdSense(state.view);
     queueMicrotask(pushAdSense);
@@ -382,9 +384,10 @@ function renderFrench(slug) {
   const page = frPages[slug];
   if (page.isLanding) {
     return `
+    <div class="home-layout">
+      ${renderSkyscraperRail('left')}
       <section class="landing fr-landing" lang="fr" aria-labelledby="quickroom-title-fr">
         <div class="landing-content">
-          <p class="eyebrow">Français</p>
           <h1 id="quickroom-title-fr">QuickRoom</h1>
           <p class="tagline">${escapeHtml(page.intro)}</p>
           <p class="landing-support">${escapeHtml(page.description)}</p>
@@ -404,7 +407,6 @@ function renderFrench(slug) {
                 .join('')}
             </div>
           </section>
-          <p><a href="/" data-action="navigate">English home</a></p>
         </div>
         <footer>
           ${renderRelatedHtml('/fr', { escapeHtml })}
@@ -412,6 +414,8 @@ function renderFrench(slug) {
           <p>18+ uniquement</p>
         </footer>
       </section>
+      ${renderSkyscraperRail('right')}
+    </div>
     `;
   }
   return `
@@ -1070,12 +1074,7 @@ function updateDocumentMetadata() {
 
 function syncHrefLang(cleanPath) {
   document.querySelectorAll('link[rel="alternate"][hreflang]').forEach((node) => node.remove());
-  const pairs = [];
-  if (cleanPath === '/' || cleanPath === '/fr') {
-    pairs.push(['en', 'https://quickroom.org/'], ['fr', 'https://quickroom.org/fr']);
-  }
-  pairs.push(['x-default', 'https://quickroom.org/']);
-  for (const [lang, href] of pairs) {
+  for (const [lang, href] of hreflangPairs(cleanPath)) {
     const link = document.createElement('link');
     link.rel = 'alternate';
     link.hreflang = lang;
@@ -1209,10 +1208,21 @@ app.addEventListener('click', async (event) => {
     render();
   }
   if (action === 'join-public') {
-    state.joinCode = button.dataset.roomCode;
-    state.joinOpen = true;
-    state.error = '';
-    render();
+    event.preventDefault();
+    const roomId = button.dataset.roomCode;
+    if (!roomId) return;
+    const formData = new FormData();
+    formData.set('room', roomId);
+    formData.set('nickname', state.joinNickname);
+    try {
+      await submitJoinRoom(formData);
+    } catch (error) {
+      state.joinCode = roomId;
+      state.joinOpen = true;
+      state.error = error.message || 'Unable to join the room.';
+      render();
+    }
+    return;
   }
   if (action === 'refresh-metrics') {
     await loadMetrics();
@@ -1322,9 +1332,11 @@ async function submitCreateRoom() {
     });
     rememberNickname(state.create.nickname);
     navigateToRoom(response.roomId);
+    return;
   } catch (error) {
     state.error = error.message || 'Unable to create the room.';
   } finally {
+    if (navigatingToRoom) return;
     state.busy = false;
     render();
   }
@@ -1339,9 +1351,12 @@ async function submitJoinRoom(formData) {
     const response = await apiRequest('/api/joinRoom', { roomId, nickname });
     rememberNickname(nickname);
     navigateToRoom(response.roomId);
+    return;
   } catch (error) {
     state.error = error.message || 'Unable to join the room.';
+    throw error;
   } finally {
+    if (navigatingToRoom) return;
     state.busy = false;
     render();
   }
@@ -1391,7 +1406,10 @@ async function loadMetrics() {
   }
 }
 
+let navigatingToRoom = false;
+
 function navigateToRoom(roomId) {
+  navigatingToRoom = true;
   sessionStorage.setItem('quickroom.current-room', roomId);
   window.location.assign(`/room/${roomId}`);
 }

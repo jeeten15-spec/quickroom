@@ -16,6 +16,29 @@ body {
   background: #fafafa;
 }
 
+.lang-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 20px;
+  border-bottom: 1px solid #ececec;
+  background: #fafafa;
+  font-size: 13px;
+}
+
+.lang-toggle a {
+  color: #555;
+  text-decoration: none;
+}
+
+.lang-toggle a[aria-current="page"] {
+  color: #111;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 button,
 input {
   font: inherit;
@@ -31,7 +54,9 @@ button:disabled {
 }
 
 .page-shell {
-  min-height: 100vh;
+  min-height: calc(100vh - 42px);
+  position: relative;
+  z-index: 1;
 }
 
 .landing,
@@ -46,6 +71,8 @@ button:disabled {
   flex-direction: column;
   justify-content: space-between;
   text-align: center;
+  position: relative;
+  z-index: 1;
 }
 
 .home-layout {
@@ -61,6 +88,8 @@ button:disabled {
   align-items: center;
   padding: 12px 8px;
   text-align: center;
+  z-index: 0;
+  pointer-events: auto;
 }
 
 .ad-rail .ad-label {
