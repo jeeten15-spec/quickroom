@@ -13,7 +13,6 @@ body {
   min-width: 320px;
   min-height: 100vh;
   margin: 0;
-  padding-bottom: 62px;
   background: #fafafa;
 }
 
@@ -79,82 +78,71 @@ button:disabled {
   min-width: 0;
 }
 
-.ad-unit {
-  text-align: center;
-}
-
-.ad-unit-leaderboard {
-  padding: 8px 12px 10px;
-  background: #fff8e6;
-  border-bottom: 1px solid #f0d48a;
-}
-
-.ad-unit-footer {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 8;
-  padding: 6px 12px;
-  background: #fff8e6;
-  border-top: 1px solid #f0d48a;
-}
-
-.ad-unit-rail {
+.iab-row {
   display: flex;
   justify-content: center;
+  padding: 8px 12px;
+}
+
+.iab-row-footer {
+  padding-bottom: 16px;
+}
+
+.iab-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   padding: 8px;
 }
 
-.ad-unit-link {
+.iab-slot {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  overflow: hidden;
   margin: 0 auto;
-  padding: 12px 16px;
-  border: 1px solid #e0b400;
-  border-radius: 6px;
-  background: linear-gradient(180deg, #fff4c2, #ffd24d);
-  color: #111;
-  text-decoration: none;
-  box-shadow: 0 1px 2px rgb(0 0 0 / 6%);
+  border: 1px solid #e6e6e6;
+  background: #f4f4f4;
+  color: #888;
 }
 
-.ad-unit-kicker {
-  font-size: 11px;
-  letter-spacing: 0.06em;
+.iab-slot-label {
+  font-size: 10px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #6b5300;
 }
 
-.ad-unit-headline {
-  font-size: 16px;
+.iab-slot-size {
+  font-size: 12px;
 }
 
-.ad-unit-cta {
-  padding: 6px 12px;
-  border-radius: 999px;
-  background: #111;
-  color: #fff;
-  font-size: 13px;
-}
-
-.ad-unit-link-leader,
-.ad-unit-link-footer {
+.iab-slot-leader {
   width: min(100%, 728px);
-  min-height: 90px;
-  flex-wrap: wrap;
+  height: 90px;
 }
 
-.ad-unit-link-footer {
-  min-height: 50px;
+.iab-slot-sky {
+  width: 160px;
+  height: 600px;
 }
 
-.ad-unit-link-rail {
+.iab-slot-box {
   width: 300px;
-  min-height: 250px;
-  flex-direction: column;
+  height: 250px;
+}
+
+.iab-slot-mobile {
+  width: min(100%, 320px);
+  height: 50px;
+}
+
+.iab-desktop {
+  display: none;
+}
+
+.iab-mobile {
+  display: flex;
 }
 
 @media (min-width: 960px) {
@@ -164,11 +152,15 @@ button:disabled {
   .ads-page-row-chat {
     grid-template-columns: minmax(0, 1fr) 176px;
   }
-  .ad-unit-link-rail {
-    width: 160px;
-    min-height: 600px;
+  .iab-desktop {
+    display: flex;
+  }
+  .iab-mobile {
+    display: none;
+  }
+  .iab-slot-sky {
     position: sticky;
-    top: 148px;
+    top: 56px;
   }
 }
 
@@ -1363,7 +1355,7 @@ code {
 
 .consent-banner {
   position: sticky;
-  bottom: 62px;
+  bottom: 0;
   z-index: 40;
   display: grid;
   gap: 12px;

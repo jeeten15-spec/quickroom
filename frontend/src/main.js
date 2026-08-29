@@ -15,6 +15,7 @@ import { hreflangPairs, renderLangToggle } from './lang';
 import {
   applyConsentMode,
   canLoadAds,
+  fillIabSlots,
   getConsent,
   initGeo,
   installConsentDefaults,
@@ -126,8 +127,8 @@ function render() {
   app.innerHTML = `
     <div class="site-top">
       ${renderLangToggle(path)}
-      ${renderAdLeaderboard()}
     </div>
+    ${isChat ? '' : renderAdLeaderboard()}
     <main class="page-shell">
       <div class="ads-page-row${isChat ? ' ads-page-row-chat' : ''}">
         ${isChat ? '' : renderAdSkyscraper('left')}
@@ -147,7 +148,7 @@ function render() {
         ${renderAdSkyscraper('right')}
       </div>
     </main>
-    ${renderAdFooter()}
+    ${isChat ? '' : renderAdFooter()}
     ${state.ageConfirmed ? '' : renderAgeGate()}
     ${state.ageConfirmed && shouldShowConsentBanner(state.view) ? renderConsentBanner() : ''}
     ${state.contactOpen ? renderContactForm() : ''}
@@ -296,9 +297,10 @@ function afterRender() {
     document.head.append(meta);
   }
   loadCloudflareAnalytics();
-  syncMonetag();
+  syncMonetag(state.view);
   if (canLoadAds(state.view)) {
     loadAdSense(state.view);
+    fillIabSlots();
     queueMicrotask(pushAdSense);
   }
   loadGoogleAnalytics();

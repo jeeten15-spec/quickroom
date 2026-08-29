@@ -1,4 +1,11 @@
-import { MONETAG_DIRECT_LINK } from './monetag-tags.js';
+import {
+  MONETAG_DIRECT_LINK,
+  MONETAG_IPP_SRC,
+  MONETAG_IPP_ZONE,
+  MONETAG_VIGNETTE_SRC,
+  MONETAG_VIGNETTE_ZONE,
+  renderIabSlot
+} from './monetag-tags.js';
 
 export { MONETAG_DIRECT_LINK };
 
@@ -211,31 +218,18 @@ export function loadAdSense(view) {
 }
 
 export function renderAdSlot() {
-  const client = adsenseClient();
-  const slot = String(import.meta.env.VITE_ADSENSE_SLOT || '').trim();
-  if (!client) {
-    return `<aside class="ad-slot ad-slot-pending" aria-hidden="true"></aside>`;
-  }
   if (usAdsOptedOut() || (regionNeedsCmp() && !getConsent()?.ads && !useGoogleFundingChoices())) {
     return '';
   }
-  if (!slot) {
-    return `<aside class="ad-slot" aria-label="Advertisement"><p class="ad-label">Ad</p></aside>`;
-  }
-  return `<aside class="ad-slot" aria-label="Advertisement">
-    <ins class="adsbygoogle"
-      style="display:block"
-      data-ad-client="${escapeAttr(client)}"
-      data-ad-slot="${escapeAttr(slot)}"
-      data-ad-format="auto"
-      data-full-width-responsive="true"></ins>
-  </aside>`;
+  return renderIabSlot('box');
 }
 
 export function pushAdSense() {
   try {
-    if (!adsenseClient() || !document.querySelector('ins.adsbygoogle')) return;
-    (window.adsbygoogle = window.adsbygoogle || []).push({});
+    if (!adsenseClient()) return;
+    document.querySelectorAll('ins.adsbygoogle').forEach(() => {
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+    });
   } catch {
     /* ignore */
   }
@@ -280,15 +274,84 @@ function escapeAttr(value) {
   return String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 }
 
+let lastView = '';
+let vignetteTimer = 0;
+let ippTimer = 0;
+
 /**
- * Direct-link ads only. Strip leftover vignette / in-page push tags from older HTML.
+ * Monetag vignette / in-page push cannot be clipped to IAB boxes (they overlay).
+ * Load them only on long articles/use cases, after a delay, not on Home/Create/chat.
  */
-export function syncMonetag() {
-  document
-    .querySelectorAll(
-      'script[data-zone="11680014"], script[data-zone="11680018"], script[src*="n6wxm.com"], script[src*="nap5k.com"]'
-    )
-    .forEach((node) => node.remove());
+export function syncMonetag(view) {
+  lastView = view;
+  if (vignetteTimer) {
+    window.clearTimeout(vignetteTimer);
+    vignetteTimer = 0;
+  }
+  if (ippTimer) {
+    window.clearTimeout(ippTimer);
+    ippTimer = 0;
+  }
+
+  const allowOverlay = isLongContentView(view) && adsConsentOk() && !usAdsOptedOut();
+  if (!allowOverlay) return;
+
+  if (!document.querySelector(`script[data-zone="${MONETAG_IPP_ZONE}"]`)) {
+    ippTimer = window.setTimeout(() => {
+      ippTimer = 0;
+      if (!isLongContentView(lastView)) return;
+      const host = document.querySelector('[data-ipp-host]') || document.body;
+      const script = host.appendChild(document.createElement('script'));
+      script.dataset.zone = MONETAG_IPP_ZONE;
+      script.src = MONETAG_IPP_SRC;
+      script.async = true;
+      script.setAttribute('data-cfasync', 'false');
+    }, 3_000);
+  }
+
+  if (sessionStorage.getItem('quickroom.vignette-session') === '1') return;
+  if (document.querySelector(`script[data-zone="${MONETAG_VIGNETTE_ZONE}"]`)) return;
+
+  vignetteTimer = window.setTimeout(() => {
+    vignetteTimer = 0;
+    if (!isLongContentView(lastView) || !adsConsentOk()) return;
+    sessionStorage.setItem('quickroom.vignette-session', '1');
+    const script = document.body.appendChild(document.createElement('script'));
+    script.dataset.zone = MONETAG_VIGNETTE_ZONE;
+    script.src = MONETAG_VIGNETTE_SRC;
+    script.async = true;
+    script.setAttribute('data-cfasync', 'false');
+  }, 10_000);
+}
+
+export function fillIabSlots() {
+  const client = adsenseClient();
+  if (!client) return;
+  const defaultSlot = String(import.meta.env.VITE_ADSENSE_SLOT || '').trim();
+  const slotFor = {
+    leader: String(import.meta.env.VITE_ADSENSE_SLOT_LEADER || defaultSlot).trim(),
+    sky: String(import.meta.env.VITE_ADSENSE_SLOT_SKY || defaultSlot).trim(),
+    box: String(import.meta.env.VITE_ADSENSE_SLOT_BOX || defaultSlot).trim(),
+    mobile: String(import.meta.env.VITE_ADSENSE_SLOT_MOBILE || defaultSlot).trim()
+  };
+  const sizes = {
+    leader: [728, 90],
+    sky: [160, 600],
+    box: [300, 250],
+    mobile: [320, 50]
+  };
+
+  document.querySelectorAll('[data-iab]').forEach((el) => {
+    if (el.querySelector('ins.adsbygoogle')) return;
+    const kind = el.getAttribute('data-iab');
+    const slot = slotFor[kind];
+    const size = sizes[kind];
+    if (!slot || !size) return;
+    el.innerHTML = `<ins class="adsbygoogle"
+      style="display:inline-block;width:${size[0]}px;height:${size[1]}px"
+      data-ad-client="${escapeAttr(client)}"
+      data-ad-slot="${escapeAttr(slot)}"></ins>`;
+  });
 }
 
 export function renderSponsoredLink() {
