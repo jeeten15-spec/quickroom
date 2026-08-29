@@ -10,6 +10,7 @@ import { frPages } from './fr-pages';
 import { renderRelatedHtml } from './related';
 import { mountPaypalSupport, renderSupportBlock } from './support';
 import { renderExtrasDomString } from './page-copy';
+import { renderSkyscraperRail } from './monetag-tags';
 import {
   applyConsentMode,
   canLoadAds,
@@ -159,7 +160,9 @@ function render() {
 
 function renderLanding() {
   return `
-    <section class="landing" aria-labelledby="quickroom-title">
+    <div class="home-layout">
+      ${renderSkyscraperRail('left')}
+      <section class="landing" aria-labelledby="quickroom-title">
       <div class="landing-content">
         <h1 id="quickroom-title">QuickRoom</h1>
         <p class="tagline">Free private chat rooms for temporary coordination—study groups, events, clients, travel. No signup.</p>
@@ -185,6 +188,8 @@ function renderLanding() {
         <p>18+ only <span>·</span> Temporary rooms</p>
       </footer>
     </section>
+      ${renderSkyscraperRail('right')}
+    </div>
   `;
 }
 
@@ -1387,9 +1392,8 @@ async function loadMetrics() {
 }
 
 function navigateToRoom(roomId) {
-  window.history.pushState({}, '', `/room/${roomId}`);
   sessionStorage.setItem('quickroom.current-room', roomId);
-  state.view = 'room-placeholder';
+  window.location.assign(`/room/${roomId}`);
 }
 
 function leaveRoomView() {

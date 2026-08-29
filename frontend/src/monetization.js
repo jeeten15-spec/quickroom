@@ -1,3 +1,7 @@
+import { MONETAG_DIRECT_LINK } from './monetag-tags.js';
+
+export { MONETAG_DIRECT_LINK };
+
 const CONSENT_KEY = 'quickroom.consent';
 const US_OPT_OUT_KEY = 'quickroom.us-ads-opt-out';
 
@@ -33,9 +37,8 @@ export function isLongContentView(view) {
 }
 
 export function adsConsentOk() {
-  if (geo.region === 'unknown') return false;
   if (usAdsOptedOut()) return false;
-  if (regionNeedsCmp()) {
+  if (geo.region === 'eea') {
     if (useGoogleFundingChoices()) return true;
     return Boolean(getConsent()?.ads);
   }
@@ -99,8 +102,9 @@ export async function initGeo() {
       };
     }
   } catch {
-    /* offline / blocked */
+    geo = { country: 'XX', region: 'other' };
   }
+  if (geo.region === 'unknown') geo = { country: geo.country || 'XX', region: 'other' };
   return geo;
 }
 
@@ -272,8 +276,6 @@ function escapeAttr(value) {
   return String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 }
 
-export const MONETAG_DIRECT_LINK = 'https://omg10.com/4/11680015';
-
 let lastView = '';
 let vignetteTimer = 0;
 let vignetteInjected = false;
@@ -291,9 +293,8 @@ function injectMonetagZone(zone, src) {
 }
 
 /**
- * Vignette + in-page push only on long articles/use cases.
- * Never on landing, Create, Join, or inside a room — those formats overlay
- * or intercept the next click.
+ * In-page push on landing + long content. Vignette after 1s on those pages.
+ * Room / create / dashboard stay without extra injection (rooms use room.html).
  */
 export function syncMonetag(view) {
   lastView = view;
@@ -301,25 +302,33 @@ export function syncMonetag(view) {
     window.clearTimeout(vignetteTimer);
     vignetteTimer = 0;
   }
-  if (!isLongContentView(view) || !adsConsentOk()) return;
+  const allow =
+    view !== 'room-placeholder' && view !== 'dashboard' && view !== 'create' && adsConsentOk();
+  if (!allow) return;
 
   if (!inpagePushInjected) {
     inpagePushInjected = true;
     injectMonetagZone('11680018', 'https://nap5k.com/tag.min.js');
   }
 
-  if (vignetteInjected || sessionStorage.getItem('quickroom.vignette') === '1') return;
+  if (vignetteInjected || document.querySelector('script[data-zone="11680014"]')) {
+    vignetteInjected = true;
+    return;
+  }
   vignetteTimer = window.setTimeout(() => {
     vignetteTimer = 0;
-    if (!isLongContentView(lastView) || !adsConsentOk()) return;
+    if (lastView === 'room-placeholder' || lastView === 'dashboard' || lastView === 'create') return;
+    if (!adsConsentOk()) return;
     vignetteInjected = true;
-    sessionStorage.setItem('quickroom.vignette', '1');
     injectMonetagZone('11680014', 'https://n6wxm.com/vignette.min.js');
-  }, 12_000);
+  }, 1_000);
 }
 
 export function renderSponsoredLink() {
-  if (!adsConsentOk()) return '';
+  if (usAdsOptedOut()) return '';
+  if (geo.region === 'eea' && !getConsent()?.ads && !document.querySelector('script[data-zone="11680018"]')) {
+    return '';
+  }
   return `<p class="sponsored-link">
     <a href="${MONETAG_DIRECT_LINK}" target="_blank" rel="sponsored nofollow noopener">Sponsored offer</a>
     <span> — optional, not required to create or join a room.</span>

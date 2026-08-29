@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { cp, mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -14,6 +14,9 @@ const { articles } = await import(pathToFileURL(path.join(root, 'src/articles.js
 const { legalPages } = await import(pathToFileURL(path.join(root, 'src/legal.js')).href);
 const { frPages } = await import(pathToFileURL(path.join(root, 'src/fr-pages.js')).href);
 const { renderRelatedHtml } = await import(pathToFileURL(path.join(root, 'src/related.js')).href);
+const { monetagHeadHtml, stripMonetagHtml, renderSkyscraperRail } = await import(
+  pathToFileURL(path.join(root, 'src/monetag-tags.js')).href
+);
 const { renderExtrasHtml, defaultFaq } = await import(
   pathToFileURL(path.join(root, 'src/page-copy.js')).href
 );
@@ -228,7 +231,9 @@ function bodyHome() {
     )
     .join('');
 
-  return `<main>
+  return `<div class="home-layout">
+      ${renderSkyscraperRail('left')}
+      <main>
       <h1>QuickRoom</h1>
       <p>Free private chat rooms for temporary coordination—study groups, events, clients, travel. No signup.</p>
       <p>Create an online chat room. Share a room code, link, or QR. Chat online free as text chat / live chat / group chat in the browser, then let the chatroom expire.</p>
@@ -239,7 +244,9 @@ function bodyHome() {
       <ul>${useCaseList}</ul>
       <h2>Guides</h2>
       <ul>${guideList}</ul>
-    </main>`;
+    </main>
+      ${renderSkyscraperRail('right')}
+    </div>`;
 }
 
 const pages = [
@@ -311,6 +318,13 @@ const pages = [
 ];
 
 const indexHtml = await readFile(path.join(distDir, 'index.html'), 'utf8');
+await writeFile(
+  path.join(distDir, 'room.html'),
+  stripMonetagHtml(indexHtml).replace(
+    '</head>',
+    '    <meta name="robots" content="noindex, nofollow" />\n  </head>'
+  )
+);
 const scriptMatch = indexHtml.match(/<script type="module" crossorigin src="([^"]+)"><\/script>/);
 const cssMatches = [...indexHtml.matchAll(/<link rel="stylesheet"[^>]*href="([^"]+)"[^>]*>/g)];
 
@@ -378,6 +392,7 @@ function renderHtml(page, { noindex = false } = {}) {
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="QuickRoom" />
     <link rel="manifest" href="/manifest.webmanifest" />
+    ${page.noMonetag ? '' : monetagHeadHtml()}
     <script type="application/ld+json">${JSON.stringify(schema)}</script>
     ${assetTags}
   </head>
@@ -403,7 +418,7 @@ for (const page of pages) {
 redirectLines.push('');
 redirectLines.push('# App routes: SPA shell for rooms.');
 redirectLines.push('# Do NOT rewrite /dashboard -> dashboard.html: that fights Pages pretty URLs and 308-loops.');
-redirectLines.push('/room/:id /index.html 200');
+redirectLines.push('/room/:id /room.html 200');
 redirectLines.push('/dashboard/ /dashboard 301');
 await writeFile(path.join(distDir, '_redirects'), `${redirectLines.join('\n')}\n`);
 
@@ -433,7 +448,8 @@ await writeFile(
       route: '/dashboard',
       title: 'QuickRoom Dashboard — Growth Metrics',
       description: 'Operator metrics for QuickRoom room creation, joining, and sharing.',
-      body: `<article class="info-page dashboard-page"><h1>Growth dashboard</h1><p>This operator dashboard requires JavaScript and is not part of the public index.</p><p><a href="/">Back to QuickRoom</a></p></article>`
+      body: `<article class="info-page dashboard-page"><h1>Growth dashboard</h1><p>This operator dashboard requires JavaScript and is not part of the public index.</p><p><a href="/">Back to QuickRoom</a></p></article>`,
+      noMonetag: true
     },
     { noindex: true }
   )
@@ -446,7 +462,8 @@ await writeFile(
       route: '/404',
       title: 'Page not found | QuickRoom',
       description: 'This QuickRoom page does not exist.',
-      body: `<main><h1>Page not found</h1><p>That URL is not a public QuickRoom page.</p><p><a href="/">Go to QuickRoom</a> · <a href="/blog">Blog</a> · <a href="/about">About</a></p></main>`
+      body: `<main><h1>Page not found</h1><p>That URL is not a public QuickRoom page.</p><p><a href="/">Go to QuickRoom</a> · <a href="/blog">Blog</a> · <a href="/about">About</a></p></main>`,
+      noMonetag: true
     },
     { noindex: true }
   ).replace(
@@ -516,5 +533,7 @@ if (pub) {
     `google.com, pub-${pub.replace(/^pub-/, '')}, DIRECT, f08c47fec0942fa0\n`
   );
 }
+
+await cp(path.join(root, 'functions'), path.join(distDir, 'functions'), { recursive: true });
 
 console.log(`Prerendered ${pages.length} SEO HTML files, sitemap, dashboard/404 shells, _redirects, and _headers.`);

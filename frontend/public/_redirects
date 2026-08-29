@@ -1,4 +1,4 @@
 # Source of truth is generated at build time by scripts/prerender-seo.mjs.
 # Keep a safe SPA fallback here for local/public copies before build.
-/room/:id /index.html 200
+/room/:id /room.html 200
 /dashboard/ /dashboard 301
