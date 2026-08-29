@@ -10,7 +10,7 @@ import { frPages } from './fr-pages';
 import { renderRelatedHtml } from './related';
 import { mountPaypalSupport, renderSupportBlock } from './support';
 import { renderExtrasDomString } from './page-copy';
-import { renderSkyscraperRail } from './monetag-tags';
+import { renderAdFooter, renderAdLeaderboard, renderAdSkyscraper } from './monetag-tags';
 import { hreflangPairs, renderLangToggle } from './lang';
 import {
   applyConsentMode,
@@ -120,23 +120,35 @@ function createInitialRoomState() {
 }
 
 function render() {
+  const isChat = state.view === 'room-placeholder';
+  const path = window.location.pathname;
   activeChat?.destroy();
   activeChat = null;
   app.innerHTML = `
-    ${state.view === 'room-placeholder' ? '' : renderLangToggle(window.location.pathname)}
+    <div class="site-top">
+      ${renderLangToggle(path)}
+      ${renderAdLeaderboard()}
+    </div>
     <main class="page-shell">
-      ${state.view === 'landing' ? renderLanding() : ''}
-      ${state.view === 'create' ? renderCreateRoom() : ''}
-      ${state.view === 'room-placeholder' ? '<div id="chat-root"></div>' : ''}
-      ${state.view === 'about' ? renderAbout() : ''}
-      ${state.view === 'blog' ? renderBlog() : ''}
-      ${state.view === 'dashboard' ? renderDashboard() : ''}
-      ${legalPages[state.view] ? renderLegal(state.view) : ''}
-      ${frPages[state.view] ? renderFrench(state.view) : ''}
-      ${useCasePages[state.view] ? renderUseCase(state.view) : ''}
-      ${guides[state.view] ? renderGuide(state.view) : ''}
-      ${articles[state.view] ? renderArticle(state.view) : ''}
+      <div class="ads-page-row${isChat ? ' ads-page-row-chat' : ''}">
+        ${isChat ? '' : renderAdSkyscraper('left')}
+        <div class="ads-page-main">
+          ${state.view === 'landing' ? renderLanding() : ''}
+          ${state.view === 'create' ? renderCreateRoom() : ''}
+          ${isChat ? '<div id="chat-root"></div>' : ''}
+          ${state.view === 'about' ? renderAbout() : ''}
+          ${state.view === 'blog' ? renderBlog() : ''}
+          ${state.view === 'dashboard' ? renderDashboard() : ''}
+          ${legalPages[state.view] ? renderLegal(state.view) : ''}
+          ${frPages[state.view] ? renderFrench(state.view) : ''}
+          ${useCasePages[state.view] ? renderUseCase(state.view) : ''}
+          ${guides[state.view] ? renderGuide(state.view) : ''}
+          ${articles[state.view] ? renderArticle(state.view) : ''}
+        </div>
+        ${renderAdSkyscraper('right')}
+      </div>
     </main>
+    ${renderAdFooter()}
     ${state.ageConfirmed ? '' : renderAgeGate()}
     ${state.ageConfirmed && shouldShowConsentBanner(state.view) ? renderConsentBanner() : ''}
     ${state.contactOpen ? renderContactForm() : ''}
@@ -162,8 +174,6 @@ function render() {
 
 function renderLanding() {
   return `
-    <div class="home-layout">
-      ${renderSkyscraperRail('left')}
       <section class="landing" aria-labelledby="quickroom-title">
       <div class="landing-content">
         <h1 id="quickroom-title">QuickRoom</h1>
@@ -190,8 +200,6 @@ function renderLanding() {
         <p>18+ only <span>·</span> Temporary rooms</p>
       </footer>
     </section>
-      ${renderSkyscraperRail('right')}
-    </div>
   `;
 }
 
@@ -384,8 +392,6 @@ function renderFrench(slug) {
   const page = frPages[slug];
   if (page.isLanding) {
     return `
-    <div class="home-layout">
-      ${renderSkyscraperRail('left')}
       <section class="landing fr-landing" lang="fr" aria-labelledby="quickroom-title-fr">
         <div class="landing-content">
           <h1 id="quickroom-title-fr">QuickRoom</h1>
@@ -414,8 +420,6 @@ function renderFrench(slug) {
           <p>18+ uniquement</p>
         </footer>
       </section>
-      ${renderSkyscraperRail('right')}
-    </div>
     `;
   }
   return `
@@ -1336,7 +1340,7 @@ async function submitCreateRoom() {
   } catch (error) {
     state.error = error.message || 'Unable to create the room.';
   } finally {
-    if (navigatingToRoom) return;
+    if (state.view === 'room-placeholder') return;
     state.busy = false;
     render();
   }
@@ -1356,7 +1360,7 @@ async function submitJoinRoom(formData) {
     state.error = error.message || 'Unable to join the room.';
     throw error;
   } finally {
-    if (navigatingToRoom) return;
+    if (state.view === 'room-placeholder') return;
     state.busy = false;
     render();
   }
@@ -1406,12 +1410,13 @@ async function loadMetrics() {
   }
 }
 
-let navigatingToRoom = false;
-
 function navigateToRoom(roomId) {
-  navigatingToRoom = true;
   sessionStorage.setItem('quickroom.current-room', roomId);
-  window.location.assign(`/room/${roomId}`);
+  window.history.pushState({}, '', `/room/${roomId}`);
+  state.view = 'room-placeholder';
+  state.busy = false;
+  state.error = '';
+  render();
 }
 
 function leaveRoomView() {
@@ -1478,5 +1483,9 @@ installConsentDefaults();
 initGeo().then(() => {
   const consent = getConsent();
   if (consent) applyConsentMode(consent);
+  if (state.view === 'room-placeholder' && activeChat) {
+    afterRender();
+    return;
+  }
   render();
 });

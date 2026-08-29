@@ -14,7 +14,7 @@ const { articles } = await import(pathToFileURL(path.join(root, 'src/articles.js
 const { legalPages } = await import(pathToFileURL(path.join(root, 'src/legal.js')).href);
 const { frPages } = await import(pathToFileURL(path.join(root, 'src/fr-pages.js')).href);
 const { renderRelatedHtml } = await import(pathToFileURL(path.join(root, 'src/related.js')).href);
-const { monetagHeadHtml, stripMonetagHtml, renderSkyscraperRail } = await import(
+const { monetagHeadHtml, stripMonetagHtml, renderAdFooter, renderAdLeaderboard, renderAdSkyscraper } = await import(
   pathToFileURL(path.join(root, 'src/monetag-tags.js')).href
 );
 const { renderLangToggle, hreflangPairs } = await import(
@@ -86,9 +86,7 @@ function bodyLegal(slug, page) {
 
 function bodyFrench(slug, page) {
   if (page.isLanding) {
-    return `<div class="home-layout">
-      ${renderSkyscraperRail('left')}
-      <section lang="fr">
+    return `<section lang="fr">
       <h1>QuickRoom</h1>
       <p>${escapeHtml(page.intro)}</p>
       <p>${escapeHtml(page.description)}</p>
@@ -101,9 +99,7 @@ function bodyFrench(slug, page) {
         )
         .join('')}</ul>
       ${relatedLinks('/fr')}
-    </section>
-      ${renderSkyscraperRail('right')}
-    </div>`;
+    </section>`;
   }
   return `<article class="info-page use-case-page" lang="fr">
       <a class="back-link" href="/fr">QuickRoom FR</a>
@@ -238,9 +234,7 @@ function bodyHome() {
     )
     .join('');
 
-  return `<div class="home-layout">
-      ${renderSkyscraperRail('left')}
-      <main>
+  return `<main>
       <h1>QuickRoom</h1>
       <p>Free private chat rooms for temporary coordination—study groups, events, clients, travel. No signup.</p>
       <p>Create an online chat room. Share a room code, link, or QR. Chat online free as text chat / live chat / group chat in the browser, then let the chatroom expire.</p>
@@ -251,9 +245,7 @@ function bodyHome() {
       <ul>${useCaseList}</ul>
       <h2>Guides</h2>
       <ul>${guideList}</ul>
-    </main>
-      ${renderSkyscraperRail('right')}
-    </div>`;
+    </main>`;
 }
 
 const pages = [
@@ -326,7 +318,7 @@ const pages = [
 
 const indexHtml = await readFile(path.join(distDir, 'index.html'), 'utf8');
 await writeFile(
-  path.join(distDir, 'room.html'),
+  path.join(distDir, 'chat-shell.html'),
   stripMonetagHtml(indexHtml).replace(
     '</head>',
     '    <meta name="robots" content="noindex, nofollow" />\n  </head>'
@@ -348,6 +340,16 @@ function gscMeta() {
   const token = process.env.VITE_GOOGLE_SITE_VERIFICATION || '';
   if (!token) return '';
   return `<meta name="google-site-verification" content="${escapeHtml(token)}" />`;
+}
+
+function wrapAds(body) {
+  return `${renderAdLeaderboard()}
+    <div class="ads-page-row">
+      ${renderAdSkyscraper('left')}
+      <div class="ads-page-main">${body}</div>
+      ${renderAdSkyscraper('right')}
+    </div>
+    ${renderAdFooter()}`;
 }
 
 function hreflangTags(route) {
@@ -403,7 +405,7 @@ function renderHtml(page, { noindex = false } = {}) {
     ${assetTags}
   </head>
   <body>
-    <div id="app">${renderLangToggle(page.route)}${page.body || ''}</div>
+    <div id="app">${renderLangToggle(page.route)}${wrapAds(page.body || '')}</div>
   </body>
 </html>
 `;
@@ -422,9 +424,8 @@ for (const page of pages) {
 }
 
 redirectLines.push('');
-redirectLines.push('# App routes: SPA shell for rooms.');
-redirectLines.push('# Do NOT rewrite /dashboard -> dashboard.html: that fights Pages pretty URLs and 308-loops.');
-redirectLines.push('/room/:id /room.html 200');
+redirectLines.push('# App routes: SPA shell for rooms. chat-shell.html avoids pretty-URL /room 308s.');
+redirectLines.push('/room/:id /chat-shell.html 200');
 redirectLines.push('/dashboard/ /dashboard 301');
 await writeFile(path.join(distDir, '_redirects'), `${redirectLines.join('\n')}\n`);
 
