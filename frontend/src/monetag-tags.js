@@ -1,4 +1,4 @@
-/** IAB display frames. Monetag vignette/IPP cannot be sized into these boxes. */
+/** IAB display frames filled by AdSense. Chat never includes these. */
 export const MONETAG_DIRECT_LINK = 'https://omg10.com/4/11680015';
 export const MONETAG_IPP_ZONE = '11680018';
 export const MONETAG_IPP_SRC = 'https://nap5k.com/tag.min.js';
@@ -31,16 +31,22 @@ export function renderAdLeaderboard() {
 }
 
 export function renderAdFooter() {
-  return `<div class="iab-row iab-row-footer">${renderIabSlot('mobile')}</div>`;
+  return `<div class="iab-row iab-row-footer">
+      ${renderIabSlot('leader', 'iab-desktop')}
+      ${renderIabSlot('mobile')}
+    </div>`;
 }
 
-export function renderAdSkyscraper(side) {
+/** Stacked vertical units; extra copies only on desktop where the page can scroll. Max 3 per side (policy/UX). */
+export function renderAdSkyscraper(side, count = 2) {
+  const n = Math.max(1, Math.min(3, Number(count) || 1));
+  const desktop = Array.from({ length: n }, () => renderIabSlot('sky', 'iab-desktop')).join('');
   return `<div class="iab-rail iab-rail-${side}">
-      ${renderIabSlot('sky', 'iab-desktop')}
+      ${desktop}
       ${renderIabSlot('box', 'iab-mobile')}
     </div>`;
 }
 
-export function renderSkyscraperRail(side) {
-  return renderAdSkyscraper(side);
+export function renderSkyscraperRail(side, count = 2) {
+  return renderAdSkyscraper(side, count);
 }

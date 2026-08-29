@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite';
+import { adsenseHeadHtml } from './src/adsense.js';
 
 export default defineConfig({
   plugins: [
@@ -6,10 +7,11 @@ export default defineConfig({
       name: 'quickroom-html-meta',
       transformIndexHtml(html) {
         const gsc = process.env.VITE_GOOGLE_SITE_VERIFICATION || '';
-        const extra = gsc
+        const gscTag = gsc
           ? `<meta name="google-site-verification" content="${gsc.replace(/"/g, '')}" />`
           : '';
-        return html.replace('</head>', `    ${extra}\n  </head>`);
+        const adsense = html.includes('google-adsense-account') ? '' : adsenseHeadHtml();
+        return html.replace('</head>', `    ${gscTag}\n${adsense}\n  </head>`);
       }
     }
   ],

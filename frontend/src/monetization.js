@@ -1,3 +1,4 @@
+import { adsenseClientId } from './adsense.js';
 import {
   MONETAG_DIRECT_LINK,
   MONETAG_IPP_SRC,
@@ -156,7 +157,21 @@ export function installConsentDefaults() {
 }
 
 function adsenseClient() {
-  return String(import.meta.env.VITE_ADSENSE_CLIENT || '').trim();
+  return adsenseClientId();
+}
+
+export function adRailCount(view) {
+  if (!isMonetizedView(view)) return 0;
+  if (
+    view === 'landing' ||
+    view === 'about' ||
+    view === 'blog' ||
+    view === 'fr' ||
+    isLongContentView(view)
+  ) {
+    return 3;
+  }
+  return 2;
 }
 
 function useGoogleFundingChoices() {
@@ -208,6 +223,10 @@ export function loadGoogleAnalytics() {
 
 export function loadAdSense(view) {
   if (adsLoaded || !canLoadAds(view)) return;
+  if (document.querySelector('script[src*="adsbygoogle.js"]')) {
+    adsLoaded = true;
+    return;
+  }
   const client = adsenseClient();
   const script = document.createElement('script');
   script.async = true;
@@ -227,7 +246,7 @@ export function renderAdSlot() {
 export function pushAdSense() {
   try {
     if (!adsenseClient()) return;
-    document.querySelectorAll('ins.adsbygoogle').forEach(() => {
+    document.querySelectorAll('ins.adsbygoogle:not([data-adsbygoogle-status])').forEach(() => {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
     });
   } catch {
@@ -346,11 +365,15 @@ export function fillIabSlots() {
     const kind = el.getAttribute('data-iab');
     const slot = slotFor[kind];
     const size = sizes[kind];
-    if (!slot || !size) return;
+    if (!size) return;
+    const format =
+      kind === 'sky' ? 'vertical' : kind === 'box' ? 'rectangle' : kind === 'mobile' ? 'horizontal' : 'horizontal';
+    const slotAttr = slot ? ` data-ad-slot="${escapeAttr(slot)}"` : '';
     el.innerHTML = `<ins class="adsbygoogle"
       style="display:inline-block;width:${size[0]}px;height:${size[1]}px"
-      data-ad-client="${escapeAttr(client)}"
-      data-ad-slot="${escapeAttr(slot)}"></ins>`;
+      data-ad-client="${escapeAttr(client)}"${slotAttr}
+      data-ad-format="${format}"
+      data-full-width-responsive="${kind === 'sky' || kind === 'box' ? 'false' : 'true'}"></ins>`;
   });
 }
 

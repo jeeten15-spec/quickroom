@@ -14,8 +14,10 @@ const { articles } = await import(pathToFileURL(path.join(root, 'src/articles.js
 const { legalPages } = await import(pathToFileURL(path.join(root, 'src/legal.js')).href);
 const { frPages } = await import(pathToFileURL(path.join(root, 'src/fr-pages.js')).href);
 const { renderRelatedHtml } = await import(pathToFileURL(path.join(root, 'src/related.js')).href);
-const { monetagHeadHtml, renderAdFooter, renderAdLeaderboard, renderAdSkyscraper } = await import(
-  pathToFileURL(path.join(root, 'src/monetag-tags.js')).href
+const { monetagHeadHtml, renderAdFooter, renderAdLeaderboard, renderAdSkyscraper, renderIabSlot } =
+  await import(pathToFileURL(path.join(root, 'src/monetag-tags.js')).href);
+const { adsenseHeadHtml, ADSENSE_ADS_TXT } = await import(
+  pathToFileURL(path.join(root, 'src/adsense.js')).href
 );
 const { renderLangToggle, hreflangPairs } = await import(
   pathToFileURL(path.join(root, 'src/lang.js')).href
@@ -59,6 +61,7 @@ function bodyUseCase(slug, page) {
       <p class="use-case-intro">${escapeHtml(page.intro)}</p>
       <p>${escapeHtml(page.description)}</p>
       <p><a href="/">Create a temporary room on QuickRoom</a> — no signup, app, or phone number required.</p>
+      ${renderIabSlot('box')}
       ${renderSections(page.sections)}
       ${renderExtrasHtml(page.title, { escapeHtml })}
       ${relatedLinks(`/${slug}`)}
@@ -90,6 +93,7 @@ function bodyFrench(slug, page) {
       <h1>QuickRoom</h1>
       <p>${escapeHtml(page.intro)}</p>
       <p>${escapeHtml(page.description)}</p>
+      ${renderIabSlot('box')}
       <p><a href="/">Créer une salle</a></p>
       <h2>Usages</h2>
       <ul>${page.jobs
@@ -107,6 +111,7 @@ function bodyFrench(slug, page) {
       <p class="use-case-intro">${escapeHtml(page.intro)}</p>
       <p>${escapeHtml(page.description)}</p>
       <p><a href="/">Créer une salle</a></p>
+      ${renderIabSlot('box')}
       ${renderSections(page.sections)}
       ${relatedLinks(`/${slug}`)}
     </article>`;
@@ -119,6 +124,7 @@ function bodyGuide(slug, page) {
       <h1>${escapeHtml(page.title)}</h1>
       <p class="use-case-intro">${escapeHtml(page.intro)}</p>
       <p>${escapeHtml(page.description)}</p>
+      ${renderIabSlot('box')}
       ${renderSections(page.sections, { orderedLists: true })}
       ${renderExtrasHtml(page.title, { escapeHtml, orderedHowTo: true })}
       <p><a href="/">Open QuickRoom</a> to create a room when you are ready.</p>
@@ -134,6 +140,7 @@ function bodyArticle(slug, page) {
       <p class="article-date">${escapeHtml(page.publishedAt)}</p>
       <p class="use-case-intro">${escapeHtml(page.intro)}</p>
       <p>${escapeHtml(page.description)}</p>
+      ${renderIabSlot('box')}
       ${renderSections(page.sections)}
       ${renderExtrasHtml('a QuickRoom temporary chat', { escapeHtml })}
       <p><a href="/">Create a private temporary room</a></p>
@@ -148,6 +155,7 @@ function bodyAbout() {
       <p>QuickRoom was created with a simple belief: <strong>technology should remove friction—not create it.</strong></p>
       <p>Every day, people need a quick place to collaborate, ask questions, solve problems, or talk. Most tools still ask for accounts, phone verification, app installs, and permanent groups before the conversation begins.</p>
       <p>QuickRoom makes starting a conversation as simple as opening a web page: create a temporary private room, share a room code, and talk in the browser without handing over a phone number or email address.</p>
+      ${renderIabSlot('box')}
       <h2>Our mission</h2>
       <p>Build the simplest, fastest, and most respectful collaboration platform on the web—no unnecessary barriers, no complicated setup, just meaningful conversations that can end when the moment ends.</p>
       <h2>Our story</h2>
@@ -186,6 +194,7 @@ function bodyBlog() {
       <p>Looking for free chat rooms, online chat rooms, a private chat room without signup, anonymous chat, group chat, a temporary chat room, chatroom, text chat, live chat, or a way to chat online free without another app? QuickRoom is a browser-based temporary room: create it, share a code, talk, let it expire.</p>
       <h2>What is QuickRoom?</h2>
       <p>QuickRoom is the fastest way to create a private chat room: no registration, no phone number, no email, and no app. Create a room, share the link or code, and start talking. Rooms expire after the duration you choose.</p>
+      ${renderIabSlot('box')}
       <h2>Why temporary rooms matter</h2>
       <p>WhatsApp groups, Discord servers, and Slack workspaces are useful—but they often outlive the conversation. A temporary room is better when the discussion has a natural end: an assignment, a sprint, an event shift, a trip, or a one-off client handoff.</p>
       <h2>Built for temporary collaboration</h2>
@@ -239,6 +248,7 @@ function bodyHome() {
       <p>Free private chat rooms for temporary coordination—study groups, events, clients, travel. No signup.</p>
       <p>Create an online chat room. Share a room code, link, or QR. Chat online free as text chat / live chat / group chat in the browser, then let the chatroom expire.</p>
       <p>Searches we built for: private chat room without signup, free chat rooms, online chat rooms, anonymous chat, temporary chat room, chatroom, chat online free, webchat.</p>
+      ${renderIabSlot('box')}
       <p><a href="/about">About QuickRoom</a> · <a href="/blog">Blog</a></p>
       ${jobs ? `<h2>Exact jobs QuickRoom is built for</h2><p>Private chat rooms, free chat rooms, online chat rooms, group chat, and temporary chatrooms—without signup.</p><ul>${jobs}</ul>` : ''}
       <h2>Use cases</h2>
@@ -304,7 +314,8 @@ const pages = [
     title: page.seoTitle,
     description: page.description,
     body: bodyLegal(slug, page),
-    lang: page.htmlLang || 'en'
+    lang: page.htmlLang || 'en',
+    railCount: 2
   })),
   ...Object.entries(frPages).map(([slug, page]) => ({
     route: `/${slug}`,
@@ -335,12 +346,12 @@ function gscMeta() {
   return `<meta name="google-site-verification" content="${escapeHtml(token)}" />`;
 }
 
-function wrapAds(body) {
+function wrapAds(body, { rails = 3 } = {}) {
   return `${renderAdLeaderboard()}
     <div class="ads-page-row">
-      ${renderAdSkyscraper('left')}
+      ${renderAdSkyscraper('left', rails)}
       <div class="ads-page-main">${body}</div>
-      ${renderAdSkyscraper('right')}
+      ${renderAdSkyscraper('right', rails)}
     </div>
     ${renderAdFooter()}`;
 }
@@ -393,12 +404,15 @@ function renderHtml(page, { noindex = false } = {}) {
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="QuickRoom" />
     <link rel="manifest" href="/manifest.webmanifest" />
+    ${adsenseHeadHtml()}
     ${page.noMonetag ? '' : monetagHeadHtml()}
     <script type="application/ld+json">${JSON.stringify(schema)}</script>
     ${assetTags}
   </head>
   <body>
-    <div id="app">${renderLangToggle(page.route)}${wrapAds(page.body || '')}</div>
+    <div id="app">${renderLangToggle(page.route)}${
+      page.noAds ? page.body || '' : wrapAds(page.body || '', { rails: page.railCount ?? 3 })
+    }</div>
   </body>
 </html>
 `;
@@ -447,7 +461,8 @@ await writeFile(
       title: 'QuickRoom Dashboard — Growth Metrics',
       description: 'Operator metrics for QuickRoom room creation, joining, and sharing.',
       body: `<article class="info-page dashboard-page"><h1>Growth dashboard</h1><p>This operator dashboard requires JavaScript and is not part of the public index.</p><p><a href="/">Back to QuickRoom</a></p></article>`,
-      noMonetag: true
+      noMonetag: true,
+      noAds: true
     },
     { noindex: true }
   )
@@ -461,7 +476,8 @@ await writeFile(
       title: 'Page not found | QuickRoom',
       description: 'This QuickRoom page does not exist.',
       body: `<main><h1>Page not found</h1><p>That URL is not a public QuickRoom page.</p><p><a href="/">Go to QuickRoom</a> · <a href="/blog">Blog</a> · <a href="/about">About</a></p></main>`,
-      noMonetag: true
+      noMonetag: true,
+      noAds: true
     },
     { noindex: true }
   ).replace(
@@ -520,14 +536,8 @@ ${xhtml}
 await writeFile(path.join(distDir, 'sitemap.xml'), sitemap);
 await writeFile(path.join(root, 'public/sitemap.xml'), sitemap);
 
-const adsense = process.env.VITE_ADSENSE_CLIENT || '';
-const pub = adsense.replace(/^ca-pub-/, '');
-if (pub) {
-  await writeFile(
-    path.join(distDir, 'ads.txt'),
-    `google.com, pub-${pub.replace(/^pub-/, '')}, DIRECT, f08c47fec0942fa0\n`
-  );
-}
+await writeFile(path.join(distDir, 'ads.txt'), ADSENSE_ADS_TXT);
+await writeFile(path.join(root, 'public/ads.txt'), ADSENSE_ADS_TXT);
 
 try {
   await cp(path.join(root, 'functions'), path.join(distDir, 'functions'), { recursive: true });

@@ -92,6 +92,7 @@ button:disabled {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 28px;
   padding: 8px;
 }
 
@@ -150,17 +151,13 @@ button:disabled {
     grid-template-columns: 176px minmax(0, 1fr) 176px;
   }
   .ads-page-row-chat {
-    grid-template-columns: minmax(0, 1fr) 176px;
+    grid-template-columns: minmax(0, 1fr);
   }
   .iab-desktop {
     display: flex;
   }
   .iab-mobile {
     display: none;
-  }
-  .iab-slot-sky {
-    position: sticky;
-    top: 56px;
   }
 }
 

@@ -13,6 +13,7 @@ import { renderExtrasDomString } from './page-copy';
 import { renderAdFooter, renderAdLeaderboard, renderAdSkyscraper } from './monetag-tags';
 import { hreflangPairs, renderLangToggle } from './lang';
 import {
+  adRailCount,
   applyConsentMode,
   canLoadAds,
   fillIabSlots,
@@ -121,6 +122,8 @@ function createInitialRoomState() {
 
 function render() {
   const isChat = state.view === 'room-placeholder';
+  const showAds = isMonetizedView(state.view);
+  const rails = adRailCount(state.view);
   const path = window.location.pathname;
   activeChat?.destroy();
   activeChat = null;
@@ -128,10 +131,10 @@ function render() {
     <div class="site-top">
       ${renderLangToggle(path)}
     </div>
-    ${isChat ? '' : renderAdLeaderboard()}
+    ${showAds ? renderAdLeaderboard() : ''}
     <main class="page-shell">
       <div class="ads-page-row${isChat ? ' ads-page-row-chat' : ''}">
-        ${isChat ? '' : renderAdSkyscraper('left')}
+        ${showAds ? renderAdSkyscraper('left', rails) : ''}
         <div class="ads-page-main">
           ${state.view === 'landing' ? renderLanding() : ''}
           ${state.view === 'create' ? renderCreateRoom() : ''}
@@ -145,10 +148,10 @@ function render() {
           ${guides[state.view] ? renderGuide(state.view) : ''}
           ${articles[state.view] ? renderArticle(state.view) : ''}
         </div>
-        ${renderAdSkyscraper('right')}
+        ${showAds ? renderAdSkyscraper('right', rails) : ''}
       </div>
     </main>
-    ${isChat ? '' : renderAdFooter()}
+    ${showAds ? renderAdFooter() : ''}
     ${state.ageConfirmed ? '' : renderAgeGate()}
     ${state.ageConfirmed && shouldShowConsentBanner(state.view) ? renderConsentBanner() : ''}
     ${state.contactOpen ? renderContactForm() : ''}
@@ -698,6 +701,7 @@ function renderAbout() {
       <p>We wondered:</p>
       <p><strong>What if starting a conversation could be as simple as creating a document or opening a web page?</strong></p>
       <p>That question became QuickRoom.</p>
+      ${renderAdSlot()}
 
       <h2>Our Mission</h2>
       <p>Our mission is to build the simplest, fastest, and most respectful collaboration platform on the web.</p>
@@ -934,6 +938,7 @@ function renderBlog() {
       <p>QuickRoom is the fastest way to create a <strong>private chat room</strong>—including <strong>free chat rooms</strong> and <strong>online chat rooms</strong> for short-lived work.</p>
       <p>No registration.</p><p>No phone number.</p><p>No email.</p><p>No app to install.</p><p>No complicated setup.</p>
       <p>Just create a room, share the link, and start talking—<strong>chat online free</strong> as <strong>text chat</strong> / <strong>live chat</strong> / <strong>group chat</strong> / <strong>webchat</strong> in the browser.</p>
+      ${renderAdSlot()}
       <p>Whether you're studying for an exam, solving a coding problem, planning an event, helping a friend, or simply having a short discussion, QuickRoom lets you create a temporary collaboration space in seconds.</p>
 
       <h2>Why We Built QuickRoom</h2>
