@@ -352,7 +352,7 @@ function gscMeta() {
 
 function wrapAds(body, { rails = 3 } = {}) {
   return `${renderAdLeaderboard()}
-    <div class="ads-page-row">
+    <div class="ads-page-row has-ad-rails">
       ${renderAdSkyscraper('left', rails)}
       <div class="ads-page-main">${body}</div>
       ${renderAdSkyscraper('right', rails)}
