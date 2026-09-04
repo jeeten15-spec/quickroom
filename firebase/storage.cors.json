@@ -1,0 +1,18 @@
+[
+  {
+    "origin": [
+      "http://localhost:5173",
+      "https://quickroom.org",
+      "https://www.quickroom.org",
+      "https://preview.quickroom.pages.dev"
+    ],
+    "method": [
+      "GET",
+      "PUT"
+    ],
+    "responseHeader": [
+      "Content-Type"
+    ],
+    "maxAgeSeconds": 3600
+  }
+]

@@ -1,0 +1,178 @@
+import {
+  FirebaseAuthError,
+  FirebaseConfigurationError,
+  FirebaseRequestError,
+  assertFirebaseConfiguration,
+  type Env,
+  verifyFirebaseIdToken
+} from './firebase';
+import {
+  HttpError,
+  cleanupExpiredRooms,
+  createRoom,
+  getMetrics,
+  getPublicRooms,
+  getRoom,
+  joinRoom,
+  leaveRoom,
+  recordPageview,
+  reportMessage,
+  sendMessage,
+  trackEvent,
+  uploadImage
+} from './handlers';
+import { ValidationError } from './validation';
+
+export default {
+  async fetch(request, env: Env): Promise<Response> {
+    const origin = request.headers.get('Origin');
+    if (origin && !isAllowedOrigin(origin, env)) {
+      return json({ error: 'Origin is not allowed.' }, 403, {});
+    }
+    const corsHeaders = getCorsHeaders(origin);
+
+    if (request.method === 'OPTIONS') {
+      return new Response(null, { status: 204, headers: corsHeaders });
+    }
+
+    try {
+      const url = new URL(request.url);
+
+      if (request.method === 'GET' && url.pathname === '/api/geo') {
+        return json(geoFromRequest(request), 200, corsHeaders);
+      }
+
+      assertFirebaseConfiguration(env);
+
+      if (request.method === 'POST' && url.pathname === '/api/pageview') {
+        return json(await recordPageview(await readJson(request), request, env), 200, corsHeaders);
+      }
+
+      const user = await verifyFirebaseIdToken(request.headers.get('Authorization'), env);
+
+      if (request.method === 'POST' && url.pathname === '/api/createRoom') {
+        return json(await createRoom(await readJson(request), user, env), 201, corsHeaders);
+      }
+      if (request.method === 'POST' && url.pathname === '/api/joinRoom') {
+        return json(await joinRoom(await readJson(request), user, env), 200, corsHeaders);
+      }
+      if (request.method === 'POST' && url.pathname === '/api/sendMessage') {
+        return json(await sendMessage(await readJson(request), user, env), 201, corsHeaders);
+      }
+      if (request.method === 'POST' && url.pathname === '/api/uploadImage') {
+        return json(await uploadImage(await readJson(request), user, env), 200, corsHeaders);
+      }
+      if (request.method === 'POST' && url.pathname === '/api/report') {
+        return json(await reportMessage(await readJson(request), user, env), 200, corsHeaders);
+      }
+      if (request.method === 'POST' && url.pathname === '/api/leaveRoom') {
+        return json(await leaveRoom(await readJson(request), user, env), 200, corsHeaders);
+      }
+      if (request.method === 'POST' && url.pathname === '/api/trackEvent') {
+        return json(await trackEvent(await readJson(request), user, env), 200, corsHeaders);
+      }
+      if (request.method === 'GET' && url.pathname === '/api/publicRooms') {
+        return json(await getPublicRooms(env), 200, corsHeaders);
+      }
+      if (request.method === 'GET' && url.pathname === '/api/metrics') {
+        return json(await getMetrics(request.headers.get('X-Admin-Token'), env), 200, corsHeaders);
+      }
+
+      const roomMatch = /^\/api\/room\/([A-Za-z0-9_-]+)$/.exec(url.pathname);
+      if (request.method === 'GET' && roomMatch) {
+        return json(
+          await getRoom(roomMatch[1], url.searchParams.get('privateWith'), user, env),
+          200,
+          corsHeaders
+        );
+      }
+
+      return json({ error: 'Not found.' }, 404, corsHeaders);
+    } catch (error) {
+      return errorResponse(error, corsHeaders);
+    }
+  },
+
+  async scheduled(_controller, env: Env): Promise<void> {
+    try {
+      assertFirebaseConfiguration(env);
+      await cleanupExpiredRooms(env);
+    } catch (error) {
+      console.error('QuickRoom scheduled cleanup failed.', error);
+    }
+  }
+} satisfies ExportedHandler<Env>;
+
+function getCorsHeaders(origin: string | null): HeadersInit {
+  return {
+    ...(origin ? { 'Access-Control-Allow-Origin': origin } : {}),
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Admin-Token',
+    'Content-Type': 'application/json; charset=utf-8',
+    Vary: 'Origin'
+  };
+}
+
+async function readJson(request: Request): Promise<unknown> {
+  if (!request.headers.get('Content-Type')?.startsWith('application/json')) {
+    throw new ValidationError('Content-Type must be application/json.');
+  }
+  const contentLength = Number(request.headers.get('Content-Length') ?? 0);
+  if (contentLength > 32 * 1024) {
+    throw new HttpError(413, 'Request body is too large.');
+  }
+
+  try {
+    return await request.json();
+  } catch {
+    throw new ValidationError('Request body must contain valid JSON.');
+  }
+}
+
+function isAllowedOrigin(origin: string, env: Env): boolean {
+  if (/^https:\/\/[a-z0-9-]+\.quickroom\.pages\.dev$/.test(origin)) return true;
+  return env.ALLOWED_ORIGINS.split(',').some((allowedOrigin) => allowedOrigin.trim() === origin);
+}
+
+function errorResponse(error: unknown, headers: HeadersInit): Response {
+  if (error instanceof ValidationError) {
+    return json({ error: error.message }, 400, headers);
+  }
+  if (error instanceof FirebaseAuthError) {
+    return json({ error: error.message }, 401, headers);
+  }
+  if (error instanceof FirebaseConfigurationError) {
+    return json({ error: error.message }, 503, headers);
+  }
+  if (error instanceof HttpError) {
+    return json({ error: error.message }, error.status, headers);
+  }
+  if (error instanceof FirebaseRequestError) {
+    console.error('QuickRoom Firebase request failed.', error.status, error.message);
+    return json({ error: 'The service is temporarily unavailable.' }, 502, headers);
+  }
+
+  console.error(error);
+  return json({ error: 'Internal server error.' }, 500, headers);
+}
+
+function json(body: unknown, status: number, headers: HeadersInit): Response {
+  return new Response(JSON.stringify(body), { status, headers });
+}
+
+const EEA_UK_CH = new Set(
+  'AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE IS LI NO GB CH'.split(
+    ' '
+  )
+);
+
+function geoFromRequest(request: Request): { country: string; region: 'eea' | 'us' | 'other' } {
+  const country = String(
+    (request as Request & { cf?: { country?: string } }).cf?.country ||
+      request.headers.get('CF-IPCountry') ||
+      ''
+  ).toUpperCase();
+  if (EEA_UK_CH.has(country)) return { country, region: 'eea' };
+  if (country === 'US') return { country, region: 'us' };
+  return { country: country || 'XX', region: 'other' };
+}
