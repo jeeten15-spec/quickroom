@@ -2,6 +2,14 @@
 export const ADSENSE_CLIENT = 'ca-pub-2208705874716134';
 export const ADSENSE_ADS_TXT = 'google.com, pub-2208705874716134, DIRECT, f08c47fec0942fa0\n';
 
+/**
+ * Home (`/` and `/fr`) IAB placeholder frames. Keep false until AdSense is approved
+ * so empty grey boxes do not sit next to Create/Join. Rails, leader, footer, and
+ * in-content 300×250 for those views stay in code — set this to true to restore them.
+ * ads.txt, the head script, and the google-adsense-account meta stay on regardless.
+ */
+export const ADSENSE_HOME_PLACEHOLDERS = false;
+
 function viteEnv(key) {
   try {
     return import.meta.env?.[key];

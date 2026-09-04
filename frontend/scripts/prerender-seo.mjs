@@ -16,7 +16,7 @@ const { frPages } = await import(pathToFileURL(path.join(root, 'src/fr-pages.js'
 const { renderRelatedHtml } = await import(pathToFileURL(path.join(root, 'src/related.js')).href);
 const { monetagHeadHtml, renderAdFooter, renderAdLeaderboard, renderAdSkyscraper, renderIabSlot, MONETAG_DIRECT_LINK } =
   await import(pathToFileURL(path.join(root, 'src/monetag-tags.js')).href);
-const { adsenseHeadHtml, ADSENSE_ADS_TXT } = await import(
+const { adsenseHeadHtml, ADSENSE_ADS_TXT, ADSENSE_HOME_PLACEHOLDERS } = await import(
   pathToFileURL(path.join(root, 'src/adsense.js')).href
 );
 const { renderLangToggle, hreflangPairs } = await import(
@@ -93,7 +93,7 @@ function bodyFrench(slug, page) {
       <h1>QuickRoom</h1>
       <p>${escapeHtml(page.intro)}</p>
       <p>${escapeHtml(page.description)}</p>
-      ${renderIabSlot('box')}
+      ${ADSENSE_HOME_PLACEHOLDERS ? renderIabSlot('box') : ''}
       <p><a href="/">Créer une salle</a></p>
       <h2>Usages</h2>
       <ul>${page.jobs
@@ -248,7 +248,7 @@ function bodyHome() {
       <p>Free private chat rooms for temporary coordination—study groups, events, clients, travel. No signup.</p>
       <p>Create an online chat room. Share a room code, link, or QR. Chat online free as text chat / live chat / group chat in the browser, then let the chatroom expire.</p>
       <p>Searches we built for: private chat room without signup, free chat rooms, online chat rooms, anonymous chat, temporary chat room, chatroom, chat online free, webchat.</p>
-      ${renderIabSlot('box')}
+      ${ADSENSE_HOME_PLACEHOLDERS ? renderIabSlot('box') : ''}
       <p><a href="/about">About QuickRoom</a> · <a href="/blog">Blog</a></p>
       ${jobs ? `<h2>Exact jobs QuickRoom is built for</h2><p>Private chat rooms, free chat rooms, online chat rooms, group chat, and temporary chatrooms—without signup.</p><ul>${jobs}</ul>` : ''}
       <h2>Use cases</h2>
@@ -265,7 +265,8 @@ const pages = [
     title: 'QuickRoom — Free Private Chat Rooms Online, No Signup',
     description:
       'Create a free private chat room or temporary online chat room without signup. Group chat, text chat, and live chat in the browser—no app or phone number.',
-    body: bodyHome()
+    body: bodyHome(),
+    noAds: !ADSENSE_HOME_PLACEHOLDERS
   },
   {
     route: '/about',
@@ -327,7 +328,8 @@ const pages = [
     title: page.seoTitle || page.title,
     description: page.description,
     body: bodyFrench(slug, page),
-    lang: 'fr'
+    lang: 'fr',
+    noAds: Boolean(page.isLanding) && !ADSENSE_HOME_PLACEHOLDERS
   }))
 ];
 
@@ -452,7 +454,8 @@ const spaShell = renderHtml(
     title: 'QuickRoom — Free Private Chat Rooms Online, No Signup',
     description:
       'Create a free private chat room or temporary online chat room without signup. Group chat, text chat, and live chat in the browser—no app or phone number.',
-    body: bodyHome()
+    body: bodyHome(),
+    noAds: !ADSENSE_HOME_PLACEHOLDERS
   },
   { noindex: false }
 );

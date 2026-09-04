@@ -1,4 +1,4 @@
-import { adsenseClientId } from './adsense.js';
+import { ADSENSE_HOME_PLACEHOLDERS, adsenseClientId } from './adsense.js';
 import { useCasePages } from './use-cases.js';
 import {
   MONETAG_DIRECT_LINK,
@@ -31,6 +31,13 @@ export function isMonetizedView(view) {
 /** AdSense IAB units — never on About (Monetag only), chat, Create, or dashboard. */
 export function isAdSenseView(view) {
   return isMonetizedView(view) && view !== 'about';
+}
+
+/** Visible IAB frames. Home placeholders are gated by ADSENSE_HOME_PLACEHOLDERS. */
+export function showAdSensePlaceholders(view) {
+  if (!isAdSenseView(view)) return false;
+  if (!ADSENSE_HOME_PLACEHOLDERS && (view === 'landing' || view === 'fr')) return false;
+  return true;
 }
 
 /** Monetag vignette / IPP / direct link — About only, so they never sit on AdSense URLs. */
@@ -172,7 +179,7 @@ function adsenseClient() {
 }
 
 export function adRailCount(view) {
-  if (!isAdSenseView(view)) return 0;
+  if (!showAdSensePlaceholders(view)) return 0;
   if (view === 'blog') return 5;
   if (useCasePages[view]) return 4;
   if (view === 'landing' || view === 'fr' || isLongContentView(view)) return 3;
@@ -191,7 +198,7 @@ export function shouldShowConsentBanner(view) {
 }
 
 export function canLoadAds(view) {
-  if (!isAdSenseView(view)) return false;
+  if (!showAdSensePlaceholders(view)) return false;
   if (!adsenseClient()) return false;
   return adsConsentOk();
 }

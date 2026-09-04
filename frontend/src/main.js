@@ -20,8 +20,8 @@ import {
   getConsent,
   initGeo,
   installConsentDefaults,
-  isAdSenseView,
   isMonetizedView,
+  showAdSensePlaceholders,
   loadAdSense,
   loadCloudflareAnalytics,
   loadGoogleAnalytics,
@@ -123,7 +123,7 @@ function createInitialRoomState() {
 
 function render() {
   const isChat = state.view === 'room-placeholder';
-  const showAds = isAdSenseView(state.view);
+  const showAds = showAdSensePlaceholders(state.view);
   const rails = adRailCount(state.view);
   const path = window.location.pathname;
   document.documentElement.classList.toggle('chat-boot', isChat);
@@ -199,7 +199,7 @@ function renderLanding() {
               : `<button class="text-link" type="button" data-action="open-join">Join with code or link</button>`
           }
         </div>
-        ${renderAdSlot()}
+        ${showAdSensePlaceholders('landing') ? renderAdSlot() : ''}
         ${renderPublicRooms()}
         ${renderCoordinationJobs()}
       </div>
@@ -409,7 +409,7 @@ function renderFrench(slug) {
           <p class="tagline">${escapeHtml(page.intro)}</p>
           <p class="landing-support">${escapeHtml(page.description)}</p>
           <button class="button button-primary" type="button" data-action="open-create">Créer une salle privée</button>
-          ${renderAdSlot()}
+          ${showAdSensePlaceholders('fr') ? renderAdSlot() : ''}
           <section class="job-links">
             <h2>Usages</h2>
             <div class="job-link-list">
