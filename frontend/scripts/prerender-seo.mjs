@@ -504,6 +504,11 @@ await writeFile(
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
 
+/ads.txt
+  Content-Type: text/plain; charset=utf-8
+  Cache-Control: public, max-age=300, must-revalidate
+  Access-Control-Allow-Origin: *
+
 /sw.js
   Content-Type: application/javascript; charset=utf-8
   Cache-Control: no-cache
@@ -552,8 +557,12 @@ try {
 } catch {
   /* no Pages Functions in this build */
 }
-for (const leftover of ['room.html', 'chat-shell.html', '_routes.json']) {
+for (const leftover of ['room.html', 'chat-shell.html']) {
   await unlink(path.join(distDir, leftover)).catch(() => {});
 }
+await writeFile(
+  path.join(distDir, '_routes.json'),
+  `${JSON.stringify({ version: 1, include: ['/ads.txt'], exclude: [] }, null, 2)}\n`
+);
 
 console.log(`Prerendered ${pages.length} SEO HTML files, sitemap, dashboard/404 shells, _redirects, and _headers.`);
