@@ -1452,3 +1452,146 @@ code {
   .participants-list,
   .participants-panel.is-open .participants-list { display: grid; }
 }
+
+.landing-editorial {
+  text-align: left;
+  margin: 28px 0 8px;
+  padding-top: 8px;
+}
+
+.landing-editorial h2 {
+  margin: 0 0 10px;
+  font-size: 18px;
+  letter-spacing: -0.02em;
+  text-align: left;
+}
+
+.landing-editorial p,
+.landing-editorial ol,
+.landing-editorial ul {
+  text-align: left;
+  color: #444444;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.home-steps {
+  margin: 0 0 16px;
+  padding-left: 22px;
+}
+
+.home-faq-item {
+  margin: 0 0 14px;
+  text-align: left;
+}
+
+.home-faq-item h3 {
+  margin: 0 0 4px;
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.home-faq-item p {
+  margin: 0;
+  color: #555555;
+  font-size: 14px;
+}
+
+.compare-wrap {
+  overflow-x: auto;
+  margin: 12px 0 20px;
+  text-align: left;
+}
+
+.compare-table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.compare-table caption {
+  caption-side: top;
+  text-align: left;
+  margin-bottom: 8px;
+  color: #555555;
+  font-size: 13px;
+}
+
+.compare-table th,
+.compare-table td {
+  border: 1px solid #ececec;
+  padding: 8px 10px;
+  vertical-align: top;
+  text-align: left;
+}
+
+.compare-table thead th {
+  background: #f7f7f7;
+  font-weight: 650;
+}
+
+.product-shot {
+  margin: 16px 0 20px;
+  text-align: left;
+}
+
+.product-shot img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.product-shot figcaption {
+  margin-top: 8px;
+  color: #666666;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.article-byline {
+  margin: -18px 0 20px !important;
+  color: #666666;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.article-byline a {
+  color: inherit;
+}
+
+.user-created-rooms {
+  margin-top: 8px;
+  text-align: left;
+}
+
+.user-created-rooms summary {
+  cursor: pointer;
+  list-style-position: outside;
+  color: #111111;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.user-created-rooms .public-room-list {
+  margin-top: 8px;
+}
+
+.blog-index {
+  list-style: none;
+  padding-left: 0;
+}
+
+.blog-index li {
+  margin: 0 0 16px;
+}
+
+.muted.small {
+  color: #777777;
+  font-size: 13px;
+}

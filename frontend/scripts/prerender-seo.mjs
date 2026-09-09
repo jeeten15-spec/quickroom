@@ -14,6 +14,16 @@ const { articles } = await import(pathToFileURL(path.join(root, 'src/articles.js
 const { legalPages } = await import(pathToFileURL(path.join(root, 'src/legal.js')).href);
 const { frPages } = await import(pathToFileURL(path.join(root, 'src/fr-pages.js')).href);
 const { renderRelatedHtml } = await import(pathToFileURL(path.join(root, 'src/related.js')).href);
+const {
+  SITE_AUTHOR,
+  homeFaq,
+  jsonLdPerson,
+  renderAboutEditorial,
+  renderAuthorByline,
+  renderComparisonTable,
+  renderContentSections,
+  renderLandingEditorial
+} = await import(pathToFileURL(path.join(root, 'src/editorial.js')).href);
 const { monetagHeadHtml, renderAdFooter, renderAdLeaderboard, renderAdSkyscraper, renderIabSlot, MONETAG_DIRECT_LINK } =
   await import(pathToFileURL(path.join(root, 'src/monetag-tags.js')).href);
 const { adsenseHeadHtml, ADSENSE_ADS_TXT, ADSENSE_HOME_PLACEHOLDERS } = await import(
@@ -35,18 +45,7 @@ function escapeHtml(value) {
 }
 
 function renderSections(sections, { orderedLists = false } = {}) {
-  return sections
-    .map((section) => {
-      const paragraphs = (section.paragraphs || [])
-        .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`)
-        .join('');
-      const listTag = orderedLists ? 'ol' : 'ul';
-      const list = section.list
-        ? `<${listTag}>${section.list.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</${listTag}>`
-        : '';
-      return `<section><h2>${escapeHtml(section.heading)}</h2>${paragraphs}${list}</section>`;
-    })
-    .join('');
+  return renderContentSections(sections, escapeHtml, { orderedLists });
 }
 
 function relatedLinks(currentRoute) {
@@ -135,11 +134,10 @@ function bodyGuide(slug, page) {
 function bodyArticle(slug, page) {
   return `<article class="info-page article-page">
       <a class="back-link" href="/blog">QuickRoom Blog</a>
-      <p class="eyebrow">QuickRoom guide</p>
+      <p class="eyebrow">Walkthrough</p>
       <h1>${escapeHtml(page.title)}</h1>
-      <p class="article-date">${escapeHtml(page.publishedAt)}</p>
+      ${renderAuthorByline(escapeHtml, page.updatedAt || page.publishedAt)}
       <p class="use-case-intro">${escapeHtml(page.intro)}</p>
-      <p>${escapeHtml(page.description)}</p>
       ${renderIabSlot('box')}
       ${renderSections(page.sections)}
       ${renderExtrasHtml('a QuickRoom temporary chat', { escapeHtml })}
@@ -151,67 +149,42 @@ function bodyArticle(slug, page) {
 function bodyAbout() {
   return `<article class="info-page">
       <a class="back-link" href="/">QuickRoom</a>
-      <h1>About QuickRoom</h1>
-      <p>QuickRoom was created with a simple belief: <strong>technology should remove friction—not create it.</strong></p>
-      <p>Every day, people need a quick place to collaborate, ask questions, solve problems, or talk. Most tools still ask for accounts, phone verification, app installs, and permanent groups before the conversation begins.</p>
-      <p>QuickRoom makes starting a conversation as simple as opening a web page: create a temporary private room, share a room code, and talk in the browser without handing over a phone number or email address.</p>
-      <h2>Our mission</h2>
-      <p>Build the simplest, fastest, and most respectful collaboration platform on the web—no unnecessary barriers, no complicated setup, just meaningful conversations that can end when the moment ends.</p>
-      <h2>Our story</h2>
-      <p>QuickRoom began with a practical observation: a five-minute coordination thread should not require a permanent workspace. Students, families, event volunteers, freelancers, and short-term teams kept creating groups they did not want to keep forever.</p>
-      <p>We built a browser-first room that can expire after an hour, a day, a week, or up to three months—so the tool matches the lifespan of the work.</p>
-      <h2>Our principles</h2>
-      <ul>
-        <li><strong>Simplicity</strong> — prefer one step over five.</li>
-        <li><strong>Privacy</strong> — people should not need personal details just to talk.</li>
-        <li><strong>Respect</strong> — keep the product welcoming and intentional.</li>
-        <li><strong>Accessibility</strong> — keep the core experience free and lightweight in the browser.</li>
-      </ul>
-      <h2>What you can use QuickRoom for</h2>
-      <p>Study groups, hackathon teams, interview panels, book clubs, classroom backchannels, travel planning, freelance client handoffs, workshop Q&amp;A, meetup organiser chat, and other short-lived coordination jobs.</p>
-      <h2>Looking ahead</h2>
-      <p>QuickRoom starts with temporary chat and is growing into a browser-first collaboration toolkit for study, events, client handoffs, and short-lived teamwork—without turning every conversation into another permanent account.</p>
-      ${renderExtrasHtml('QuickRoom', { escapeHtml })}
+      ${renderAboutEditorial(escapeHtml)}
       <p class="sponsored-link"><a href="${MONETAG_DIRECT_LINK}" rel="sponsored nofollow noopener">Sponsored offer</a> — optional, not required to create or join a room.</p>
       ${relatedLinks('/about')}
     </article>`;
 }
 
 function bodyBlog() {
-  const guideLinks = Object.entries(guides)
-    .map(([slug, page]) => `<li><a href="/${escapeHtml(slug)}">${escapeHtml(page.title)}</a> — ${escapeHtml(page.description)}</li>`)
-    .join('');
   const articleLinks = Object.entries(articles)
-    .map(([slug, page]) => `<li><a href="/${escapeHtml(slug)}">${escapeHtml(page.title)}</a> — ${escapeHtml(page.description)}</li>`)
-    .join('');
-  const useCaseLinks = Object.entries(useCasePages)
-    .slice(0, 10)
-    .map(([slug, page]) => `<li><a href="/${escapeHtml(slug)}">${escapeHtml(page.title)}</a></li>`)
+    .map(
+      ([slug, page]) =>
+        `<li>
+          <a href="/${escapeHtml(slug)}">${escapeHtml(page.title)}</a>
+          <span> — ${escapeHtml(page.updatedAt || page.publishedAt)} · ${escapeHtml(page.author || SITE_AUTHOR.name)}</span>
+          <p>${escapeHtml(page.description)}</p>
+        </li>`
+    )
     .join('');
   return `<article class="info-page">
       <a class="back-link" href="/">QuickRoom</a>
-      <h1>QuickRoom Blog — Free Chat Rooms & Private Temporary Chat</h1>
-      <p>Looking for free chat rooms, online chat rooms, a private chat room without signup, anonymous chat, group chat, a temporary chat room, chatroom, text chat, live chat, or a way to chat online free without another app? QuickRoom is a browser-based temporary room: create it, share a code, talk, let it expire.</p>
-      <h2>What is QuickRoom?</h2>
-      <p>QuickRoom is the fastest way to create a private chat room: no registration, no phone number, no email, and no app. Create a room, share the link or code, and start talking. Rooms expire after the duration you choose.</p>
+      <p class="eyebrow">Editorial</p>
+      <h1>How QuickRoom actually works</h1>
+      <p>These are walkthroughs written against the live product: screenshots of create, chat, and share; a comparison table we reuse on the homepage; and the private vs public listing rule. They are not keyword-stuffed “best free chat 2026” listicles.</p>
+      ${renderAuthorByline(escapeHtml, '9 September 2026')}
+      <h2>Articles</h2>
+      <ul class="blog-index">${articleLinks}</ul>
       ${renderIabSlot('box')}
-      <h2>Why temporary rooms matter</h2>
-      <p>WhatsApp groups, Discord servers, and Slack workspaces are useful—but they often outlive the conversation. A temporary room is better when the discussion has a natural end: an assignment, a sprint, an event shift, a trip, or a one-off client handoff.</p>
-      <h2>Built for temporary collaboration</h2>
-      <p>Use QuickRoom for study groups, exam preparation, coding help, project discussions, book clubs, family planning, event coordination, interview panels, and short support conversations—free chat rooms and online chat rooms that do not require signup.</p>
-      <h2>Articles &amp; practical guides</h2>
-      <ul>${articleLinks}${guideLinks}</ul>
-      <h2>Exact jobs QuickRoom is built for</h2>
-      <ul>${(coordinationJobs || [])
-        .map(
-          (job) =>
-            `<li><a href="${escapeHtml(job.href)}">${escapeHtml(job.label)}</a> — ${escapeHtml(job.blurb)}</li>`
-        )
-        .join('')}</ul>
-      <h2>Popular use cases</h2>
-      <ul>${useCaseLinks}</ul>
-      <p><a href="/">Create a room on QuickRoom</a> · <a href="/about">About QuickRoom</a></p>
-      ${renderExtrasHtml('QuickRoom', { escapeHtml })}
+      <h2>Comparison snapshot</h2>
+      <p>Full notes live in <a href="/blog/quickroom-vs-discord-whatsapp-slack">QuickRoom vs WhatsApp, Discord, and Slack</a>. The table is the same one on the homepage so we do not maintain two stories.</p>
+      ${renderComparisonTable(escapeHtml)}
+      <h2>Practical setup guides</h2>
+      <ul>
+        <li><a href="/private-study-group-without-whatsapp">How to start a private study group without WhatsApp</a></li>
+        <li><a href="/temporary-chat-room-for-hackathons">A temporary chat room for hackathons</a></li>
+        <li><a href="/short-lived-event-backchannel">How to run a short-lived event backchannel</a></li>
+      </ul>
+      <p>Product questions: <a href="mailto:${escapeHtml(SITE_AUTHOR.email)}">${escapeHtml(SITE_AUTHOR.email)}</a>. <a href="/about">About</a>.</p>
       ${relatedLinks('/blog')}
     </article>`;
 }
@@ -229,32 +202,18 @@ function bodyHome() {
     .filter(Boolean)
     .join('');
 
-  const useCaseList = Object.entries(useCasePages)
-    .map(
-      ([slug, page]) =>
-        `<li><a href="/${escapeHtml(slug)}">${escapeHtml(page.title)}</a> — ${escapeHtml(page.description)}</li>`
-    )
-    .join('');
-
-  const guideList = Object.entries(guides)
-    .map(
-      ([slug, page]) =>
-        `<li><a href="/${escapeHtml(slug)}">${escapeHtml(page.title)}</a> — ${escapeHtml(page.description)}</li>`
-    )
-    .join('');
-
-  return `<main>
+  return `<main class="landing landing-content">
       <h1>QuickRoom</h1>
-      <p>Free private chat rooms for temporary coordination—study groups, events, clients, travel. No signup.</p>
-      <p>Create an online chat room. Share a room code, link, or QR. Chat online free as text chat / live chat / group chat in the browser, then let the chatroom expire.</p>
-      <p>Searches we built for: private chat room without signup, free chat rooms, online chat rooms, anonymous chat, temporary chat room, chatroom, chat online free, webchat.</p>
+      <p>A named chat room you create, share as a link, and let expire. Nickname only — no account.</p>
+      <p>18+ text chat in the browser. Not a video lounge, not a K–12 classroom product.</p>
       ${ADSENSE_HOME_PLACEHOLDERS ? renderIabSlot('box') : ''}
-      <p><a href="/about">About QuickRoom</a> · <a href="/blog">Blog</a></p>
-      ${jobs ? `<h2>Exact jobs QuickRoom is built for</h2><p>Private chat rooms, free chat rooms, online chat rooms, group chat, and temporary chatrooms—without signup.</p><ul>${jobs}</ul>` : ''}
-      <h2>Use cases</h2>
-      <ul>${useCaseList}</ul>
-      <h2>Guides</h2>
-      <ul>${guideList}</ul>
+      <p><a href="/about">About QuickRoom</a> · <a href="/blog">How it works</a></p>
+      <section class="public-rooms" aria-labelledby="public-rooms-title">
+        <h2 id="public-rooms-title">Public topic rooms</h2>
+        <p>The three newest public rooms appear here after the page loads so the homepage stays readable as the list grows. Older public rooms open under a control named User Created Rooms. Private rooms never appear in that list — share those with a link.</p>
+      </section>
+      ${renderLandingEditorial(escapeHtml)}
+      ${jobs ? `<h2>Exact jobs QuickRoom is built for</h2><p>Each link is a specific coordination job. Templates on create are title shortcuts for these jobs.</p><ul>${jobs}</ul>` : ''}
     </main>`;
 }
 
@@ -262,30 +221,35 @@ const pages = [
   {
     route: '/',
     file: 'index.html',
-    title: 'QuickRoom — Free Private Chat Rooms Online, No Signup',
+    title: 'QuickRoom — named chat rooms with a shareable link',
     description:
-      'Create a free private chat room or temporary online chat room without signup. Group chat, text chat, and live chat in the browser—no app or phone number.',
+      'Create a named browser chat room, share /?room=…, and let it expire. Nickname only. 18+ text chat — not video matching, not K–12.',
     body: bodyHome(),
-    noAds: !ADSENSE_HOME_PLACEHOLDERS
+    noAds: !ADSENSE_HOME_PLACEHOLDERS,
+    faq: homeFaq(),
+    person: true
   },
   {
     route: '/about',
     file: 'about.html',
-    title: 'About QuickRoom — Private Temporary Chat Rooms, No Signup',
+    title: 'About QuickRoom — who builds it and what we will not add',
     description:
-      'Why QuickRoom exists: free private chat rooms, temporary chat rooms, and online chat without accounts, apps, or phone numbers.',
+      'Jeeten builds QuickRoom. Named rooms, 18+ only, no K–12, no stranger video. Code on GitHub, contact feedback@quickroom.org.',
     body: bodyAbout(),
     noAds: true,
-    noAdSense: true
+    noAdSense: true,
+    person: true
   },
   {
     route: '/blog',
     file: 'blog.html',
-    title: 'QuickRoom Blog — Free Chat Rooms, Anonymous Chat, No Signup',
+    title: 'How QuickRoom actually works — walkthroughs and comparison',
     description:
-      'Guides to private chat rooms without signup, free online chat rooms, anonymous group chat, and temporary chatrooms on QuickRoom.',
+      'Product walkthroughs with screenshots, a comparison table versus WhatsApp, Discord, and Slack, and the private vs public listing rule.',
     body: bodyBlog(),
-    railCount: 5
+    railCount: 5,
+    faq: homeFaq(),
+    person: true
   },
   ...Object.entries(useCasePages).map(([slug, page]) => ({
     route: `/${slug}`,
@@ -311,7 +275,14 @@ const pages = [
     description: page.description,
     body: bodyArticle(slug, page),
     faq: defaultFaq('a QuickRoom temporary chat'),
-    lang: 'en'
+    lang: 'en',
+    person: true,
+    article: {
+      headline: page.title,
+      description: page.description,
+      datePublished: page.publishedAt,
+      dateModified: page.updatedAt || page.publishedAt
+    }
   })),
   ...Object.entries(legalPages).map(([slug, page]) => ({
     route: `/${slug}`,
@@ -380,6 +351,25 @@ function renderHtml(page, { noindex = false } = {}) {
       isPartOf: { '@type': 'WebSite', name: 'QuickRoom', url: SITE }
     }
   ];
+  if (page.person) {
+    graph.push(jsonLdPerson());
+  }
+  if (page.article) {
+    graph.push({
+      '@type': 'Article',
+      headline: page.article.headline,
+      description: page.article.description,
+      datePublished: page.article.datePublished,
+      dateModified: page.article.dateModified,
+      author: jsonLdPerson(),
+      publisher: {
+        '@type': 'Organization',
+        name: 'QuickRoom',
+        url: SITE
+      },
+      mainEntityOfPage: canonical
+    });
+  }
   if (page.faq?.length) {
     graph.push({
       '@type': 'FAQPage',
@@ -451,9 +441,9 @@ for (const page of pages) {
 const spaShell = renderHtml(
   {
     route: '/',
-    title: 'QuickRoom — Free Private Chat Rooms Online, No Signup',
+    title: 'QuickRoom — named chat rooms with a shareable link',
     description:
-      'Create a free private chat room or temporary online chat room without signup. Group chat, text chat, and live chat in the browser—no app or phone number.',
+      'Create a named browser chat room, share /?room=…, and let it expire. Nickname only. 18+ text chat — not video matching, not K–12.',
     body: bodyHome(),
     noAds: !ADSENSE_HOME_PLACEHOLDERS
   },

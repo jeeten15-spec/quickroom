@@ -5,6 +5,14 @@ import { registerPwa } from './pwa';
 import { coordinationJobs, useCasePages } from './use-cases';
 import { guides } from './guides';
 import { articles } from './articles';
+import {
+  SITE_AUTHOR,
+  renderAboutEditorial,
+  renderAuthorByline,
+  renderComparisonTable,
+  renderContentSections,
+  renderLandingEditorial
+} from './editorial';
 import { legalPages } from './legal';
 import { frPages } from './fr-pages';
 import { renderRelatedHtml } from './related';
@@ -187,8 +195,8 @@ function renderLanding() {
       <section class="landing" aria-labelledby="quickroom-title">
       <div class="landing-content">
         <h1 id="quickroom-title">QuickRoom</h1>
-        <p class="tagline">Free private chat rooms for temporary coordination—study groups, events, clients, travel. No signup.</p>
-        <p class="landing-support">Create an online chat room. Share a link, code, or QR. Chat online free. Let it expire.</p>
+        <p class="tagline">A named chat room you create, share as a link, and let expire. Nickname only — no account.</p>
+        <p class="landing-support">18+ text chat in the browser. Not a video lounge, not a K–12 classroom product.</p>
         <button class="button button-primary" type="button" data-action="open-create">
           Create private room
         </button>
@@ -201,10 +209,11 @@ function renderLanding() {
         </div>
         ${showAdSensePlaceholders('landing') ? renderAdSlot() : ''}
         ${renderPublicRooms()}
+        ${renderLandingEditorial(escapeHtml)}
         ${renderCoordinationJobs()}
       </div>
       <footer>
-        <p class="footer-welcome">Private chat room / free chat rooms / online chat—no app, no account, no phone number.</p>
+        <p class="footer-welcome">Rooms are temporary on purpose. Private by default; public listing is optional discovery.</p>
         ${renderSupportBlock()}
         ${renderSiteFooter()}
         <p>18+ only <span>·</span> Temporary rooms</p>
@@ -217,7 +226,7 @@ function renderCoordinationJobs() {
   return `
     <section class="job-links" aria-labelledby="jobs-title">
       <h2 id="jobs-title">Exact jobs QuickRoom is built for</h2>
-      <p class="job-links-intro">Private chat rooms, free chat rooms, online chat rooms, group chat, and temporary chatrooms—without signup.</p>
+      <p class="job-links-intro">Each link is a specific coordination job, not a synonym dump. Templates on create are title shortcuts for these jobs.</p>
       <div class="job-link-list">
         ${coordinationJobs
           .map(
@@ -254,25 +263,37 @@ function renderJoinForm() {
   `;
 }
 
-function renderPublicRooms() {
+function publicRoomButton(room) {
   return `
-    <section class="public-rooms" aria-labelledby="public-rooms-title">
-      <h2 id="public-rooms-title">Public topic rooms</h2>
-      <p class="public-rooms-note">Open discovery for faster reach. Prefer Private rooms for events, clients, classes, and travel.</p>
-      ${
-        state.publicRooms.length
-          ? `<div class="public-room-list">
-        ${state.publicRooms
-          .map(
-            (room) => `
               <button class="public-room" type="button" data-action="join-public" data-room-code="${escapeHtml(room.roomId)}">
                 <span aria-hidden="true">${escapeHtml(room.icon)}</span>
                 <span>${escapeHtml(room.name)}</span>
-              </button>
-            `
-          )
-          .join('')}
-      </div>`
+              </button>`;
+}
+
+function renderPublicRooms() {
+  const list = [...state.publicRooms].sort(
+    (left, right) => Number(right.createdAt || 0) - Number(left.createdAt || 0)
+  );
+  const latest = list.slice(0, 3);
+  const older = list.slice(3);
+  return `
+    <section class="public-rooms" aria-labelledby="public-rooms-title">
+      <h2 id="public-rooms-title">Public topic rooms</h2>
+      <p class="public-rooms-note">The three newest public rooms sit here so the homepage stays readable as the list grows. Older public rooms live under User Created Rooms. Private rooms never appear here — share those with a link.</p>
+      ${
+        list.length
+          ? `<div class="public-room-list">
+        ${latest.map(publicRoomButton).join('')}
+      </div>
+      ${
+        older.length
+          ? `<details class="user-created-rooms">
+        <summary>User Created Rooms</summary>
+        <div class="public-room-list">${older.map(publicRoomButton).join('')}</div>
+      </details>`
+          : ''
+      }`
           : `<p class="public-rooms-empty">No active public rooms right now. Create a Private room for your group instead.</p>`
       }
     </section>
@@ -686,71 +707,7 @@ function renderAbout() {
   return `
     <article class="info-page" data-ipp-host>
       <a class="back-link" href="/" data-action="navigate">QuickRoom</a>
-      <h1>About QuickRoom</h1>
-      <p>QuickRoom was created with a simple belief:</p>
-      <p><strong>Technology should remove friction—not create it.</strong></p>
-      <p>Our journey didn't begin in a Silicon Valley startup or a large technology company.</p>
-      <p>It began with a simple observation.</p>
-      <p>Every day, millions of people need a quick place to collaborate, ask questions, solve problems, or simply talk.</p>
-      <p>Yet most online communication tools ask for too much before the conversation even begins.</p>
-      <p>Create an account.</p>
-      <p>Verify your phone.</p>
-      <p>Install an app.</p>
-      <p>Invite contacts.</p>
-      <p>Accept permissions.</p>
-      <p>Manage another notification.</p>
-      <p>We wondered:</p>
-      <p><strong>What if starting a conversation could be as simple as creating a document or opening a web page?</strong></p>
-      <p>That question became QuickRoom.</p>
-
-      <h2>Our Mission</h2>
-      <p>Our mission is to build the simplest, fastest, and most respectful collaboration platform on the web.</p>
-      <p>We believe people should be able to create a private room in seconds, share a link, and start collaborating immediately.</p>
-      <p>No unnecessary barriers.</p>
-      <p>No complicated setup.</p>
-      <p>Just meaningful conversations.</p>
-
-      <h2>Our Story</h2>
-      <p>QuickRoom was founded by someone who comes from a humble background and has always believed that technology should create opportunities rather than obstacles.</p>
-      <p>Growing up without unlimited resources teaches an important lesson:</p>
-      <p><strong>The best tools are often the simplest ones.</strong></p>
-      <p>That philosophy influences every decision we make.</p>
-      <p>We aren't trying to build the biggest social network.</p>
-      <p>We're trying to build one of the most useful tools on the Internet.</p>
-      <p>If QuickRoom helps a student prepare for an exam, enables a family to organize an event, allows a team to solve a problem, or helps strangers collaborate on an idea, then we're moving in the right direction.</p>
-
-      <h2>Our Principles</h2>
-      <h3>Simplicity</h3>
-      <p>The best technology often feels invisible.</p>
-      <p>If something can be done with one click instead of five, we'll choose one.</p>
-      <h3>Privacy</h3>
-      <p>People shouldn't have to share personal information just to have a conversation.</p>
-      <p>Privacy isn't a premium feature.</p>
-      <p>It should be the default.</p>
-      <h3>Respect</h3>
-      <p>We want QuickRoom to remain a welcoming place where ideas are shared respectfully.</p>
-      <p>Healthy communities don't happen by accident—they're built intentionally.</p>
-      <h3>Accessibility</h3>
-      <p>We believe useful technology should be available to as many people as possible.</p>
-      <p>That's why we aim to keep the core experience free and lightweight, working directly in your browser without requiring powerful devices or expensive hardware.</p>
-
-      <h2>Our Commitment</h2>
-      <p>We're intentionally keeping QuickRoom clean.</p>
-      <p>No clutter.</p>
-      <p>No unnecessary features.</p>
-      <p>No endless distractions.</p>
-      <p>As the platform grows, we'll continue to focus on thoughtful improvements rather than feature overload.</p>
-      <p>Ads may appear on the landing page, articles, and use-case pages. Live chat rooms do not show ads, so the conversation stays the focus.</p>
-      <p>Our users are not the product.</p>
-      <p>They're the reason the product exists.</p>
-
-      <h2>Looking Ahead</h2>
-      <p>QuickRoom is only the beginning.</p>
-      <p>Our vision extends beyond chat.</p>
-      <p>We're building a browser-first collaboration platform that will eventually include intelligent study tools, shared workspaces, AI-powered assistance, collaborative documents, and other lightweight tools that help people learn, create, and solve problems together.</p>
-      <p>We're taking small steps, listening carefully to our community, and improving continuously.</p>
-      <p>Thank you for being part of the journey.</p>
-      <p>We're glad you're here.</p>
+      ${renderAboutEditorial(escapeHtml)}
       ${renderSponsoredLink()}
       ${renderGithubTrust()}
       ${renderSupportBlock()}
@@ -868,30 +825,11 @@ function renderArticle(slug) {
   return `
     <article class="info-page article-page">
       <a class="back-link" href="/blog" data-action="navigate">QuickRoom Blog</a>
-      <p class="eyebrow">QuickRoom guide</p>
+      <p class="eyebrow">Walkthrough</p>
       <h1>${escapeHtml(article.title)}</h1>
-      <p class="article-date">${escapeHtml(article.publishedAt)}</p>
+      ${renderAuthorByline(escapeHtml, article.updatedAt || article.publishedAt)}
       <p class="use-case-intro">${escapeHtml(article.intro)}</p>
-      <p>${escapeHtml(article.description)}</p>
-      ${article.sections
-        .map(
-          (section) => `
-            <section>
-              <h2>${escapeHtml(section.heading)}</h2>
-              ${(section.paragraphs || [])
-                .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`)
-                .join('')}
-              ${
-                section.list
-                  ? `<ul>${section.list
-                      .map((item) => `<li>${escapeHtml(item)}</li>`)
-                      .join('')}</ul>`
-                  : ''
-              }
-            </section>
-          `
-        )
-        .join('')}
+      ${renderContentSections(article.sections, escapeHtml)}
       ${renderSeoExtras('a QuickRoom temporary chat')}
       ${renderAdSlot()}
       ${renderRelatedHtml(`/${slug}`, { escapeHtml })}
@@ -906,111 +844,33 @@ function renderBlog() {
   const articleLinks = Object.entries(articles)
     .map(
       ([slug, page]) =>
-        `<li><a href="/${escapeHtml(slug)}" data-action="navigate">${escapeHtml(page.title)}</a> — ${escapeHtml(page.description)}</li>`
+        `<li>
+          <a href="/${escapeHtml(slug)}" data-action="navigate">${escapeHtml(page.title)}</a>
+          <span class="muted small"> — ${escapeHtml(page.updatedAt || page.publishedAt)} · ${escapeHtml(page.author || SITE_AUTHOR.name)}</span>
+          <p class="muted small">${escapeHtml(page.description)}</p>
+        </li>`
     )
     .join('');
   return `
     <article class="info-page">
       <a class="back-link" href="/" data-action="navigate">QuickRoom</a>
-      <h1>QuickRoom Blog — Free Chat Rooms & Private Temporary Chat</h1>
-      <p>Looking for <strong>free chat rooms</strong>, <strong>online chat rooms</strong>, a <strong>private chat room without signup</strong>, <strong>anonymous chat</strong>, <strong>group chat</strong>, a <strong>temporary chat room</strong>, <strong>chatroom</strong>, <strong>text chat</strong>, <strong>live chat</strong>, or a way to <strong>chat online free</strong> without another app? QuickRoom is a browser-based temporary room: create it, share a code, talk, let it expire.</p>
-
+      <p class="eyebrow">Editorial</p>
+      <h1>How QuickRoom actually works</h1>
+      <p>These are walkthroughs written against the live product: screenshots of create, chat, and share; a comparison table we reuse on the homepage; and the private vs public listing rule. They are not keyword-stuffed “best free chat 2026” listicles.</p>
+      ${renderAuthorByline(escapeHtml, '9 September 2026')}
       <h2>Articles</h2>
-      <ul>${articleLinks}</ul>
-
-      <h2>The Internet Made Starting a Conversation Surprisingly Difficult</h2>
-      <p>It sounds strange, but in 2026, starting a simple private conversation with a group of people has become harder than it should be.</p>
-      <p>Need to discuss tomorrow's assignment with classmates?</p>
-      <p>Create a WhatsApp group.</p>
-      <p>Need to brainstorm with a few colleagues?</p>
-      <p>Set up a Discord server.</p>
-      <p>Want to collaborate during a hackathon?</p>
-      <p>Create a Slack workspace.</p>
-      <p>Planning a family event?</p>
-      <p>Start another messaging group.</p>
-      <p>Almost every platform expects you to create an account, verify your email or phone number, install an app, share your personal information, manage notifications, and maintain yet another permanent group that you'll probably never use again.</p>
-      <p>We believe there's a better way.</p>
-      <p>Today, we're excited to launch <strong>QuickRoom</strong>.</p>
-
-      <h2>What is QuickRoom?</h2>
-      <p>QuickRoom is the fastest way to create a <strong>private chat room</strong>—including <strong>free chat rooms</strong> and <strong>online chat rooms</strong> for short-lived work.</p>
-      <p>No registration.</p><p>No phone number.</p><p>No email.</p><p>No app to install.</p><p>No complicated setup.</p>
-      <p>Just create a room, share the link, and start talking—<strong>chat online free</strong> as <strong>text chat</strong> / <strong>live chat</strong> / <strong>group chat</strong> / <strong>webchat</strong> in the browser.</p>
+      <ul class="blog-index">${articleLinks}</ul>
       ${renderAdSlot()}
-      <p>Whether you're studying for an exam, solving a coding problem, planning an event, helping a friend, or simply having a short discussion, QuickRoom lets you create a temporary collaboration space in seconds.</p>
-
-      <h2>Why We Built QuickRoom</h2>
-      <p>The idea began with a simple question:</p>
-      <p><strong>Why should a five-minute conversation require a permanent account?</strong></p>
-      <p>The web has become incredibly powerful, yet many everyday interactions have become unnecessarily complicated.</p>
-      <p>We wanted to build something that feels like the early Internet—simple, fast, lightweight, and open—but with modern security, privacy, and thoughtful design.</p>
-      <p>QuickRoom is our attempt to remove friction.</p>
-      <p>You shouldn't have to hand over your personal information just to have a conversation—whether you call it <strong>anonymous chat</strong>, a <strong>temporary chat room</strong>, or a simple <strong>chatroom</strong>.</p>
-
-      <h2>Designed for Temporary Collaboration</h2>
-      <p>QuickRoom isn't trying to replace your favorite messaging app.</p>
-      <p>Instead, it's designed for moments where you need a conversation <strong>right now</strong>.</p>
-      <p>Examples include:</p>
-      <ul>
-        <li>Study groups</li><li>Exam preparation</li><li>Coding help</li><li>Project discussions</li><li>Online classes</li><li>Book clubs</li><li>Brainstorming sessions</li><li>Family planning</li><li>Event coordination</li><li>Community discussions</li><li>Interview panels</li><li>Quick support conversations</li>
-      </ul>
-      <p>Create a room.</p><p>Share the link.</p><p>Collaborate.</p>
-      <p>When you're done, the room automatically expires.</p><p>Simple.</p>
-
-      <h2>Built Around Privacy</h2>
-      <p>Every QuickRoom starts with privacy in mind.</p>
-      <p>There are no mandatory user profiles.</p><p>No phone numbers.</p><p>No email addresses.</p><p>No permanent identity.</p>
-      <p>Rooms are temporary by default, and users can choose how long they remain available.</p>
-      <p>We believe conversations don't always need to live forever.</p>
-
-      <h2>Clean by Design</h2>
-      <p>The modern web is full of distractions: autoplay videos, floating chat widgets, and endless notifications.</p>
-      <p>QuickRoom is intentionally different inside the room.</p>
-      <p>Our design philosophy is simple:</p>
-      <p><strong>Every pixel in the conversation should have a purpose.</strong></p>
-      <p>Ads may appear on the landing page, articles, and use-case pages. They are not placed inside live chat rooms.</p>
-
-      <h2>Where We're Going</h2>
-      <p>This is only Phase One.</p>
-      <p>QuickRoom starts as a lightweight browser-based chat platform, but our vision is much larger.</p>
-      <p>Over the coming months, we plan to introduce features that make collaboration even easier while keeping the experience simple.</p>
-      <p>Some of the ideas we're exploring include:</p>
-      <ul>
-        <li>Temporary image sharing</li><li>Smart room templates</li><li>Shared notes</li><li>Collaborative whiteboards</li><li>AI-powered discussion summaries</li><li>Study assistants</li><li>Instant quizzes from shared notes</li><li>PDF collaboration</li><li>Polls</li><li>Shared task lists</li>
-      </ul>
-      <p>Our long-term goal is to build the simplest browser-based collaboration platform on the Internet.</p>
-
-      <h2>Keeping QuickRoom Accessible</h2>
-      <p>We're committed to keeping QuickRoom accessible to everyone.</p>
-      <p>Our goal is to keep creating and joining a room free.</p>
-      <p>If we ever introduce premium features, they'll enhance the experience rather than restrict basic collaboration.</p>
-      <p>Advertising on landing pages, articles, and use cases helps keep rooms free to use. Ads are not shown inside the chat.</p>
-      <p>Users come first.</p><p>Always.</p>
-
-      <h2>Practical Guides</h2>
+      <h2>Comparison snapshot</h2>
+      <p>Full notes live in <a href="/blog/quickroom-vs-discord-whatsapp-slack" data-action="navigate">QuickRoom vs WhatsApp, Discord, and Slack</a>. The table is the same one on the homepage so we do not maintain two stories.</p>
+      ${renderComparisonTable(escapeHtml)}
+      <h2>Practical setup guides</h2>
       <ul>
         <li><a href="/private-study-group-without-whatsapp" data-action="navigate">How to start a private study group without WhatsApp</a></li>
         <li><a href="/temporary-chat-room-for-hackathons" data-action="navigate">A temporary chat room for hackathons</a></li>
         <li><a href="/short-lived-event-backchannel" data-action="navigate">How to run a short-lived event backchannel</a></li>
       </ul>
-
-      <h2>Exact jobs QuickRoom is built for</h2>
-      <ul>
-        ${coordinationJobs
-          .map(
-            (job) =>
-              `<li><a href="${escapeHtml(job.href)}" data-action="navigate">${escapeHtml(job.label)}</a> — ${escapeHtml(job.blurb)}</li>`
-          )
-          .join('')}
-      </ul>
-
-      <h2>We'd Love Your Feedback</h2>
-      <p>QuickRoom is just getting started.</p>
-      <p>Some of our best ideas have already come from conversations with students, educators, developers, and curious early users.</p>
-      <p>If you have suggestions, feature requests, or ideas, we'd genuinely love to hear from you.</p>
-      <p>Together, we hope to build something that's useful, simple, and enjoyable for millions of people around the world.</p>
-      <p>Welcome to QuickRoom.</p>
-      <p>Create a room.</p><p>Share a link.</p><p>Start talking.</p>
+      <p>Product questions: <a href="mailto:${escapeHtml(SITE_AUTHOR.email)}">${escapeHtml(SITE_AUTHOR.email)}</a>.</p>
       ${renderGithubTrust()}
       ${renderSupportBlock()}
       ${renderSiteFooter()}
@@ -1030,16 +890,16 @@ function updateDocumentMetadata() {
       ? { title: page.seoTitle || page.title, description: page.description, lang: page.htmlLang || 'en' }
         : state.view === 'about'
         ? {
-            title: 'About QuickRoom — Private Temporary Chat Rooms, No Signup',
+            title: 'About QuickRoom — who builds it and what we will not add',
             description:
-              'Why QuickRoom exists: free private chat rooms, temporary chat rooms, and online chat without accounts, apps, or phone numbers.',
+              'Jeeten builds QuickRoom. Named rooms, 18+ only, no K–12, no stranger video. Code on GitHub, contact feedback@quickroom.org.',
             lang: 'en'
           }
         : state.view === 'blog'
           ? {
-              title: 'QuickRoom Blog — Free Chat Rooms, Anonymous Chat, No Signup',
+              title: 'How QuickRoom actually works — walkthroughs and comparison',
               description:
-                'Guides to private chat rooms without signup, free online chat rooms, anonymous group chat, and temporary chatrooms on QuickRoom.',
+                'Product walkthroughs with screenshots, a comparison table versus WhatsApp, Discord, and Slack, and the private vs public listing rule.',
               lang: 'en'
             }
           : state.view === 'dashboard'
@@ -1049,9 +909,9 @@ function updateDocumentMetadata() {
                 lang: 'en'
               }
           : {
-              title: 'QuickRoom — Free Private Chat Rooms Online, No Signup',
+              title: 'QuickRoom — named chat rooms with a shareable link',
               description:
-                'Create a free private chat room or temporary online chat room without signup. Group chat, text chat, and live chat in the browser—no app or phone number.',
+                'Create a named browser chat room, share /?room=…, and let it expire. Nickname only. 18+ text chat — not video matching, not K–12.',
               lang: 'en'
             };
   document.title = metadata.title;

@@ -1,352 +1,329 @@
+import { PRODUCT_SHOTS } from './editorial.js';
+
+const AUTHOR = 'Jeeten';
+const UPDATED = '9 September 2026';
+
 export const articles = {
   'blog/private-chat-room-no-signup-global-guide': {
-    title: 'Private Chat Rooms Without Signup: A Practical Global Guide',
-    seoTitle: 'Private Chat Room Without Signup — Free Chat Rooms & Anonymous Chat | QuickRoom',
+    title: 'What “no signup” actually means in QuickRoom',
+    seoTitle: 'Private Chat Room Without Signup — How QuickRoom Works | QuickRoom',
     description:
-      'Create a private chat room without signup, free chat rooms, anonymous chat, online chat rooms, group chat, and temporary chat rooms—no phone number or app. A global guide to chat online free with QuickRoom.',
+      'How QuickRoom creates a private room with a nickname and a code—no email, phone number, or app—and what that does and does not protect.',
     publishedAt: 'July 30, 2026',
+    updatedAt: UPDATED,
+    author: AUTHOR,
     intro:
-      'People around the world search for a faster way to start a conversation without installing an app, sharing a phone number, or building another permanent group. They type phrases like private chat room without signup, free chat rooms, anonymous chat, online chat rooms, chat online free, group chat, temporary chat room, chatroom, text chat, live chat, and webchat—all pointing to the same need: a simple room that starts now and can end later.',
+      'If you only need a thread for one assignment, one shift, or one client week, the expensive part is not the chat itself. It is the account, the phone number, and the group that never gets deleted. This page is the honest product walkthrough: what you click, what we store, and when you should not use QuickRoom.',
     sections: [
       {
-        heading: 'The search is the same, even when the language changes',
+        heading: 'The four screens, in order',
         paragraphs: [
-          'In the United States, United Kingdom, India, and elsewhere, people look for temporary chat room no signup, private chat room without phone number, anonymous group chat temporary, free chat room online, create a chat room with code, chat rooms free, online chatting, and chat online with a group. The intent is practical: start a small conversation quickly without another account.',
-          'In France, related searches include chat privé sans inscription and salle de discussion temporaire. In Germany, privater Chat ohne Anmeldung or temporärer Chatraum. In Poland, prywatny czat bez rejestracji. In Spain, chat privado sin registro and sala de chat temporal. Whatever the language, the job is a private chat room / free chat rooms experience that does not demand registration.'
+          'You choose a template so the room has a default name (Study, Event, Interview, and so on). Then you set expiry, pick a nickname, and decide whether the room is private or listed as public. After create, the share screen gives a code, a link of the form https://quickroom.org/?room=…, and a QR code.',
+          'Joining is the same nickname field plus that code. There is no password reset email because there is no password. The browser keeps an anonymous Firebase session so you can refresh without inventing a new identity every time.'
+        ],
+        figure: PRODUCT_SHOTS.create
+      },
+      {
+        heading: 'What we do not collect',
+        paragraphs: [
+          'QuickRoom does not ask for an email address or phone number to create or join a room. We do not build a friend graph. Nicknames are chosen by the participant and are not verified identities.',
+          'Cloudflare still sees an IP and country the way any HTTPS site does. We use country only for aggregate pageview counts on public articles, not to profile people inside a room. Details are on the privacy page.'
         ]
       },
       {
-        heading: 'Free chat rooms and online chat rooms without the permanent group',
+        heading: 'The code is the lock',
         paragraphs: [
-          'A useful free chat room or online chat room should reduce friction, not move it elsewhere. People should be able to create a room, choose a nickname, share a room code or link, and begin talking from a browser—chat free online as text chat or live chat for the moment that matters.',
-          'QuickRoom is designed for short-lived collaboration: study groups, family planning, hackathon teams, interview panels, book clubs, event backchannels, classroom questions, and client handoffs. Rooms can expire after one hour, six hours, one day, one week, or three months—so the chatroom does not become another forever notification stream.'
-        ]
+          'Anyone who has the room code can attempt to join. That is a feature for speed and a risk if you post the code on a public story. For events, classes, clients, and travel, use Private (or Invite Only) and send the code in a channel that already knows who should be there.',
+          'Public topic rooms on the homepage are for people who want discovery. They are a different job. Do not put a client or a hiring panel in a public listing.'
+        ],
+        figure: PRODUCT_SHOTS.share
       },
       {
-        heading: 'Anonymous chat and private chat without phone numbers',
-        paragraphs: [
-          'Anonymous chat and private chat room without signup searches often mean: no email, no phone number, no permanent profile. QuickRoom uses nicknames and room codes instead of accounts. That supports anonymous-friendly group chat when participants do not want to exchange personal contact details just to coordinate.',
-          'Treat the room code like an invitation. For Private or Invite Only rooms, send it directly to the intended participants. Anyone with the code can attempt to join, so do not post codes on public feeds when the conversation should stay private.'
-        ]
-      },
-      {
-        heading: 'Exact jobs people use these chat rooms for',
+        heading: 'Jobs this is for — and jobs it is not',
         list: [
-          'Study group chat / free chat rooms for revision, homework, tutoring, and exam prep—group chat with no WhatsApp requirement.',
-          'Temporary chat room for hackathons and short-term teams—chatroom coordination for the sprint only.',
-          'Event volunteer live chat and workshop Q&A—online chat rooms via join link or QR.',
-          'Classroom backchannel and meetup organiser group chat—chat online free during the session.',
-          'Travel and family planning text chat—one trip or decision, then the room expires.',
-          'Freelance client handoff and temporary support live chat—private chat without signup for a finite engagement.',
-          'Book club and interview panel private chat—webchat that ends when the discussion ends.'
+          'For: revision sprints, hackathon weekends, volunteer shifts, interview backchannels, one-trip family planning, freelance handoffs.',
+          'Not for: random stranger matching, adult video chat, or anyone under 18 (including K–12 classes).',
+          'Not a records system: keep grades, ATS scorecards, invoices, and contracts where they already belong.'
         ]
       },
       {
-        heading: 'What QuickRoom is (and is not)',
+        heading: 'Inside the room',
         paragraphs: [
-          'QuickRoom is a temporary private chat room product: create a room, share a code, chat online in the browser, let it expire. It is built for people you already intend to talk with—classmates, teammates, clients, volunteers, family—not for random stranger matching or adult video chat sites.',
-          'If you searched for free video chat with strangers or random video chat, that is a different category. If you searched for free chat rooms, online chat rooms, private chat room without signup, anonymous chat, group chat, temporary chat room, chatroom, chat online free, text chat, live chat, or webchat for a coordinated group, QuickRoom is aimed at that job.'
-        ]
-      },
-      {
-        heading: 'Privacy without overpromising',
-        paragraphs: [
-          'QuickRoom does not require an email address, phone number, or permanent user profile. Rooms are accessed with a code and are deleted after their selected expiry.',
-          'That does not make every code safe to share publicly. Choose room type carefully and distribute codes only through the channel appropriate for the group.'
-        ]
-      },
-      {
-        heading: 'Start a room when the conversation matters',
-        paragraphs: [
-          'The best communication tool for a short conversation is often the one that lets the group begin immediately. A temporary room gives the discussion a focused place—whether you call it a free chat room, online chat room, private chat room, anonymous chat space, or simple group chat—and a clear point at which it can end.',
-          'Create a room on QuickRoom, share the code, and keep the conversation as lightweight as the moment requires.'
-        ]
+          'The product is group text chat, optional one-to-one chat if you enabled it at create time, and image sharing that follows the same expiry as the room. There are no ad units in the live conversation. If you leave, you can come back with the same link until the timer ends.'
+        ],
+        figure: PRODUCT_SHOTS.chat
       }
     ]
   },
 
   'blog/free-online-chat-rooms-no-signup': {
-    title: 'Free Online Chat Rooms With No Signup: Create a Room in Seconds',
-    seoTitle: 'Free Online Chat Rooms No Signup — Chat Online Free | QuickRoom',
+    title: 'A free room that is supposed to disappear',
+    seoTitle: 'Free Online Chat Rooms With No Signup | QuickRoom',
     description:
-      'Free online chat rooms with no signup. Create a free chat room, chatroom, or group chat in your browser—chat online free, text chat and live chat without accounts, apps, or phone numbers.',
+      'How to open a free QuickRoom in the browser, pick an expiry, and avoid leaving another permanent group on everyone’s phone.',
     publishedAt: 'August 21, 2026',
+    updatedAt: UPDATED,
+    author: AUTHOR,
     intro:
-      'Searches for free chat rooms, free online chat rooms, chat rooms free, online chat rooms, chatroom, chat online free, free chat, online chatting, and chat now usually mean one thing: start talking without a registration wall. QuickRoom gives you a temporary free chat room in the browser.',
+      '“Free chat room” on the internet often means a stranger lobby. QuickRoom is the opposite: you invite a known group, you pick when the room dies, and you do not pay or register to do that. Here is the setup we actually ship.',
     sections: [
       {
-        heading: 'Why people look for free chat rooms online',
+        heading: 'Create, don’t register',
         paragraphs: [
-          'Permanent apps are great for ongoing relationships. They are awkward for a one-hour study sprint, a volunteer shift, a workshop Q&A, or a client handoff that should end. Free chat rooms and online chat rooms that expire keep the conversation focused.',
-          'QuickRoom skips email verification, phone numbers, and app installs. Pick a nickname, create a room, share the code—chat free online as text chat or live group chat for the window you choose.'
-        ]
+          'Open quickroom.org, confirm you are 18+, then Create private room. Name it after the work (“Week 4 lab”, “Saturday shift”, “Panel 14:00”), not after a person you should not identify in a title.',
+          'Expiry options run from one hour to three months. If you cannot name an end, you probably want WhatsApp or Slack instead.'
+        ],
+        figure: PRODUCT_SHOTS.create
       },
       {
-        heading: 'Keywords that map to the same job',
-        list: [
-          'free chat rooms / free chat room online / chat rooms free',
-          'online chat rooms / online chat room / chatroom / chatrooms',
-          'chat online / chat online free / free chat / chat now / online chatting',
-          'group chat / text chat / live chat / webchat / chat web',
-          'temporary chat room / private chat room without signup'
-        ]
-      },
-      {
-        heading: 'How to open a free chat room on QuickRoom',
-        list: [
-          'Open QuickRoom and choose Create private room.',
-          'Name the room and set an expiry (hour, day, week, or longer).',
-          'Share the room code, link, or QR with your group.',
-          'Everyone joins in the browser and chats—no signup.',
-          'When the moment ends, the room expires on schedule.'
-        ]
-      },
-      {
-        heading: 'Better than forcing another permanent group',
+        heading: 'Share without harvesting numbers',
         paragraphs: [
-          'WhatsApp, Discord, and Slack are powerful—and often leave leftover groups. A free chat room that disappears after the event, class, or delivery keeps inboxes quieter.',
-          'Explore Exact jobs on the homepage—from study group chat to event volunteer live chat—or start from the temporary chat room and private chat room without signup pages.'
+          'Paste the join link into the cohort channel that already exists (Canvas, Teams, a calendar invite). People who cannot install another app can still open a browser.',
+          'If the group is in the same physical room, the QR on the share dialog is faster than spelling a code out loud.'
+        ],
+        figure: PRODUCT_SHOTS.share
+      },
+      {
+        heading: 'What “free” covers',
+        paragraphs: [
+          'Creating and joining the core room is free. We may show ads on public articles and About so the product can stay free to use. Those ads are not injected into Create/Join or into the chat transcript.',
+          'If a page ever asked you to watch a video or click a yellow box to enter a room, that is not QuickRoom’s join path—report it. The join path is the form on this site or a /?room= link.'
         ]
       }
     ]
   },
 
   'blog/anonymous-chat-temporary-group-chat': {
-    title: 'Anonymous Chat and Temporary Group Chat Without Accounts',
-    seoTitle: 'Anonymous Chat & Temporary Group Chat No Account | QuickRoom',
+    title: 'Anonymous nicknames, not a stranger queue',
+    seoTitle: 'Anonymous Chat Without Accounts — Temporary Group Chat | QuickRoom',
     description:
-      'Anonymous chat and temporary group chat without accounts. Private chat room, chat anonymous, anonymous chat rooms, and free chat rooms in the browser—no phone number, no signup.',
+      'QuickRoom nicknames are not verified identities. That is useful for a known group that should not swap phone numbers—and dangerous if you treat it like random chat.',
     publishedAt: 'August 21, 2026',
+    updatedAt: UPDATED,
+    author: AUTHOR,
     intro:
-      'People searching for anonymous chat, chat anonymous, anon chat, anonymous chat rooms, anonymous chat online, private chat, and temporary group chat often need coordination without exchanging phone numbers. QuickRoom is built for that: nicknames, room codes, and rooms that expire.',
+      'People say “anonymous chat” when they mean two different products. One is a roulette with strangers. The other is a class or crew that does not want to swap personal numbers for a two-hour job. QuickRoom is only the second.',
     sections: [
       {
-        heading: 'Anonymous-friendly does not mean public-to-everyone',
+        heading: 'What “anonymous” means here',
         paragraphs: [
-          'Anonymous chat on QuickRoom means participants are not forced to create profiles or share phone numbers. It does not mean the room is a public random-stranger queue. You invite people with a code—classmates, teammates, clients, volunteers—into a private chat room.',
-          'If your search was random chat with strangers or free video chat with strangers, look for products built for that. If you need anonymous chat rooms for a known group, a temporary group chat with no account is the better fit.'
+          'You are not asked for a legal name, email, or phone. Firebase Anonymous Authentication gives the browser a random ID for that session. Nicknames can be duplicated; they are labels, not accounts.',
+          'We can still see that a browser is in a room, and Cloudflare sees network metadata. “Anonymous” is not “invisible to the operator of the website.” Read the privacy policy if that distinction matters for your use.'
         ]
       },
       {
-        heading: 'Searches this workflow covers',
+        heading: 'Invite people you already intend to talk to',
+        paragraphs: [
+          'Share the code the same way you would share a meeting PIN: email thread, LMS group, calendar guests. Do not seed a public room and hope the right strangers arrive.',
+          'If you wanted random video chat, this product will feel empty and we will not add that feature. The 18+ gate exists so this does not become a kids’ hangout either.'
+        ],
+        figure: PRODUCT_SHOTS.chat
+      },
+      {
+        heading: 'When the nickname model is the wrong tool',
         list: [
-          'anonymous chat / chat anonymous / anon chat / anonymous chat online',
-          'anonymous chat rooms / free anonymous chat',
-          'private chat / private chat room without signup',
-          'temporary group chat / group chat / chat group',
-          'chat with people you already invited—via code, not a stranger roulette'
-        ]
-      },
-      {
-        heading: 'Practical setups',
-        paragraphs: [
-          'Study groups use anonymous-friendly free chat rooms when students do not want to share numbers. Event staff use live chat rooms for a shift. Freelancers use a private chat room for one client engagement, then let it expire.',
-          'Create a room, share the code only with the intended people, and choose Private or Invite Only when the discussion should stay closed.'
-        ]
-      },
-      {
-        heading: 'Start anonymous chat that still has an end date',
-        paragraphs: [
-          'Open QuickRoom, create a private room, set expiry, and share the invitation. That is anonymous chat and temporary group chat without turning into another permanent messaging identity.',
-          'Read the global private chat room guide or jump to Exact jobs for study, events, travel, and support scenarios.'
+          'You need to prove who sent a message (use a named workspace).',
+          'You must retain chat for legal or HR discovery (use the system your counsel already approved).',
+          'Participants are under 18 (do not use QuickRoom).'
         ]
       }
     ]
   },
 
   'blog/quickroom-vs-discord-whatsapp-slack': {
-    title: 'QuickRoom vs Discord vs WhatsApp vs Slack for a One-Off Group',
-    seoTitle:
-      'QuickRoom vs Discord vs WhatsApp vs Slack — Temporary Group Chat | US, UK, AU',
+    title: 'QuickRoom vs WhatsApp, Discord, and Slack when the chat should end',
+    seoTitle: 'QuickRoom vs Discord vs WhatsApp vs Slack | Temporary Group Chat',
     description:
-      'Compare QuickRoom with Discord, WhatsApp, and Slack when a US, UK, or Australian group only needs a short-lived chat—no server, phone numbers, or workspace.',
+      'A side-by-side of signup, leftover groups, and fit—based on how QuickRoom is actually built, not a generic “best chat app” roundup.',
     publishedAt: 'August 28, 2026',
+    updatedAt: UPDATED,
+    author: AUTHOR,
     intro:
-      'Most groups in the United States, United Kingdom, and Australia already have Discord, WhatsApp, iMessage, or Slack. Those tools are excellent for ongoing communities. They are slow when the job is one assignment, one interview panel, or one hackathon weekend.',
+      'I did not build QuickRoom to replace the apps your group already lives in. I built it because those apps are slow when the job is one deadline. The table below is the decision I use when someone asks “why not just WhatsApp?”',
     sections: [
       {
-        heading: 'The job, not the brand',
+        heading: 'Use the tool that matches the lifespan',
         paragraphs: [
-          'If the conversation should still be there in a year, use the app the group already lives in. If the conversation should end when the deadline ends, a temporary browser room is usually the better default.',
-          'QuickRoom is a private room with a code, nicknames, and an expiry. It is not a Discord replacement, not WhatsApp, and not a random video-chat site.'
+          'If the same ten people will still need this thread next year, stay in WhatsApp, Discord, or Slack. Switching tools has a cost.',
+          'If you can point at a calendar and say “this is over on Friday,” a room with an expiry is usually less mess than a new group, server, or workspace.'
+        ],
+        table: 'comparison'
+      },
+      {
+        heading: 'WhatsApp and iMessage leftovers',
+        paragraphs: [
+          'WhatsApp is the default across much of the UK, EU, and Australia because everyone already has it. The hidden cost is a phone-number graph plus a group that sits on the home screen until someone is rude enough to leave.',
+          'In mixed iPhone/Android US groups, iMessage falls back to SMS and GroupMe becomes the campus default. A room code avoids collecting numbers from people you only need for this module.'
         ]
       },
       {
-        heading: 'WhatsApp and iMessage',
+        heading: 'Discord servers that never get archived',
         paragraphs: [
-          'WhatsApp is the default in the UK, much of Europe, and Australia. It requires phone numbers. A group for one university project then sits on everyone’s home screen until someone is willing to delete it.',
-          'In the US, iMessage and GroupMe have the same leftover-group problem, and mixed Android/iPhone groups still fall back to SMS. A room code avoids collecting numbers from classmates you only need for this module.'
+          'Discord is the right call for a society or a hackathon that already runs there. Creating a fresh server for five people still means accounts, roles, and a space that rarely gets deleted after the demo.',
+          'Use QuickRoom when some of the group does not have Discord yet, or when there should be no server owner after the weekend.'
         ]
       },
       {
-        heading: 'Discord',
+        heading: 'Slack is for organisations that already paid that tax',
         paragraphs: [
-          'Discord is the right call for a society, game community, or hackathon that already runs on it. Creating a new server for a five-person project still means accounts, permissions, and a space that rarely gets archived.',
-          'Use QuickRoom when some people do not have Discord yet, or when you want the channel to disappear after the event without a server owner.'
+          'Guest accounts, SSO, and IT review make Slack a poor fit for a two-hour interview panel with an external chair. Keep the official file in the ATS. Use a browser room only for “we’re running long” and “you ask the next question.”',
+          'If your company already requires Slack for that panel, do not fight it. QuickRoom is for the case where Slack access is the blocker.'
         ]
       },
       {
-        heading: 'Slack',
+        heading: 'What the QuickRoom UI actually asks',
         paragraphs: [
-          'Slack is built for organisations. Guest accounts, workspace approval, and IT policy make it a poor fit for an interview panel that lasts two hours or a freelance handoff that lasts a week.',
-          'Keep official hiring records in the ATS. Use a temporary room only for live coordination among authorised panelists.'
-        ]
-      },
-      {
-        heading: 'When to pick QuickRoom',
-        list: [
-          'The group is 18+ and already knows who should be in the room',
-          'You do not want to collect phone numbers',
-          'You can name an end date: assignment, weekend, interview day',
-          'People can open a browser; they should not have to install another app'
-        ]
+          'Template, name, expiry, nickname, private vs public. Then a share surface. Then chat. That is the whole create path. Compare that to “create workspace / verify email / invite guests / set channels.”'
+        ],
+        figure: PRODUCT_SHOTS.create
       }
     ]
   },
 
   'blog/study-group-chat-without-whatsapp-or-groupme': {
-    title: 'How to Run a Study Group Without WhatsApp, GroupMe, or Phone Numbers',
-    seoTitle:
-      'Study Group Chat Without WhatsApp or GroupMe | US, UK, Australia | QuickRoom',
+    title: 'Run a university study group without collecting phone numbers',
+    seoTitle: 'Study Group Chat Without WhatsApp or GroupMe | QuickRoom',
     description:
-      'Set up an 18+ study group chat for university in the US, UK, or Australia without WhatsApp, GroupMe, or sharing phone numbers. Browser room, code, expiry.',
+      'An 18+ setup for US, UK, and Australian coursework: Private study room, expiry at the deadline, code in the cohort channel—not on a public story.',
     publishedAt: 'August 28, 2026',
+    updatedAt: UPDATED,
+    author: AUTHOR,
     intro:
-      'US, UK, and Australian students still default to WhatsApp, GroupMe, iMessage, or Discord for a single coursework deadline. The chat outlives the module. A temporary room keeps the revision thread aligned with the assignment.',
+      'The WhatsApp group for “just this assignment” is still there in March. This is the setup I recommend for adult university groups who should not be harvesting numbers for a two-week lab.',
     sections: [
       {
         heading: 'Who this is for',
         paragraphs: [
-          'Adult university and college groups (18+). QuickRoom is not for K–12 classes or anyone under 18.',
-          'Typical searches: study group without WhatsApp, group chat without phone number, university project chat UK, college groupme alternative, assignment chat Australia.'
+          'Adult university, college, and adult-education groups (18+). QuickRoom is not a K–12 classroom tool. If any classmate is under 18, use the school-approved LMS chat.',
+          'Keep submissions, grades, and exam materials in Canvas, Moodle, Blackboard, or the portal your faculty already named. The room is only for questions and photos of a diagram you are allowed to share.'
         ]
       },
       {
-        heading: 'A setup that takes a minute',
+        heading: 'A one-minute setup',
         list: [
-          'One person creates a Study room named after the module or assignment.',
-          'Set expiry to the deadline plus a day (24 hours or 7 days).',
-          'Choose Private. Share the code in the existing cohort channel—not on a public story.',
-          'Ask people to use a recognisable nickname (first name is enough).',
-          'Keep grades and submissions in Canvas, Moodle, Blackboard, or the university portal.'
-        ]
+          'Create a Study room named after the module or assignment code.',
+          'Set expiry to the deadline plus a day (24 hours or 7 days is the usual pair).',
+          'Choose Private. Paste the code into the existing cohort Teams/Discord/Canvas thread—not onto Instagram.',
+          'Ask for a recognisable nickname (first name is enough).',
+          'If you meet in person, put the QR on a slide for thirty seconds.'
+        ],
+        figure: PRODUCT_SHOTS.share
       },
       {
-        heading: 'US vs UK vs Australia',
+        heading: 'US vs UK vs Australia, in practice',
         paragraphs: [
-          'In the UK and Australia, WhatsApp is the social default; the pitch is “no numbers, no leftover group.”',
-          'In the US, GroupMe and iMessage are common on campus. The same pitch works: a mixed-phone group should not depend on who has iMessage.',
-          'Share a QR on a seminar slide if the group is meeting in a room; otherwise paste the code in the cohort Teams/Slack/Discord that already exists.'
-        ]
-      },
-      {
-        heading: 'What not to put in the room',
-        paragraphs: [
-          'Student IDs, unpaid invoices, exam papers you are not allowed to circulate, or anyone’s personal contact list. The room is a discussion layer, not the official record.',
-          'If a classmate is under 18, do not use QuickRoom. Use the school-approved tool.'
+          'UK and Australia: the pitch is “no numbers, no leftover WhatsApp group.” US: GroupMe and iMessage split the campus; a browser link is the thing that works for both.',
+          'Do not put student IDs, unpaid invoices, or papers you are not allowed to circulate in the room.'
         ]
       }
     ]
   },
 
   'blog/interview-panel-chat-without-slack': {
-    title: 'Interview Panel Chat Without Opening a Slack Workspace',
-    seoTitle: 'Interview Panel Chat Without Slack — Temporary Hiring Room | QuickRoom',
+    title: 'A hiring-panel backchannel without a new Slack workspace',
+    seoTitle: 'Interview Panel Chat Without Slack | QuickRoom',
     description:
-      'Coordinate a live interview panel in the US or UK without a new Slack workspace or guest accounts. Short-lived private room for authorised interviewers.',
+      'Coordinate timing among authorised interviewers in the browser. Keep scorecards and candidate PII in the ATS—not in the room.',
     publishedAt: 'August 28, 2026',
+    updatedAt: UPDATED,
+    author: AUTHOR,
     intro:
-      'A hiring panel often needs a quiet backchannel for timing, “we’re running long,” and who asks the next question. Opening a Slack workspace—or adding guests to the company Slack—is more process than the hour requires.',
+      'The panel needs a place for “we’re five minutes over” that is not the candidate-facing call. Opening Slack guests for that hour is more process than the meeting. A private QuickRoom is the smaller tool.',
     sections: [
       {
-        heading: 'Use it for coordination, not the official file',
+        heading: 'Coordination only',
         paragraphs: [
-          'Scorecards, equal-opportunity records, and candidate PII belong in the ATS (Greenhouse, Lever, Workday, Beamery). QuickRoom is only for authorised panelists during the session.',
-          'Name the room after the interview slot, not the candidate’s full identity. Set expiry to the end of the interview day.'
+          'Scorecards, equal-opportunity records, and candidate personal data belong in Greenhouse, Lever, Workday, or whatever ATS you already use. Name the QuickRoom after the slot (“Thu 14:00 panel”), not after the candidate.',
+          'Set expiry to the end of the interview day. After you hang up, copy anything that must persist into the ATS, then let the room die.'
         ]
       },
       {
-        heading: 'Suggested run-of-show',
+        heading: 'Run-of-show',
         list: [
-          'Create an Interview room 15 minutes before the panel.',
-          'Private or Invite Only. Share the code in the calendar invite or a 1:1 message—not in a public Slack channel.',
-          'Use the group room for time checks; optional one-to-one chat for a narrow question if you enabled it.',
-          'After the session, copy any decision that must persist into the ATS, then let the room expire.'
-        ]
+          'Create an Interview room fifteen minutes before the panel.',
+          'Private or Invite Only. Put the code in the calendar invite or a 1:1 message—not in a public Slack channel.',
+          'Use the group room for time checks. Turn on one-to-one chat only if two interviewers need a side question.',
+          'Do not paste right-to-work documents or special-category data into the transcript.'
+        ],
+        figure: PRODUCT_SHOTS.chat
       },
       {
-        heading: 'US and UK hiring context',
+        heading: 'Why Slack is often the wrong room',
         paragraphs: [
-          'In the US, mixed-company panels (agency + hiring manager + skip-level) often cannot all join the same Slack. A browser link is the lowest common denominator.',
-          'In the UK, the same pattern shows up with external chairs and community interviewers. Do not put special-category data or right-to-work documents in the room.'
+          'US agency + hiring manager + skip-level panels often cannot share one Slack. UK external chairs have the same problem. A link that opens in a browser is the lowest common denominator—not a replacement for your HR file.'
         ]
       }
     ]
   },
 
   'blog/university-group-project-chat-us-uk-australia': {
-    title: 'A University Group-Project Chat That Ends With the Semester',
-    seoTitle:
-      'University Group Project Chat — US, UK, Australia | Temporary Room | QuickRoom',
+    title: 'A group-project chat that ends when the semester ends',
+    seoTitle: 'University Group Project Chat | Temporary Room | QuickRoom',
     description:
-      'Run an 18+ university group-project chat in the US, UK, or Australia that expires with the semester. No Discord server, WhatsApp group, or phone-number list.',
+      'Match room expiry to the brief: a week for a sprint, up to three months for a teaching block. For 18+ university groups only.',
     publishedAt: 'August 28, 2026',
+    updatedAt: UPDATED,
+    author: AUTHOR,
     intro:
-      'Group projects cluster at the start of term (August–October in the US, September in the UK, February/July in Australia) and again before finals. The chat tool should match that calendar.',
+      'Group projects cluster at the start of term and again before finals. The chat should follow that calendar, not sit in Discord until graduation.',
     sections: [
       {
-        heading: 'Pick an expiry that matches the brief',
+        heading: 'Pick the expiry from the brief, not from habit',
         paragraphs: [
-          'A one-week sprint can use a 7-day room. A project that lasts the teaching block can use three months. Either way, someone should be able to walk away when the grade is in.',
-          'Create the room from the Study template. Put the assessment name in the room title so late joiners know they are in the right place.'
-        ]
+          'A one-week sprint can use a 7-day room. A project that lasts the teaching block can use three months. Someone should be able to walk away when the grade is in.',
+          'Use the Study template and put the assessment name in the title so late joiners do not enter the wrong room.'
+        ],
+        figure: PRODUCT_SHOTS.create
       },
       {
         heading: 'How groups actually share the code',
         paragraphs: [
-          'US: paste into the Canvas/GroupMe thread that already exists, then move discussion into the room.',
-          'UK: share in the Microsoft Teams module channel or the society Discord, not on Instagram.',
-          'Australia: same as the UK for WhatsApp-heavy cohorts—code in the existing chat, work in the room that can die later.'
+          'US: paste into the Canvas or GroupMe thread that already exists, then move working discussion into the room.',
+          'UK: Microsoft Teams module channel or society Discord—not a public Instagram story.',
+          'Australia: same as the UK for WhatsApp-heavy cohorts: code in the existing chat, work in the room that can expire.'
         ]
       },
       {
         heading: 'Adults only',
         paragraphs: [
-          'This is for university, college, TA discussion among adults, and adult education. It is not a tool to roll out to a secondary-school class.'
+          'This is for university, college, TA discussion among adults, and adult education. It is not a rollout for a secondary-school class.'
         ]
       }
     ]
   },
 
   'blog/temporary-team-chat-without-phone-numbers-europe': {
-    title: 'Temporary Team Chat in Europe Without Collecting Phone Numbers',
-    seoTitle: 'Temporary Team Chat Europe — No Phone Number, GDPR-Aware | QuickRoom',
+    title: 'Temporary team chat in Europe without a WhatsApp number list',
+    seoTitle: 'Temporary Team Chat in Europe — No Phone Number | QuickRoom',
     description:
-      'A GDPR-aware temporary team chat for European groups that do not want WhatsApp numbers or a new Slack. Browser rooms for adults, with an end date.',
+      'A practical EU/UK setup: Private room, code in the registration email, contracts kept in the tools already under your DPA. QuickRoom is 18+.',
     publishedAt: 'August 28, 2026',
+    updatedAt: UPDATED,
+    author: AUTHOR,
     intro:
-      'European teams often default to WhatsApp because it is already on the phone. That quietly builds a phone-number graph for a workshop that lasts one afternoon. A room code is a smaller request.',
+      'WhatsApp is already on the phone, so it becomes the workshop thread by default. That quietly copies a phone-number graph for an afternoon that should have ended at 17:00. A room code is a smaller request.',
     sections: [
       {
-        heading: 'Why this ranks as a real job in the EU',
+        heading: 'What we store versus what WhatsApp stores',
         paragraphs: [
-          'Workshops, Erasmus project groups, meetup organisers, and freelance handoffs all need a thread that can end. Slack guest access is heavy. WhatsApp is personal-device infrastructure.',
-          'QuickRoom is 18+. It uses nicknames and Firebase anonymous IDs, not marketing profiles. Advertising, if enabled, appears on articles—not in the room—and requires consent in the EEA, UK, and Switzerland.'
+          'QuickRoom stores nicknames, messages, and images until the expiry you chose, plus an anonymous Firebase ID for that browser. We do not ask for a mobile number. Advertising on public pages, if you allow it, uses a consent banner in the EEA, UK, and Switzerland. Live rooms do not show ads.',
+          'That is not a substitute for your organisation’s DPA. Keep contracts, invoices, and special-category data in the systems you already named to legal.'
         ]
       },
       {
-        heading: 'A practical EU setup',
+        heading: 'A workshop setup that fits GDPR-minded teams',
         list: [
-          'Create a Private room named after the workshop or work package.',
-          'Expiry: end of day, or one week for follow-up questions.',
-          'Share the code in the existing email thread or event page for attendees who already registered.',
-          'Keep contracts, invoices, and special-category data in the tools that are already under your organisation’s DPA.'
-        ]
+          'Create a Private room named after the work package or event.',
+          'Expiry: end of day, or one week if you promised a follow-up window.',
+          'Share the code in the confirmation email to people who already registered.',
+          'French-speaking attendees can read product pages at /fr; the create UI is still English in this version, but messages are just text.'
+        ],
+        figure: PRODUCT_SHOTS.share
       },
       {
-        heading: 'French-speaking teams',
+        heading: 'When not to use it',
         paragraphs: [
-          'A French landing and use-case pages exist at /fr, including chat privé sans inscription and salle de discussion temporaire. The product UI for creating a room is still English in this version; the room itself is just text.'
+          'If works council or IT forbids any tool outside the approved list, follow that list. QuickRoom is for groups that are allowed to choose a lightweight browser room and want an end date.'
         ]
       }
     ]
