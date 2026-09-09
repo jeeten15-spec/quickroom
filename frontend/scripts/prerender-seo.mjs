@@ -170,7 +170,6 @@ function bodyBlog() {
       <a class="back-link" href="/">QuickRoom</a>
       <p class="eyebrow">Editorial</p>
       <h1>How QuickRoom actually works</h1>
-      <p>These are walkthroughs written against the live product: screenshots of create, chat, and share; a comparison table we reuse on the homepage; and the private vs public listing rule. They are not keyword-stuffed “best free chat 2026” listicles.</p>
       ${renderAuthorByline(escapeHtml, '9 September 2026')}
       <h2>Articles</h2>
       <ul class="blog-index">${articleLinks}</ul>
@@ -206,7 +205,6 @@ function bodyHome() {
       <h1>QuickRoom</h1>
       <p>A named chat room you create, share as a link, and let expire. Nickname only — no account.</p>
       <p>18+ text chat in the browser. Not a video lounge, not a K–12 classroom product.</p>
-      ${renderIabSlot('box')}
       <p><a href="/about">About QuickRoom</a> · <a href="/blog">How it works</a></p>
       <section class="public-rooms" aria-labelledby="public-rooms-title">
         <h2 id="public-rooms-title">Public topic rooms</h2>
@@ -226,6 +224,8 @@ const pages = [
       'Create a named browser chat room, share /?room=…, and let it expire. Nickname only. 18+ text chat — not video matching, not K–12.',
     body: bodyHome(),
     noAds: false,
+    railCount: 5,
+    native: false,
     faq: homeFaq(),
     person: true
   },
@@ -234,7 +234,7 @@ const pages = [
     file: 'about.html',
     title: 'About QuickRoom — who builds it and what we will not add',
     description:
-      'Jeeten builds QuickRoom. Named rooms, 18+ only, no K–12, no stranger video. Code on GitHub, contact feedback@quickroom.org.',
+      'Jeets builds QuickRoom. Named rooms, 18+ only, no K–12, no stranger video. Code on GitHub, contact feedback@quickroom.org.',
     body: bodyAbout(),
     noAds: true,
     noAdSense: true,
@@ -247,7 +247,7 @@ const pages = [
     description:
       'Product walkthroughs with screenshots, a comparison table versus WhatsApp, Discord, and Slack, and the private vs public listing rule.',
     body: bodyBlog(),
-    railCount: 5,
+    railCount: 4,
     faq: homeFaq(),
     person: true
   },
@@ -291,7 +291,7 @@ const pages = [
     description: page.description,
     body: bodyLegal(slug, page),
     lang: page.htmlLang || 'en',
-    railCount: 2
+    railCount: slug === 'privacy' ? 3 : slug === 'privacy-choices' ? 2 : 1
   })),
   ...Object.entries(frPages).map(([slug, page]) => ({
     route: `/${slug}`,
@@ -300,7 +300,8 @@ const pages = [
     description: page.description,
     body: bodyFrench(slug, page),
     lang: 'fr',
-    noAds: false
+    noAds: false,
+    railCount: page.isLanding ? 2 : 1
   }))
 ];
 
@@ -323,11 +324,11 @@ function gscMeta() {
   return `<meta name="google-site-verification" content="${escapeHtml(token)}" />`;
 }
 
-function wrapAds(body, { rails = 1 } = {}) {
+function wrapAds(body, { rails = 1, native = true } = {}) {
   return `${renderAdLeaderboard()}
     <div class="ads-page-row has-ad-rails">
       ${renderAdSkyscraper('left', rails)}
-      <div class="ads-page-main">${renderNativeBanner()}${body}</div>
+      <div class="ads-page-main">${native ? renderNativeBanner() : ''}${body}</div>
       ${renderAdSkyscraper('right', rails)}
     </div>
     ${renderAdFooter()}`;
@@ -408,7 +409,7 @@ function renderHtml(page, { noindex = false } = {}) {
   </head>
   <body>
     <div id="app">${renderLangToggle(page.route)}${
-      page.noAds ? page.body || '' : wrapAds(page.body || '', { rails: 1 })
+      page.noAds ? page.body || '' : wrapAds(page.body || '', { rails: page.railCount ?? 1, native: page.native !== false })
     }</div>
   </body>
 </html>
@@ -445,7 +446,9 @@ const spaShell = renderHtml(
     description:
       'Create a named browser chat room, share /?room=…, and let it expire. Nickname only. 18+ text chat — not video matching, not K–12.',
     body: bodyHome(),
-    noAds: false
+    noAds: false,
+    railCount: 5,
+    native: false
   },
   { noindex: false }
 );

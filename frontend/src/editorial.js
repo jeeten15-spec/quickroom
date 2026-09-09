@@ -1,7 +1,7 @@
 /** Shared publisher copy, comparison table, screenshots, and author for crawlable + client HTML. */
 
 export const SITE_AUTHOR = {
-  name: 'Jeeten',
+  name: 'Jeets',
   jobTitle: 'Founder of QuickRoom',
   url: 'https://github.com/jeeten15-spec',
   githubHandle: 'jeeten15-spec',
@@ -12,17 +12,17 @@ export const SITE_AUTHOR = {
 
 export const PRODUCT_SHOTS = {
   create: {
-    src: '/images/quickroom-create-templates.svg',
+    src: '/images/quickroom-create-templates.jpg',
     alt: 'QuickRoom create flow: choosing a room template such as Study, Coding, or Event.',
     caption: 'Step 1 — pick a starting template. The rest of setup is name, expiry, and a nickname.'
   },
   share: {
-    src: '/images/quickroom-share.svg',
+    src: '/images/quickroom-share.jpg',
     alt: 'QuickRoom share dialog with a room code, join link, and QR code.',
     caption: 'After create, you share a code, link, or QR. Nobody else needs an account.'
   },
   chat: {
-    src: '/images/quickroom-chat.svg',
+    src: '/images/quickroom-chat.jpg',
     alt: 'QuickRoom chat: messages, composer, and participant list in the browser.',
     caption: 'The room itself is text chat (and optional images). Ads are not placed inside live rooms.'
   }
@@ -40,7 +40,7 @@ const COMPARISON_ROWS = [
 export function renderFigure(shot, escapeHtml) {
   if (!shot) return '';
   return `<figure class="product-shot">
-      <img src="${escapeHtml(shot.src)}" alt="${escapeHtml(shot.alt)}" width="960" height="540" loading="lazy" />
+      <img src="${escapeHtml(shot.src)}" alt="${escapeHtml(shot.alt)}" width="1280" height="720" loading="lazy" decoding="async" />
       <figcaption>${escapeHtml(shot.caption)}</figcaption>
     </figure>`;
 }

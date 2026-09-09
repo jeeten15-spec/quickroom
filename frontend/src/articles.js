@@ -1,6 +1,6 @@
 import { PRODUCT_SHOTS } from './editorial.js';
 
-const AUTHOR = 'Jeeten';
+const AUTHOR = 'Jeets';
 const UPDATED = '9 September 2026';
 
 export const articles = {

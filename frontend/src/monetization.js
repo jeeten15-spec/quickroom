@@ -188,8 +188,13 @@ function adsenseClient() {
 }
 
 export function adRailCount(view) {
-  if (showChatRightRail(view) || showPageBanners(view)) return 1;
-  return 0;
+  if (showChatRightRail(view)) return 1;
+  if (!showPageBanners(view)) return 0;
+  if (view === 'landing') return 5;
+  if (view === 'blog') return 4;
+  if (view === 'privacy') return 3;
+  if (view === 'privacy-choices' || view === 'fr') return 2;
+  return 1;
 }
 
 function useGoogleFundingChoices() {

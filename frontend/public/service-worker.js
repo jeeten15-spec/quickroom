@@ -1,4 +1,4 @@
-const SHELL_CACHE = 'quickroom-shell-v1';
+const SHELL_CACHE = 'quickroom-shell-v2';
 const ROOM_CACHE = 'quickroom-room-v1';
 const shellUrls = ['/', '/index.html', '/manifest.webmanifest', '/icon.svg'];
 
@@ -32,6 +32,10 @@ self.addEventListener('fetch', (event) => {
   }
 
   if (request.method === 'GET' && url.origin === self.location.origin) {
+    if (url.pathname.startsWith('/images/')) {
+      event.respondWith(fetch(request));
+      return;
+    }
     event.respondWith(cacheThenNetwork(request));
   }
 });

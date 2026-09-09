@@ -207,7 +207,6 @@ function renderLanding() {
               : `<button class="text-link" type="button" data-action="open-join">Join with code or link</button>`
           }
         </div>
-        ${showPageBanners('landing') ? renderAdSlot() : ''}
         ${renderPublicRooms()}
         ${renderLandingEditorial(escapeHtml)}
         ${renderCoordinationJobs()}
@@ -854,7 +853,6 @@ function renderBlog() {
       <a class="back-link" href="/" data-action="navigate">QuickRoom</a>
       <p class="eyebrow">Editorial</p>
       <h1>How QuickRoom actually works</h1>
-      <p>These are walkthroughs written against the live product: screenshots of create, chat, and share; a comparison table we reuse on the homepage; and the private vs public listing rule. They are not keyword-stuffed “best free chat 2026” listicles.</p>
       ${renderAuthorByline(escapeHtml, '9 September 2026')}
       <h2>Articles</h2>
       <ul class="blog-index">${articleLinks}</ul>
@@ -890,7 +888,7 @@ function updateDocumentMetadata() {
         ? {
             title: 'About QuickRoom — who builds it and what we will not add',
             description:
-              'Jeeten builds QuickRoom. Named rooms, 18+ only, no K–12, no stranger video. Code on GitHub, contact feedback@quickroom.org.',
+              'Jeets builds QuickRoom. Named rooms, 18+ only, no K–12, no stranger video. Code on GitHub, contact feedback@quickroom.org.',
             lang: 'en'
           }
         : state.view === 'blog'
