@@ -32,11 +32,12 @@ export const legalPages = {
       {
         heading: 'Advertising (content pages only)',
         paragraphs: [
-          'Google AdSense (publisher ca-pub-2208705874716134) fills reserved IAB frames on public pages except About, Create, the operator dashboard, and live chat rooms. The blog uses five 160×600 units per side; use-case pages use four; Home, guides, and articles use three; shorter legal pages use two. Room buttons and the conversation stay clear of AdSense.',
-          'Monetag in-page push, vignette, and the labeled sponsored link run only on the About page, which does not show AdSense. They are delayed (about 3 seconds for in-page push, 10 seconds for vignette, vignette at most once per browser session). We do not use Monetag OnClick or pop-under tags.',
+          'Adsterra display banners fill the reserved IAB frames on public pages except About: 728×90 along the top and bottom on wide screens, 300×250 on small screens (a 320×50 zone was not supplied), 160×600 in the side rails on wide screens, a 300×250 in the article body, and one Native 1:1 unit per page. A 160×600 also sits to the right of live chat on wide screens; on a phone that unit becomes a 300×250 below the room. Create and content pages use the same banner set. The operator dashboard has no ads.',
+          'Monetag in-page push, vignette, and the labeled sponsored link run only on the About page, which does not show Adsterra. They are delayed (about 3 seconds for in-page push, 10 seconds for vignette, vignette at most once per browser session). We do not use Monetag OnClick or pop-under tags.',
+          'Google AdSense remains in the HTML head and /ads.txt so the site can finish Google’s publisher review. AdSense units are not injected into the same frames as Adsterra.',
           'In the European Economic Area, the United Kingdom, and Switzerland, advertising cookies and personalized ads are off until you accept them in the consent message. We use Google Consent Mode where Google tags are present. After AdSense approval, Google’s certified Privacy & messaging / Funding Choices message should also be turned on in the AdSense dashboard—that is the IAB TCF 2.2 CMP Google requires for publishers.',
           'In the United States, you can use Privacy choices to opt out of the sale/sharing of personal information for advertising. We also honour the Global Privacy Control (GPC) signal where present.',
-          'Google, Monetag, and their advertising partners may process data as described in their advertising privacy documentation. We do not control their full vendor list; the consent tools show partners when they are active.'
+          'Adsterra, Google, Monetag, and their advertising partners may process data as described in their advertising privacy documentation. We do not control their full vendor list; the consent tools show partners when they are active.'
         ]
       },
       {
@@ -85,7 +86,7 @@ export const legalPages = {
       {
         heading: 'Advertising and analytics cookies',
         paragraphs: [
-          'Google AdSense, Monetag, and (if enabled) Google Analytics set cookies only after you allow them in Europe, or according to US privacy choices. Cloudflare Web Analytics, when enabled, is designed to operate without advertising cookies.',
+          'Adsterra, Google AdSense (head tag and ads.txt only), Monetag, and (if enabled) Google Analytics set cookies only after you allow them in Europe, or according to US privacy choices. Cloudflare Web Analytics, when enabled, is designed to operate without advertising cookies.',
           'You can change your mind on Privacy choices or by clearing site data for quickroom.org.'
         ]
       }
@@ -101,7 +102,7 @@ export const legalPages = {
       {
         heading: 'United States',
         paragraphs: [
-          'If you are in California or another US state with a similar law, you can opt out of the sale or sharing of personal information for cross-context advertising on QuickRoom content pages. This sets a browser flag we honour before loading AdSense. We also honour Global Privacy Control (GPC) when your browser sends it.'
+          'If you are in California or another US state with a similar law, you can opt out of the sale or sharing of personal information for cross-context advertising on QuickRoom content pages. This sets a browser flag we honour before loading Adsterra or Monetag. We also honour Global Privacy Control (GPC) when your browser sends it.'
         ]
       },
       {

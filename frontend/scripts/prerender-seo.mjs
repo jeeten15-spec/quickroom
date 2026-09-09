@@ -24,9 +24,9 @@ const {
   renderContentSections,
   renderLandingEditorial
 } = await import(pathToFileURL(path.join(root, 'src/editorial.js')).href);
-const { monetagHeadHtml, renderAdFooter, renderAdLeaderboard, renderAdSkyscraper, renderIabSlot, MONETAG_DIRECT_LINK } =
+const { monetagHeadHtml, renderAdFooter, renderAdLeaderboard, renderAdSkyscraper, renderIabSlot, renderNativeBanner, MONETAG_DIRECT_LINK } =
   await import(pathToFileURL(path.join(root, 'src/monetag-tags.js')).href);
-const { adsenseHeadHtml, ADSENSE_ADS_TXT, ADSENSE_HOME_PLACEHOLDERS } = await import(
+const { adsenseHeadHtml, ADSENSE_ADS_TXT } = await import(
   pathToFileURL(path.join(root, 'src/adsense.js')).href
 );
 const { renderLangToggle, hreflangPairs } = await import(
@@ -73,7 +73,7 @@ function bodyLegal(slug, page) {
       <p class="eyebrow">Legal</p>
       <h1>${escapeHtml(page.title)}</h1>
       <p class="use-case-intro">${escapeHtml(page.description)}</p>
-      <p>Last updated 28 August 2026</p>
+      <p>Last updated 9 September 2026</p>
       ${page.sections
         .map(
           (section) =>
@@ -92,7 +92,7 @@ function bodyFrench(slug, page) {
       <h1>QuickRoom</h1>
       <p>${escapeHtml(page.intro)}</p>
       <p>${escapeHtml(page.description)}</p>
-      ${ADSENSE_HOME_PLACEHOLDERS ? renderIabSlot('box') : ''}
+      ${renderIabSlot('box')}
       <p><a href="/">Créer une salle</a></p>
       <h2>Usages</h2>
       <ul>${page.jobs
@@ -206,7 +206,7 @@ function bodyHome() {
       <h1>QuickRoom</h1>
       <p>A named chat room you create, share as a link, and let expire. Nickname only — no account.</p>
       <p>18+ text chat in the browser. Not a video lounge, not a K–12 classroom product.</p>
-      ${ADSENSE_HOME_PLACEHOLDERS ? renderIabSlot('box') : ''}
+      ${renderIabSlot('box')}
       <p><a href="/about">About QuickRoom</a> · <a href="/blog">How it works</a></p>
       <section class="public-rooms" aria-labelledby="public-rooms-title">
         <h2 id="public-rooms-title">Public topic rooms</h2>
@@ -225,7 +225,7 @@ const pages = [
     description:
       'Create a named browser chat room, share /?room=…, and let it expire. Nickname only. 18+ text chat — not video matching, not K–12.',
     body: bodyHome(),
-    noAds: !ADSENSE_HOME_PLACEHOLDERS,
+    noAds: false,
     faq: homeFaq(),
     person: true
   },
@@ -300,7 +300,7 @@ const pages = [
     description: page.description,
     body: bodyFrench(slug, page),
     lang: 'fr',
-    noAds: Boolean(page.isLanding) && !ADSENSE_HOME_PLACEHOLDERS
+    noAds: false
   }))
 ];
 
@@ -323,11 +323,11 @@ function gscMeta() {
   return `<meta name="google-site-verification" content="${escapeHtml(token)}" />`;
 }
 
-function wrapAds(body, { rails = 3 } = {}) {
+function wrapAds(body, { rails = 1 } = {}) {
   return `${renderAdLeaderboard()}
     <div class="ads-page-row has-ad-rails">
       ${renderAdSkyscraper('left', rails)}
-      <div class="ads-page-main">${body}</div>
+      <div class="ads-page-main">${renderNativeBanner()}${body}</div>
       ${renderAdSkyscraper('right', rails)}
     </div>
     ${renderAdFooter()}`;
@@ -408,7 +408,7 @@ function renderHtml(page, { noindex = false } = {}) {
   </head>
   <body>
     <div id="app">${renderLangToggle(page.route)}${
-      page.noAds ? page.body || '' : wrapAds(page.body || '', { rails: page.railCount ?? 3 })
+      page.noAds ? page.body || '' : wrapAds(page.body || '', { rails: 1 })
     }</div>
   </body>
 </html>
@@ -445,7 +445,7 @@ const spaShell = renderHtml(
     description:
       'Create a named browser chat room, share /?room=…, and let it expire. Nickname only. 18+ text chat — not video matching, not K–12.',
     body: bodyHome(),
-    noAds: !ADSENSE_HOME_PLACEHOLDERS
+    noAds: false
   },
   { noindex: false }
 );

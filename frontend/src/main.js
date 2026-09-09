@@ -24,16 +24,15 @@ import {
   adRailCount,
   applyConsentMode,
   canLoadAds,
-  fillIabSlots,
+  fillAdsterraSlots,
   getConsent,
   initGeo,
   installConsentDefaults,
   isMonetizedView,
-  showAdSensePlaceholders,
-  loadAdSense,
+  showChatRightRail,
+  showPageBanners,
   loadCloudflareAnalytics,
   loadGoogleAnalytics,
-  pushAdSense,
   renderAdSlot,
   renderConsentBanner,
   renderSponsoredLink,
@@ -131,7 +130,8 @@ function createInitialRoomState() {
 
 function render() {
   const isChat = state.view === 'room-placeholder';
-  const showAds = showAdSensePlaceholders(state.view);
+  const showAds = showPageBanners(state.view);
+  const showChatRail = showChatRightRail(state.view);
   const rails = adRailCount(state.view);
   const path = window.location.pathname;
   document.documentElement.classList.toggle('chat-boot', isChat);
@@ -143,7 +143,7 @@ function render() {
     </div>
     ${showAds ? renderAdLeaderboard() : ''}
     <main class="page-shell">
-      <div class="ads-page-row${showAds ? ' has-ad-rails' : ''}${isChat ? ' ads-page-row-chat' : ''}">
+      <div class="ads-page-row${showAds || showChatRail ? ' has-ad-rails' : ''}${isChat ? ' ads-page-row-chat' : ''}">
         ${showAds ? renderAdSkyscraper('left', rails) : ''}
         <div class="ads-page-main">
           ${state.view === 'landing' ? renderLanding() : ''}
@@ -158,7 +158,7 @@ function render() {
           ${guides[state.view] ? renderGuide(state.view) : ''}
           ${articles[state.view] ? renderArticle(state.view) : ''}
         </div>
-        ${showAds ? renderAdSkyscraper('right', rails) : ''}
+        ${showAds || showChatRail ? renderAdSkyscraper('right', 1, { includeMobileBox: showChatRail }) : ''}
       </div>
     </main>
     ${showAds ? renderAdFooter() : ''}
@@ -207,7 +207,7 @@ function renderLanding() {
               : `<button class="text-link" type="button" data-action="open-join">Join with code or link</button>`
           }
         </div>
-        ${showAdSensePlaceholders('landing') ? renderAdSlot() : ''}
+        ${showPageBanners('landing') ? renderAdSlot() : ''}
         ${renderPublicRooms()}
         ${renderLandingEditorial(escapeHtml)}
         ${renderCoordinationJobs()}
@@ -324,10 +324,8 @@ function afterRender() {
   }
   loadCloudflareAnalytics();
   syncMonetag(state.view);
-  if (canLoadAds(state.view)) {
-    loadAdSense(state.view);
-    fillIabSlots();
-    queueMicrotask(pushAdSense);
+  if (state.ageConfirmed && canLoadAds(state.view)) {
+    fillAdsterraSlots();
   }
   loadGoogleAnalytics();
   if (state.ageConfirmed && isMonetizedView(state.view)) {
@@ -402,7 +400,7 @@ function renderLegal(slug) {
       <p class="eyebrow">Legal</p>
       <h1>${escapeHtml(page.title)}</h1>
       <p class="use-case-intro">${escapeHtml(page.description)}</p>
-      <p class="article-date">Last updated 28 August 2026</p>
+      <p class="article-date">Last updated 9 September 2026</p>
       ${choices}
       ${page.sections
         .map(
@@ -430,7 +428,7 @@ function renderFrench(slug) {
           <p class="tagline">${escapeHtml(page.intro)}</p>
           <p class="landing-support">${escapeHtml(page.description)}</p>
           <button class="button button-primary" type="button" data-action="open-create">Créer une salle privée</button>
-          ${showAdSensePlaceholders('fr') ? renderAdSlot() : ''}
+          ${showPageBanners('fr') ? renderAdSlot() : ''}
           <section class="job-links">
             <h2>Usages</h2>
             <div class="job-link-list">

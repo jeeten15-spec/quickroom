@@ -1,12 +1,13 @@
-import { ADSENSE_HOME_PLACEHOLDERS, adsenseClientId } from './adsense.js';
-import { useCasePages } from './use-cases.js';
+import { adsenseClientId } from './adsense.js';
+import { fillAdsterraSlots as mountAdsterra } from './adsterra.js';
 import {
   MONETAG_DIRECT_LINK,
   MONETAG_IPP_SRC,
   MONETAG_IPP_ZONE,
   MONETAG_VIGNETTE_SRC,
   MONETAG_VIGNETTE_ZONE,
-  renderIabSlot
+  renderIabSlot,
+  renderNativeBanner
 } from './monetag-tags.js';
 
 export { MONETAG_DIRECT_LINK };
@@ -33,11 +34,19 @@ export function isAdSenseView(view) {
   return isMonetizedView(view) && view !== 'about';
 }
 
-/** Visible IAB frames. Home placeholders are gated by ADSENSE_HOME_PLACEHOLDERS. */
-export function showAdSensePlaceholders(view) {
-  if (!isAdSenseView(view)) return false;
-  if (!ADSENSE_HOME_PLACEHOLDERS && (view === 'landing' || view === 'fr')) return false;
+/** Adsterra IAB frames on Home and content pages. About stays Monetag-only. Chat uses a right rail only. */
+export function showPageBanners(view) {
+  if (!view || view === 'about' || view === 'dashboard' || view === 'room-placeholder') return false;
   return true;
+}
+
+export function showChatRightRail(view) {
+  return view === 'room-placeholder';
+}
+
+/** @deprecated Use showPageBanners — kept so older call sites keep compiling. */
+export function showAdSensePlaceholders(view) {
+  return showPageBanners(view);
 }
 
 /** Monetag vignette / IPP / direct link — About only, so they never sit on AdSense URLs. */
@@ -179,11 +188,8 @@ function adsenseClient() {
 }
 
 export function adRailCount(view) {
-  if (!showAdSensePlaceholders(view)) return 0;
-  if (view === 'blog') return 5;
-  if (useCasePages[view]) return 4;
-  if (view === 'landing' || view === 'fr' || isLongContentView(view)) return 3;
-  return 2;
+  if (showChatRightRail(view) || showPageBanners(view)) return 1;
+  return 0;
 }
 
 function useGoogleFundingChoices() {
@@ -191,16 +197,20 @@ function useGoogleFundingChoices() {
 }
 
 export function shouldShowConsentBanner(view) {
-  if (!isMonetizedView(view)) return false;
+  if (view === 'dashboard') return false;
   if (!regionNeedsCmp()) return false;
   if (useGoogleFundingChoices() && adsenseClient()) return false;
   return !getConsent();
 }
 
 export function canLoadAds(view) {
-  if (!showAdSensePlaceholders(view)) return false;
-  if (!adsenseClient()) return false;
+  if (!showPageBanners(view) && !showChatRightRail(view)) return false;
   return adsConsentOk();
+}
+
+export function fillAdsterraSlots() {
+  if (!adsConsentOk()) return;
+  mountAdsterra();
 }
 
 export function canLoadGa() {
@@ -252,7 +262,7 @@ export function renderAdSlot() {
   if (usAdsOptedOut() || (regionNeedsCmp() && !getConsent()?.ads && !useGoogleFundingChoices())) {
     return '';
   }
-  return renderIabSlot('box');
+  return `${renderNativeBanner()}${renderIabSlot('box')}`;
 }
 
 export function pushAdSense() {
@@ -270,7 +280,7 @@ export function renderConsentBanner() {
   return `<div class="consent-banner" role="dialog" aria-labelledby="consent-title">
     <div class="consent-copy">
       <h2 id="consent-title">Cookies and ads in Europe</h2>
-      <p>We use cookies for optional ads (Google AdSense on most public pages; Monetag only on About) and, if enabled, analytics. Rooms work without this. Read the <a href="/privacy" data-action="navigate">privacy policy</a> and <a href="/cookies" data-action="navigate">cookies</a> pages. After AdSense approval, also turn on Google Privacy &amp; messaging (GDPR + US) in AdSense.</p>
+      <p>We use cookies for optional ads (Adsterra banners on most public pages, including a 160×600 beside chat; Monetag only on About) and, if enabled, analytics. Creating and joining still work if you reject ads. Read the <a href="/privacy" data-action="navigate">privacy policy</a> and <a href="/cookies" data-action="navigate">cookies</a> pages.</p>
     </div>
     <div class="consent-actions">
       <button class="button button-secondary" type="button" data-action="consent-reject">Reject optional</button>

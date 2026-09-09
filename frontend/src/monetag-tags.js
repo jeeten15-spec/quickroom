@@ -25,24 +25,36 @@ export function renderIabSlot(kind, extraClass = '') {
     </aside>`;
 }
 
+/** Native 1:1 — one container id per page (Adsterra requirement). */
+export function renderNativeBanner(extraClass = '') {
+  return `<aside class="iab-slot iab-slot-native ${extraClass}" data-iab="native" aria-label="Advertisement">
+      <span class="iab-slot-label">Advertisement</span>
+      <div id="container-abc721dbe52aafa768ddacd83d3d6360"></div>
+    </aside>`;
+}
+
 export function renderAdLeaderboard() {
-  return `<div class="iab-row iab-row-leader">${renderIabSlot('leader')}</div>`;
+  return `<div class="iab-row iab-row-leader">
+      ${renderIabSlot('leader', 'iab-desktop')}
+      ${renderIabSlot('box', 'iab-mobile')}
+    </div>`;
 }
 
 export function renderAdFooter() {
   return `<div class="iab-row iab-row-footer">
       ${renderIabSlot('leader', 'iab-desktop')}
-      ${renderIabSlot('mobile')}
+      ${renderIabSlot('box', 'iab-mobile')}
     </div>`;
 }
 
-/** Stacked vertical units; extra copies only on desktop where the page can scroll. */
-export function renderAdSkyscraper(side, count = 2) {
+/** One 160×600 per side on desktop. Optional 300×250 for chat on small screens. */
+export function renderAdSkyscraper(side, count = 1, { includeMobileBox = false } = {}) {
   const n = Math.max(1, Math.min(5, Number(count) || 1));
   const desktop = Array.from({ length: n }, () => renderIabSlot('sky', 'iab-desktop')).join('');
-  return `<div class="iab-rail iab-rail-${side}">
+  const mobile = includeMobileBox ? renderIabSlot('box', 'iab-mobile') : '';
+  return `<div class="iab-rail iab-rail-${side}${includeMobileBox ? ' iab-rail-chat' : ''}">
       ${desktop}
-      ${renderIabSlot('box', 'iab-mobile')}
+      ${mobile}
     </div>`;
 }
 

@@ -9,9 +9,8 @@
   box-sizing: border-box;
 }
 
-html.chat-boot .iab-slot,
-html.chat-boot .iab-rail,
-html.chat-boot .iab-row {
+html.chat-boot .iab-row,
+html.chat-boot .iab-rail-left {
   display: none !important;
 }
 
@@ -88,11 +87,15 @@ button:disabled {
 }
 
 .iab-rail {
-  display: flex;
+  display: none;
   flex-direction: column;
   align-items: center;
   gap: 28px;
   padding: 8px;
+}
+
+.iab-rail.iab-rail-chat {
+  display: flex;
 }
 
 .iab-slot {
@@ -132,9 +135,17 @@ button:disabled {
   height: 250px;
 }
 
-.iab-slot-mobile {
-  width: min(100%, 320px);
-  height: 50px;
+.iab-slot-native {
+  width: min(100%, 400px);
+  min-height: 250px;
+  height: auto;
+  padding: 8px;
+}
+
+.iab-slot iframe {
+  display: block;
+  margin: 0 auto;
+  border: 0;
 }
 
 .iab-desktop {
@@ -149,15 +160,24 @@ button:disabled {
   .ads-page-row.has-ad-rails {
     grid-template-columns: 176px minmax(0, 1fr) 176px;
   }
-  .ads-page-row-chat,
+  .ads-page-row.has-ad-rails.ads-page-row-chat {
+    grid-template-columns: minmax(0, 1fr) 176px;
+  }
   .ads-page-row:not(.has-ad-rails) {
     grid-template-columns: minmax(0, 1fr);
+  }
+  .iab-rail {
+    display: flex;
   }
   .iab-desktop {
     display: flex;
   }
   .iab-mobile {
     display: none;
+  }
+  .ads-page-row-chat .iab-rail-right {
+    position: sticky;
+    top: 8px;
   }
 }
 
