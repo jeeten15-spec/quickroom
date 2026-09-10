@@ -16,7 +16,7 @@ function meta(page, lang) {
 }
 
 const calendarLines = UPCOMING_EVENTS.map(
-  (event) => `${event.eventDay}: ${event.title} — search phrases: ${event.keywords.join('; ')}.`
+  (event) => `${event.eventDay}: ${event.title} — chatroom idea: ${event.keywords.join('; ')}.`
 );
 
 const packs = [
@@ -33,8 +33,7 @@ const packs = [
         {
           heading: 'How to use this calendar',
           paragraphs: [
-            'Four weeks before the event, create a Private QuickRoom named after the thing, not after a person. Paste the code into the one channel that already knows the guest list. Set expiry for the morning after.',
-            'October to December is when finance, gifts, travel VPNs, and insurance ads pay more. January is diets, money resets, and dating. We write for those windows on purpose—and we still will not put ads inside your live room.'
+            'Four weeks before the event, create a Private QuickRoom named after the thing, not after a person. Paste the code into the one channel that already knows the guest list. Set expiry for the morning after.'
           ]
         },
         {

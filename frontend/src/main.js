@@ -366,7 +366,7 @@ function renderLocaleBlogIndex({ lang, backHref, backLabel, title, intro, headin
       <p class="eyebrow">${escapeHtml(heading)}</p>
       <h1>${escapeHtml(title)}</h1>
       ${renderAuthorByline(escapeHtml, '10 September 2026')}
-      <p class="use-case-intro">${escapeHtml(intro)}</p>
+      ${intro ? `<p class="use-case-intro">${escapeHtml(intro)}</p>` : ''}
       ${renderInArticleAd()}
       <ul class="blog-index">${articleLinks}</ul>
       ${renderRelatedHtml(backHref === '/' ? '/blog' : backHref, { escapeHtml })}
@@ -1168,9 +1168,7 @@ function renderBlog() {
     backHref: '/',
     backLabel: 'QuickRoom',
     heading: 'Editorial',
-    title: 'How QuickRoom actually works — plus seasonal group chats',
-    intro:
-      'Product walkthroughs, and a 2026 calendar of festivals, sports, and high-bid commercial queries (VPN, finance, dating, watch parties, utilities) written four weeks before the event. French and Spanish sit at /fr/blog and /es/blog.'
+    title: 'How QuickRoom actually works — plus seasonal group chats'
   });
 }
 

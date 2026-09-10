@@ -6,7 +6,7 @@
 
 export function privacyParagraphs(pageTitle) {
   return [
-    `${pageTitle} on QuickRoom is designed for short-lived coordination. Participants join with a room code and a nickname—no email address, phone number, or app install is required.`,
+    'Temporary chat on QuickRoom is designed for short-lived coordination. Participants join with a room code and a nickname—no email address, phone number, or app install is required.',
     'Treat the room code like an invitation. Share it only with the people who should be in the conversation, especially for Private or Invite Only rooms.',
     'When the expiry you chose is reached, the room and its messages and images are cleaned up according to QuickRoom’s temporary-room lifecycle. That keeps the conversation from becoming another permanent group you never meant to keep.'
   ];
