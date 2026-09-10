@@ -33,7 +33,8 @@ import {
   validateRoomType,
   validateTemplate,
   validateText,
-  validateUid
+  validateUid,
+  type ExpiryOption
 } from './validation';
 
 type StoredRoom = Room & {
@@ -53,6 +54,10 @@ interface MetricsRoomRecord {
   participantsPeak: number;
   shareClicks: number;
   type: string;
+  name?: string;
+  expiresAt?: number | null;
+  expiry?: string;
+  country?: string;
 }
 
 interface MetricsCreatorRecord {
@@ -64,11 +69,60 @@ const rateLimitState = new Map<string, number>();
 const PRESENCE_TTL_MS = 15_000;
 const METRICS_RETENTION_MS = 45 * 24 * 60 * 60 * 1000;
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+const MONTH_MS = 30 * 24 * 60 * 60 * 1000;
+
+const EXPIRY_LABELS: Record<ExpiryOption, string> = {
+  '1h': '1 hour',
+  '6h': '6 hours',
+  '24h': '24 hours',
+  '7d': '7 days',
+  '3mo': '3 months'
+};
+
+const COUNTRY_NAMES: Record<string, string> = {
+  US: 'United States',
+  GB: 'United Kingdom',
+  IN: 'India',
+  AU: 'Australia',
+  CA: 'Canada',
+  DE: 'Germany',
+  FR: 'France',
+  BR: 'Brazil',
+  ID: 'Indonesia',
+  PK: 'Pakistan',
+  NG: 'Nigeria',
+  PH: 'Philippines',
+  BD: 'Bangladesh',
+  MX: 'Mexico',
+  JP: 'Japan',
+  KR: 'South Korea',
+  IT: 'Italy',
+  ES: 'Spain',
+  NL: 'Netherlands',
+  SE: 'Sweden',
+  PL: 'Poland',
+  TR: 'Turkey',
+  SA: 'Saudi Arabia',
+  AE: 'United Arab Emirates',
+  SG: 'Singapore',
+  MY: 'Malaysia',
+  TH: 'Thailand',
+  VN: 'Vietnam',
+  ZA: 'South Africa',
+  NZ: 'New Zealand',
+  IE: 'Ireland',
+  CH: 'Switzerland',
+  AT: 'Austria',
+  BE: 'Belgium',
+  PT: 'Portugal',
+  XX: 'Unknown'
+};
 
 export async function createRoom(
   body: unknown,
   user: AuthenticatedUser,
-  env: Env
+  env: Env,
+  country = 'XX'
 ): Promise<Record<string, unknown>> {
   const input = expectRecord(body);
   enforceRateLimit(`create:${user.uid}`, 5_000);
@@ -77,6 +131,7 @@ export async function createRoom(
   const now = Date.now();
   const roomId = createId();
   const nickname = validateNickname(input.nickname);
+  const expiryOption = typeof input.expiry === 'string' ? input.expiry : '';
   const room = createRoomRecord(
     {
       name: validateRoomName(input.name),
@@ -136,7 +191,11 @@ export async function createRoom(
       createdBy: user.uid,
       participantsPeak: 1,
       shareClicks: 0,
-      type: room.type
+      type: room.type,
+      name: room.name,
+      expiresAt: room.expiresAt,
+      expiry: expiryOption,
+      country: String(country || 'XX').toUpperCase().slice(0, 2)
     } satisfies MetricsRoomRecord
   });
   await bumpCreatorMetrics(env, user.uid, now);
@@ -272,16 +331,77 @@ export async function getMetrics(
 
   const now = Date.now();
   const weekStart = now - WEEK_MS;
+  const monthStart = now - MONTH_MS;
   const rooms = (await databaseGet<Record<string, MetricsRoomRecord>>(env, 'metrics/rooms')) ?? {};
+  const liveRooms =
+    (await databaseGet<Record<string, StoredRoom>>(env, 'rooms')) ?? {};
   const creators =
     (await databaseGet<Record<string, MetricsCreatorRecord>>(env, 'metrics/creators')) ?? {};
   const weekRooms = Object.values(rooms).filter((room) => room.createdAt >= weekStart);
+  const monthRooms = Object.entries(rooms).filter(([, room]) => room.createdAt >= monthStart);
   const peaks = weekRooms.map((room) => room.participantsPeak || 1).sort((a, b) => a - b);
   const roomsCreatedWeek = weekRooms.length;
+  const roomsCreatedMonth = monthRooms.length;
   const roomsWithTwoPlus = weekRooms.filter((room) => (room.participantsPeak || 1) >= 2).length;
   const roomsWithShare = weekRooms.filter((room) => (room.shareClicks || 0) > 0).length;
   const creatorIds = [...new Set(weekRooms.map((room) => room.createdBy))];
   const returnCreators = creatorIds.filter((uid) => (creators[uid]?.roomCount || 0) >= 2).length;
+  const monthCreatorIds = [...new Set(monthRooms.map(([, room]) => room.createdBy))];
+
+  const liveList = Object.values(liveRooms).filter(
+    (room) => room && (room.expiresAt == null || Number(room.expiresAt) > now)
+  );
+  const livePublic = liveList.filter((room) => room.type === 'public').length;
+  const livePrivate = liveList.length - livePublic;
+
+  const expiryMix: Record<string, number> = {};
+  let publicMonth = 0;
+  let privateMonth = 0;
+  const countryCounts: Record<string, number> = {};
+  const enrichedMonth = monthRooms.map(([roomId, rec]) => {
+    const live = liveRooms[roomId];
+    const type = rec.type || live?.type || 'private';
+    if (type === 'public') publicMonth += 1;
+    else privateMonth += 1;
+    const expiry = expiryLabel(rec.createdAt, rec.expiresAt ?? live?.expiresAt, rec.expiry);
+    expiryMix[expiry] = (expiryMix[expiry] || 0) + 1;
+    const country = String(rec.country || 'XX').toUpperCase();
+    countryCounts[country] = (countryCounts[country] || 0) + 1;
+    return {
+      name: rec.name || live?.name || 'Untitled room',
+      type: type === 'public' ? 'public' : 'private',
+      country,
+      expiry,
+      live: Boolean(live && (live.expiresAt == null || Number(live.expiresAt) > now))
+    };
+  });
+  const stillLiveMonth = enrichedMonth.filter((room) => room.live).length;
+
+  const roomsByCountry = Object.entries(countryCounts)
+    .sort((left, right) => right[1] - left[1])
+    .slice(0, 5)
+    .map(([country, count]) => {
+      const inCountry = enrichedMonth.filter((room) => room.country === country);
+      const publicRooms = inCountry
+        .filter((room) => room.type === 'public')
+        .slice(0, 25)
+        .map((room) => ({ name: room.name, expiry: room.expiry }));
+      const privateRooms = inCountry
+        .filter((room) => room.type !== 'public')
+        .slice(0, 25)
+        .map((room) => ({ name: room.name, expiry: room.expiry }));
+      return {
+        country,
+        countryName: COUNTRY_NAMES[country] || country,
+        count,
+        publicRooms,
+        privateRooms
+      };
+    });
+
+  const expiryMixList = Object.entries(expiryMix)
+    .sort((left, right) => right[1] - left[1])
+    .map(([label, count]) => ({ label, count }));
 
   const geoDaily =
     (await databaseGet<Record<string, Record<string, number>>>(env, 'metrics/geoDaily')) ?? {};
@@ -318,12 +438,22 @@ export async function getMetrics(
   return {
     generatedAt: now,
     roomsCreatedWeek,
+    roomsCreatedMonth,
     medianJoiners: median(peaks),
     pctRoomsWithTwoPlus: percent(roomsWithTwoPlus, roomsCreatedWeek),
     shareClickRate: percent(roomsWithShare, roomsCreatedWeek),
     returnCreators,
     creatorsThisWeek: creatorIds.length,
     returnCreatorsPct: percent(returnCreators, creatorIds.length),
+    creatorsThisMonth: monthCreatorIds.length,
+    publicRoomsMonth: publicMonth,
+    privateRoomsMonth: privateMonth,
+    liveRoomsNow: liveList.length,
+    livePublicNow: livePublic,
+    livePrivateNow: livePrivate,
+    stillLiveMonth,
+    expiryMixMonth: expiryMixList,
+    roomsByCountry,
     pageviews14d: pageviewsByCountry.reduce((n, row) => n + row.views, 0),
     pageviewsByCountry,
     pageviewsByPath
@@ -888,6 +1018,25 @@ async function pruneOldMetrics(env: Env, now: number): Promise<void> {
   if (Object.keys(deletions).length) {
     await databasePatch(env, '/', deletions);
   }
+}
+
+function expiryLabel(
+  createdAt: number,
+  expiresAt: number | null | undefined,
+  expiry?: string
+): string {
+  if (expiry && expiry in EXPIRY_LABELS) {
+    return EXPIRY_LABELS[expiry as ExpiryOption];
+  }
+  if (expiresAt == null) return 'Unknown';
+  const ms = Number(expiresAt) - createdAt;
+  const hour = 60 * 60 * 1000;
+  if (ms <= hour * 1.5) return '1 hour';
+  if (ms <= hour * 8) return '6 hours';
+  if (ms <= hour * 30) return '24 hours';
+  if (ms <= hour * 24 * 10) return '7 days';
+  if (ms <= hour * 24 * 100) return '3 months';
+  return 'Custom';
 }
 
 function median(values: number[]): number {

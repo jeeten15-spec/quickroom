@@ -156,6 +156,32 @@ button:disabled {
   display: flex;
 }
 
+@media (max-width: 959px) {
+  html.chat-boot .ads-page-row-chat {
+    align-items: stretch;
+  }
+  html.chat-boot .chat-page {
+    height: calc(100dvh - 120px);
+    min-height: 280px;
+  }
+  html.chat-boot .iab-rail-chat {
+    max-height: 56px;
+    overflow: hidden;
+    padding: 4px 0 8px;
+  }
+  html.chat-boot .iab-rail-chat .iab-slot-box {
+    width: min(100%, 320px);
+    height: 50px;
+    min-height: 50px;
+  }
+  html.chat-boot .iab-rail-chat iframe {
+    width: 300px;
+    height: 250px;
+    transform: scale(0.2);
+    transform-origin: top center;
+  }
+}
+
 @media (min-width: 960px) {
   .ads-page-row.has-ad-rails {
     grid-template-columns: 176px minmax(0, 1fr) 176px;

@@ -51,7 +51,7 @@ export default {
       const user = await verifyFirebaseIdToken(request.headers.get('Authorization'), env);
 
       if (request.method === 'POST' && url.pathname === '/api/createRoom') {
-        return json(await createRoom(await readJson(request), user, env), 201, corsHeaders);
+        return json(await createRoom(await readJson(request), user, env, geoFromRequest(request).country), 201, corsHeaders);
       }
       if (request.method === 'POST' && url.pathname === '/api/joinRoom') {
         return json(await joinRoom(await readJson(request), user, env), 200, corsHeaders);

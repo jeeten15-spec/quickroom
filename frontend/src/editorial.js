@@ -89,7 +89,7 @@ export function homeFaq() {
     },
     {
       q: 'Who builds QuickRoom?',
-      a: `${SITE_AUTHOR.name} (${SITE_AUTHOR.jobTitle}). The product is open source on GitHub. Contact ${SITE_AUTHOR.email}.`
+      a: `The product is open source on GitHub. Contact ${SITE_AUTHOR.email}.`
     }
   ];
 }
@@ -158,11 +158,6 @@ export function renderLandingEditorial(escapeHtml) {
     <section class="landing-editorial" aria-labelledby="home-faq-heading">
       <h2 id="home-faq-heading">Questions people actually ask</h2>
       ${renderHomeFaq(escapeHtml)}
-    </section>
-    <section class="landing-editorial" aria-labelledby="who-builds">
-      <h2 id="who-builds">Who builds this</h2>
-      <p>${escapeHtml(SITE_AUTHOR.name)} maintains QuickRoom. Code is on <a href="${escapeHtml(SITE_AUTHOR.githubUrl)}">${escapeHtml(SITE_AUTHOR.githubHandle)}</a>. Product questions: <a href="mailto:${escapeHtml(SITE_AUTHOR.email)}">${escapeHtml(SITE_AUTHOR.email)}</a>. The <a href="/about">about page</a> states what we will not add: K–12 products and stranger video chat.</p>
-      ${renderFigure(PRODUCT_SHOTS.chat, escapeHtml)}
     </section>`;
 }
 

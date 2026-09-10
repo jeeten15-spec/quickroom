@@ -343,6 +343,78 @@ function renderGithubTrust() {
   `;
 }
 
+function renderExpiryMix(m) {
+  const rows = Array.isArray(m.expiryMixMonth) ? m.expiryMixMonth : [];
+  if (!rows.length) return '';
+  return `
+    <h2>Expiry mix (30 days)</h2>
+    <p class="use-case-intro">How long people asked rooms to live. Longer rooms use more Worker/database time.</p>
+    <table class="metrics-table">
+      <thead><tr><th>Duration</th><th>Rooms</th></tr></thead>
+      <tbody>
+        ${rows
+          .map(
+            (row) =>
+              `<tr><td>${escapeHtml(row.label)}</td><td>${escapeHtml(String(row.count))}</td></tr>`
+          )
+          .join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+function renderRoomsByCountry(m) {
+  const groups = Array.isArray(m.roomsByCountry) ? m.roomsByCountry : [];
+  if (!groups.length) {
+    return `<p class="metric-note">Country room lists appear after new rooms are created (country is stored at create time). Older rooms without a country code are grouped as Unknown.</p>`;
+  }
+  return `
+    <h2>Rooms created by country (top 5, 30 days)</h2>
+    <p class="use-case-intro">Names and chosen duration only. Use this to see where demand is and whether live-room count justifies a Cloudflare plan change.</p>
+    ${groups
+      .map((group) => {
+        const publicRows = Array.isArray(group.publicRooms) ? group.publicRooms : [];
+        const privateRows = Array.isArray(group.privateRooms) ? group.privateRooms : [];
+        return `
+          <h3>${escapeHtml(group.countryName || group.country)} · ${escapeHtml(String(group.count))} rooms</h3>
+          <div class="metrics-tables">
+            <table class="metrics-table">
+              <thead><tr><th>Public rooms</th><th>Duration</th></tr></thead>
+              <tbody>
+                ${
+                  publicRows.length
+                    ? publicRows
+                        .map(
+                          (row) =>
+                            `<tr><td>${escapeHtml(row.name)}</td><td>${escapeHtml(row.expiry)}</td></tr>`
+                        )
+                        .join('')
+                    : '<tr><td colspan="2">None</td></tr>'
+                }
+              </tbody>
+            </table>
+            <table class="metrics-table">
+              <thead><tr><th>Private rooms</th><th>Duration</th></tr></thead>
+              <tbody>
+                ${
+                  privateRows.length
+                    ? privateRows
+                        .map(
+                          (row) =>
+                            `<tr><td>${escapeHtml(row.name)}</td><td>${escapeHtml(row.expiry)}</td></tr>`
+                        )
+                        .join('')
+                    : '<tr><td colspan="2">None</td></tr>'
+                }
+              </tbody>
+            </table>
+          </div>
+        `;
+      })
+      .join('')}
+  `;
+}
+
 function renderCountryPageviews(m) {
   const rows = Array.isArray(m.pageviewsByCountry) ? m.pageviewsByCountry : [];
   const paths = Array.isArray(m.pageviewsByPath) ? m.pageviewsByPath : [];
@@ -488,7 +560,7 @@ function renderDashboard() {
       <a class="back-link" href="/" data-action="navigate">QuickRoom</a>
       <p class="eyebrow">Operator metrics</p>
       <h1>Growth dashboard</h1>
-      <p class="use-case-intro">Rooms created / week, joining quality, share behaviour, and return creators.</p>
+      <p class="use-case-intro">Rooms created / week, joining quality, share behaviour, and return creators. Extra month and country tables below are for capacity and Cloudflare plan decisions.</p>
       ${
         state.metrics
           ? renderDashboardMetrics()
@@ -534,8 +606,32 @@ function renderDashboardMetrics() {
         <p class="metric-value">${escapeHtml(m.returnCreatorsPct)}%</p>
         <p class="metric-note">${escapeHtml(String(m.returnCreators))} of ${escapeHtml(String(m.creatorsThisWeek))} creators this week</p>
       </div>
+      <div class="metric-card">
+        <p class="metric-label">Rooms created / month</p>
+        <p class="metric-value">${escapeHtml(String(m.roomsCreatedMonth ?? 0))}</p>
+      </div>
+      <div class="metric-card">
+        <p class="metric-label">Live rooms now</p>
+        <p class="metric-value">${escapeHtml(String(m.liveRoomsNow ?? 0))}</p>
+        <p class="metric-note">${escapeHtml(String(m.livePublicNow ?? 0))} public · ${escapeHtml(String(m.livePrivateNow ?? 0))} private</p>
+      </div>
+      <div class="metric-card">
+        <p class="metric-label">Public / private (30d)</p>
+        <p class="metric-value">${escapeHtml(String(m.publicRoomsMonth ?? 0))} / ${escapeHtml(String(m.privateRoomsMonth ?? 0))}</p>
+      </div>
+      <div class="metric-card">
+        <p class="metric-label">Creators this month</p>
+        <p class="metric-value">${escapeHtml(String(m.creatorsThisMonth ?? 0))}</p>
+      </div>
+      <div class="metric-card">
+        <p class="metric-label">Still live of this month</p>
+        <p class="metric-value">${escapeHtml(String(m.stillLiveMonth ?? 0))}</p>
+        <p class="metric-note">of ${escapeHtml(String(m.roomsCreatedMonth ?? 0))} created in 30 days</p>
+      </div>
     </div>
-    <p class="dashboard-updated">Window: last 7 days for rooms · last 14 days for country pageviews · Updated ${escapeHtml(new Date(m.generatedAt).toLocaleString())}</p>
+    <p class="dashboard-updated">Window: last 7 days for rooms · last 30 days for month/country room lists · last 14 days for country pageviews · Updated ${escapeHtml(new Date(m.generatedAt).toLocaleString())}</p>
+    ${renderExpiryMix(m)}
+    ${renderRoomsByCountry(m)}
     ${renderCountryPageviews(m)}
     <div class="form-actions">
       <button class="button button-secondary" type="button" data-action="refresh-metrics">Refresh</button>
