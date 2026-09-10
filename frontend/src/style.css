@@ -9,7 +9,7 @@
   box-sizing: border-box;
 }
 
-html.chat-boot .iab-row,
+html.chat-boot .iab-row:not(.iab-row-chat-bottom),
 html.chat-boot .iab-rail-left,
 html.chat-boot .iab-anchor {
   display: none !important;
@@ -83,8 +83,16 @@ button:disabled {
   padding: 8px 12px;
 }
 
-.iab-row-footer {
-  padding-bottom: 16px;
+.iab-row-chat-bottom {
+  display: none;
+}
+
+.vpn-picks {
+  margin: 12px 0 8px;
+}
+
+.vpn-picks a {
+  font-weight: 600;
 }
 
 .iab-rail {
@@ -235,6 +243,15 @@ html.has-anchor-ad .iab-anchor {
   .ads-page-row-chat .iab-rail-right {
     position: sticky;
     top: 8px;
+  }
+  html.chat-boot .iab-row-chat-bottom {
+    display: flex;
+    justify-content: center;
+    padding: 8px 12px 12px;
+  }
+  html.chat-boot .chat-page {
+    height: calc(100dvh - 300px);
+    min-height: 360px;
   }
 }
 

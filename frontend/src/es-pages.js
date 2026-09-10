@@ -73,6 +73,10 @@ export const esPages = {
         ]
       },
       {
+        heading: 'Si también quieres la conexión privada, usa un VPN',
+        vpnPicks: 'es'
+      },
+      {
         heading: 'Cuándo usarlo',
         list: [
           'Un viaje o un piso, sin WhatsApp eterno',

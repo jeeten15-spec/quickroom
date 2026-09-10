@@ -23,6 +23,9 @@ export const ADSTERRA = {
     height: 250,
     host: 'https://www.highrevenueformat.com'
   },
+  socialBar: {
+    src: 'https://pl31271245.profitableratecpmnetwork.com/b2/01/1c/b2011ca9c26121c80792f3d72d304822.js'
+  },
   /** No 320×50 invoke snippet was provided; mobile leader/footer use 300×250 instead. */
   mobile: null
 };
@@ -75,6 +78,18 @@ function mountNativeBanner(container) {
   document.body.append(script);
 }
 
+function mountSocialBar() {
+  if (document.documentElement.classList.contains('chat-boot')) return;
+  if (document.querySelector('script[data-adsterra-social]')) return;
+  if (!ADSTERRA.socialBar?.src) return;
+  const script = document.createElement('script');
+  script.async = true;
+  script.dataset.adsterraSocial = '1';
+  script.setAttribute('data-cfasync', 'false');
+  script.src = ADSTERRA.socialBar.src;
+  document.body.append(script);
+}
+
 let mediaBound = false;
 
 export function fillAdsterraSlots() {
@@ -89,6 +104,8 @@ export function fillAdsterraSlots() {
     const spec = KIND_TO_SPEC[kind];
     if (spec) mountIframeBanner(el, spec);
   });
+
+  mountSocialBar();
 
   if (!mediaBound && typeof window.matchMedia === 'function') {
     mediaBound = true;

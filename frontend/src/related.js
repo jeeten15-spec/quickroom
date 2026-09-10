@@ -2,8 +2,8 @@
 
 const RELATED = {
   '/blog/quickroom-vs-discord-whatsapp-slack': [
+    { href: '/blog/vpn-for-private-chat-rooms', label: 'VPN for a private connection' },
     { href: '/blog/study-group-chat-without-whatsapp-or-groupme', label: 'Study group chat without WhatsApp or GroupMe' },
-    { href: '/blog/interview-panel-chat-without-slack', label: 'Interview panel chat without Slack' },
     { href: '/hackathon-chat-room', label: 'Hackathon team chat room' }
   ],
   '/blog/study-group-chat-without-whatsapp-or-groupme': [
@@ -65,6 +65,16 @@ const RELATED = {
     { href: '/fr/salle-de-discussion-temporaire', label: 'Salle temporaire' },
     { href: '/hackathon-chat-room', label: 'Hackathon chat (English)' },
     { href: '/temporary-chat-room-for-hackathons', label: 'Hackathon guide' }
+  ],
+  '/private-chat-room-no-signup': [
+    { href: '/blog/vpn-for-private-chat-rooms', label: 'VPN for a private connection' },
+    { href: '/blog/quickroom-vs-discord-whatsapp-slack', label: 'QuickRoom vs Discord, WhatsApp, and Slack' },
+    { href: '/temporary-chat-room', label: 'Temporary chat room' }
+  ],
+  '/blog/vpn-for-private-chat-rooms': [
+    { href: '/private-chat-room-no-signup', label: 'Private chat without signup' },
+    { href: '/blog/quickroom-vs-discord-whatsapp-slack', label: 'vs Discord, WhatsApp, Slack' },
+    { href: '/blog/vpn-travel-chat-privacy', label: 'VPN travel chat' }
   ],
   '/blog': [
     { href: '/blog/seasonal-group-chat-calendar', label: 'Seasonal group chat calendar' },

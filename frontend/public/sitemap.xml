@@ -497,6 +497,30 @@
       <xhtml:link rel="alternate" hreflang="x-default" href="https://quickroom.org/" />
   </url>
   <url>
+    <loc>https://quickroom.org/blog/vpn-for-private-chat-rooms</loc>
+    <lastmod>2026-09-10</lastmod>
+      <xhtml:link rel="alternate" hreflang="en" href="https://quickroom.org/blog/vpn-for-private-chat-rooms" />
+      <xhtml:link rel="alternate" hreflang="fr" href="https://quickroom.org/fr/blog/vpn-pour-chat-prive" />
+      <xhtml:link rel="alternate" hreflang="es" href="https://quickroom.org/es/blog/vpn-para-chat-privado" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://quickroom.org/" />
+  </url>
+  <url>
+    <loc>https://quickroom.org/fr/blog/vpn-pour-chat-prive</loc>
+    <lastmod>2026-09-10</lastmod>
+      <xhtml:link rel="alternate" hreflang="en" href="https://quickroom.org/blog/vpn-for-private-chat-rooms" />
+      <xhtml:link rel="alternate" hreflang="fr" href="https://quickroom.org/fr/blog/vpn-pour-chat-prive" />
+      <xhtml:link rel="alternate" hreflang="es" href="https://quickroom.org/es/blog/vpn-para-chat-privado" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://quickroom.org/" />
+  </url>
+  <url>
+    <loc>https://quickroom.org/es/blog/vpn-para-chat-privado</loc>
+    <lastmod>2026-09-10</lastmod>
+      <xhtml:link rel="alternate" hreflang="en" href="https://quickroom.org/blog/vpn-for-private-chat-rooms" />
+      <xhtml:link rel="alternate" hreflang="fr" href="https://quickroom.org/fr/blog/vpn-pour-chat-prive" />
+      <xhtml:link rel="alternate" hreflang="es" href="https://quickroom.org/es/blog/vpn-para-chat-privado" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://quickroom.org/" />
+  </url>
+  <url>
     <loc>https://quickroom.org/privacy</loc>
     <lastmod>2026-09-10</lastmod>
       <xhtml:link rel="alternate" hreflang="en" href="https://quickroom.org/privacy" />

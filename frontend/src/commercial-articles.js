@@ -814,6 +814,82 @@ const packs = [
         }
       ]
     }
+  },
+  {
+    en: {
+      slug: 'blog/vpn-for-private-chat-rooms',
+      title: 'A private room is not a private connection. Add a VPN.',
+      seoTitle: 'VPN for Private Chat Rooms — Mullvad, Proton, IVPN | QuickRoom',
+      description:
+        'If you also want the connection private, use a VPN. Three options we reviewed for US, UK, and Canadian traffic: Mullvad, Proton VPN, and IVPN — next to a QuickRoom that expires.',
+      intro:
+        'People search “private chat without signup” and “Discord alternative” when they want fewer accounts. That job is the room code. The other job is the café Wi‑Fi. Mixing them up is how you get a private group on a very public pipe. A VPN is the rare upsell that does not fight the brand.',
+      sections: [
+        {
+          heading: 'What QuickRoom actually hides',
+          paragraphs: [
+            'We do not ask for an email or phone number. The room dies when you said it would. Anyone with the code can still try to join, and Cloudflare still sees an IP — yours, or your VPN exit. That is not a scandal. It is HTTPS in 2026.',
+            'Discord hides even less than people think: an account, a server owner, a graph of who talked. Use Discord when the community should last. Use QuickRoom when Friday should delete the thread. Use a VPN when the hotel router should not read your banking tab on the way in.'
+          ],
+          figure: PRODUCT_SHOTS.share
+        },
+        {
+          heading: 'If you also want the connection private, use a VPN',
+          vpnPicks: 'en'
+        },
+        {
+          heading: 'How to pair them without becoming a spy novel',
+          list: [
+            'Turn the VPN on before you open the join link.',
+            'Keep the room Private. Paste the code in a channel that already knows the guests.',
+            'Do not paste passport scans or one-time passwords into chat. A VPN will not save you from that.',
+            'US, UK, and Canadian groups: pick an exit in a country you are allowed to use. Then talk like adults.'
+          ]
+        }
+      ]
+    },
+    fr: {
+      slug: 'fr/blog/vpn-pour-chat-prive',
+      title: 'Une salle privée n’est pas une connexion privée. Ajoutez un VPN.',
+      seoTitle: 'VPN pour chat privé — Mullvad, Proton, IVPN | QuickRoom',
+      description:
+        'Si vous voulez aussi une connexion privée, utilisez un VPN. Trois options passées en revue : Mullvad, Proton VPN, IVPN.',
+      intro:
+        '« Chat privé sans inscription » cache le groupe, pas le Wi‑Fi. Un VPN est la rare offre qui va dans le même sens que QuickRoom.',
+      sections: [
+        {
+          heading: 'Ce que QuickRoom cache vraiment',
+          paragraphs: [
+            'Pas d’e-mail, pas de numéro, une salle qui expire. Cloudflare voit encore une IP — la vôtre ou celle du VPN. Discord voit encore un compte. Deux outils, deux emplois.'
+          ]
+        },
+        {
+          heading: 'Si vous voulez aussi une connexion privée, utilisez un VPN',
+          vpnPicks: 'fr'
+        }
+      ]
+    },
+    es: {
+      slug: 'es/blog/vpn-para-chat-privado',
+      title: 'Una sala privada no es una conexión privada. Añade un VPN.',
+      seoTitle: 'VPN para chat privado — Mullvad, Proton, IVPN | QuickRoom',
+      description:
+        'Si también quieres la conexión privada, usa un VPN. Tres opciones revisadas: Mullvad, Proton VPN e IVPN.',
+      intro:
+        '«Chat privado sin registro» esconde el grupo, no el Wi‑Fi. Un VPN es la rara oferta que va en la misma dirección que QuickRoom.',
+      sections: [
+        {
+          heading: 'Qué esconde QuickRoom de verdad',
+          paragraphs: [
+            'Sin email, sin teléfono, una sala que caduca. Cloudflare sigue viendo una IP — la tuya o la del VPN. Discord sigue viendo una cuenta. Dos herramientas, dos trabajos.'
+          ]
+        },
+        {
+          heading: 'Si también quieres la conexión privada, usa un VPN',
+          vpnPicks: 'es'
+        }
+      ]
+    }
   }
 ];
 

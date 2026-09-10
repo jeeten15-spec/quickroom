@@ -80,6 +80,10 @@ export const frPages = {
           'Un échange client le temps d’une livraison',
           'Une discussion familiale pour un trajet ou une décision'
         ]
+      },
+      {
+        heading: 'Si vous voulez aussi une connexion privée, utilisez un VPN',
+        vpnPicks: 'fr'
       }
     ]
   },

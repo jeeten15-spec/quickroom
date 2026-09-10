@@ -1,5 +1,7 @@
 /** Shared publisher copy, comparison table, screenshots, and author for crawlable + client HTML. */
 
+import { renderVpnPicks } from './vpn-picks.js';
+
 export const SITE_AUTHOR = {
   name: 'Jeets',
   jobTitle: 'Founder of QuickRoom',
@@ -132,8 +134,9 @@ export function renderContentSections(sections, escapeHtml, { orderedLists = fal
         : '';
       const figure = section.figure ? renderFigure(section.figure, escapeHtml) : '';
       const table = section.table === 'comparison' ? renderComparisonTable(escapeHtml) : '';
+      const vpn = section.vpnPicks ? renderVpnPicks(escapeHtml, section.vpnPicks) : '';
       const inject = index === 0 && afterFirstHtml ? afterFirstHtml : '';
-      return `<section><h2>${escapeHtml(section.heading)}</h2>${paragraphs}${list}${figure}${table}</section>${inject}`;
+      return `<section><h2>${escapeHtml(section.heading)}</h2>${paragraphs}${list}${figure}${table}${vpn}</section>${inject}`;
     })
     .join('');
 }

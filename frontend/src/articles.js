@@ -177,6 +177,13 @@ export const articles = {
           'Template, name, expiry, nickname, private vs public. Then a share surface. Then chat. That is the whole create path. Compare that to “create workspace / verify email / invite guests / set channels.”'
         ],
         figure: PRODUCT_SHOTS.create
+      },
+      {
+        heading: 'If you also want the connection private, use a VPN',
+        paragraphs: [
+          'Discord, WhatsApp, and Slack still see a lot of metadata even on “private” servers. QuickRoom still sits behind Cloudflare. A VPN is the missing layer: it encrypts the café Wi‑Fi hop. We reviewed three options the same way we built this product — can you pay without a phone number, is there an independent no-logs audit, will a US/UK/CA relative actually install it.'
+        ],
+        vpnPicks: 'en'
       }
     ]
   },

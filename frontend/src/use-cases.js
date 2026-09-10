@@ -64,6 +64,10 @@ export const useCasePages = {
           'A private side discussion during an online event',
           'A temporary space where participants do not need profiles'
         ]
+      },
+      {
+        heading: 'If you also want the connection private, use a VPN',
+        vpnPicks: 'en'
       }
     ]
   },

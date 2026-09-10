@@ -317,7 +317,7 @@ export function renderConsentBanner() {
   return `<div class="consent-banner" role="dialog" aria-labelledby="consent-title">
     <div class="consent-copy">
       <h2 id="consent-title">Cookies and ads in Europe</h2>
-      <p>We use cookies for optional ads (Adsterra native and a desktop sticky 728×90 on blog and privacy pages, banners on other public pages, a 160×600 beside chat; Monetag only on About) and, if enabled, analytics. Creating and joining still work if you reject ads. Read the <a href="/privacy" data-action="navigate">privacy policy</a> and <a href="/cookies" data-action="navigate">cookies</a> pages.</p>
+      <p>We use cookies for optional ads (Adsterra native, Social Bar, and a desktop sticky 728×90 on blog and privacy pages; a 728×90 under chat on laptops; Monetag only on About) and, if enabled, analytics. Creating and joining still work if you reject ads. Read the <a href="/privacy" data-action="navigate">privacy policy</a> and <a href="/cookies" data-action="navigate">cookies</a> pages.</p>
     </div>
     <div class="consent-actions">
       <button class="button button-secondary" type="button" data-action="consent-reject">Reject optional</button>

@@ -18,7 +18,8 @@ import { esPages } from './es-pages';
 import { renderRelatedHtml } from './related';
 import { mountPaypalSupport, renderSupportBlock } from './support';
 import { renderExtrasDomString } from './page-copy';
-import { renderAdFooter, renderAdLeaderboard, renderAdSkyscraper, renderAnchorAd, renderIabSlot } from './monetag-tags';
+import { renderAdFooter, renderAdLeaderboard, renderAdSkyscraper, renderAnchorAd, renderChatBottomLeader, renderIabSlot } from './monetag-tags';
+import { renderVpnPicks } from './vpn-picks';
 import { hreflangPairs, renderLangToggle } from './lang';
 import {
   adRailCount,
@@ -167,6 +168,7 @@ function render() {
         </div>
         ${showAds || showChatRail ? renderAdSkyscraper('right', 1, { includeMobileBox: showChatRail }) : ''}
       </div>
+      ${showChatRail ? renderChatBottomLeader() : ''}
     </main>
     ${showAds ? renderAdFooter() : ''}
     ${showAds && showAnchorAd(state.view) ? renderAnchorAd() : ''}
@@ -677,6 +679,7 @@ function renderFrench(slug) {
                   ? `<ul>${section.list.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>`
                   : ''
               }
+              ${section.vpnPicks ? renderVpnPicks(escapeHtml, section.vpnPicks) : ''}
             </section>
           `
         )
@@ -752,6 +755,7 @@ function renderSpanish(slug) {
                   ? `<ul>${section.list.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>`
                   : ''
               }
+              ${section.vpnPicks ? renderVpnPicks(escapeHtml, section.vpnPicks) : ''}
             </section>
           `
         )
