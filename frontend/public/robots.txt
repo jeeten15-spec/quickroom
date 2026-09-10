@@ -1,0 +1,20 @@
+User-agent: Mediapartners-Google
+Allow: /
+
+User-agent: AdsBot-Google
+Allow: /
+
+User-agent: Googlebot
+Allow: /ads.txt
+Allow: /
+
+User-agent: *
+Allow: /ads.txt
+Allow: /
+
+# Ephemeral app surfaces — do not spend crawl budget here.
+Disallow: /room/
+Disallow: /dashboard
+Disallow: /dashboard/
+
+Sitemap: https://quickroom.org/sitemap.xml

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" role="img" aria-label="QuickRoom">
+  <rect width="192" height="192" rx="42" fill="#FAFAFA"/>
+  <path d="M96 43c-30 0-54 19-54 43 0 14 8 26 21 34v29l27-18c2 0 4 1 6 1 30 0 54-19 54-43S126 43 96 43Z" fill="#0066FF"/>
+  <circle cx="78" cy="88" r="7" fill="#FAFAFA"/>
+  <circle cx="114" cy="88" r="7" fill="#FAFAFA"/>
+</svg>
