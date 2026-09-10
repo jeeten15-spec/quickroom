@@ -1,4 +1,5 @@
 import { PRODUCT_SHOTS } from './editorial.js';
+import { commercialArticles } from './commercial-articles.js';
 
 const AUTHOR = 'Jeets';
 const UPDATED = '9 September 2026';
@@ -329,3 +330,5 @@ export const articles = {
     ]
   }
 };
+
+Object.assign(articles, commercialArticles);

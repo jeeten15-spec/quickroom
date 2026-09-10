@@ -10,7 +10,8 @@
 }
 
 html.chat-boot .iab-row,
-html.chat-boot .iab-rail-left {
+html.chat-boot .iab-rail-left,
+html.chat-boot .iab-anchor {
   display: none !important;
 }
 
@@ -140,6 +141,36 @@ button:disabled {
   min-height: 250px;
   height: auto;
   padding: 8px;
+}
+
+.iab-in-article {
+  margin: 20px auto;
+}
+
+.iab-anchor {
+  display: none;
+}
+
+html.has-anchor-ad .iab-anchor {
+  display: none;
+}
+
+@media (min-width: 960px) {
+  html.has-anchor-ad {
+    padding-bottom: 110px;
+  }
+  html.has-anchor-ad .iab-anchor {
+    display: flex;
+    justify-content: center;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 5;
+    padding: 8px 12px 10px;
+    background: rgba(250, 250, 250, 0.94);
+    border-top: 1px solid #ececec;
+  }
 }
 
 .iab-slot iframe {

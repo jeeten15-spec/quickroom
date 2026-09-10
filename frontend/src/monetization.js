@@ -63,7 +63,8 @@ const PRODUCT_SURFACES = new Set([
   'privacy',
   'cookies',
   'privacy-choices',
-  'fr'
+  'fr',
+  'es'
 ]);
 
 /** Articles, use cases, guides, blog — not Create/Join/room/home. */
@@ -191,10 +192,17 @@ export function adRailCount(view) {
   if (showChatRightRail(view)) return 1;
   if (!showPageBanners(view)) return 0;
   if (view === 'landing') return 5;
-  if (view === 'blog') return 4;
-  if (view === 'privacy') return 3;
-  if (view === 'privacy-choices' || view === 'fr') return 2;
+  if (view === 'blog' || view === 'privacy' || isLongContentView(view)) return 1;
+  if (view === 'privacy-choices' || view === 'fr' || view === 'es') return 2;
   return 1;
+}
+
+/** Sticky leader + in-article native beat extra 160×600 stacks on blog/privacy. Never on chat or locale homes. */
+export function showAnchorAd(view) {
+  if (!showPageBanners(view)) return false;
+  if (!adsConsentOk()) return false;
+  if (view === 'blog' || view === 'privacy' || view === 'privacy-choices') return true;
+  return isLongContentView(view);
 }
 
 function useGoogleFundingChoices() {
@@ -270,6 +278,30 @@ export function renderAdSlot() {
   return `${renderNativeBanner()}${renderIabSlot('box')}`;
 }
 
+/** Mid-article native (higher CPM than banners). One native unit per page. */
+export function renderInArticleAd() {
+  if (usAdsOptedOut() || (regionNeedsCmp() && !getConsent()?.ads && !useGoogleFundingChoices())) {
+    return '';
+  }
+  const slot = String(import.meta.env.VITE_ADSENSE_SLOT_IN_ARTICLE || '').trim();
+  if (slot) {
+    return `<aside class="iab-slot iab-in-article" aria-label="Advertisement">
+      <span class="iab-slot-label">Advertisement</span>
+      <ins class="adsbygoogle"
+        style="display:block; text-align:center;"
+        data-ad-layout="in-article"
+        data-ad-format="fluid"
+        data-ad-client="${escapeAttr(adsenseClient())}"
+        data-ad-slot="${escapeAttr(slot)}"></ins>
+    </aside>`;
+  }
+  return renderNativeBanner('iab-in-article');
+}
+
+export function renderInContentOffer() {
+  return renderSponsoredLink();
+}
+
 export function pushAdSense() {
   try {
     if (!adsenseClient()) return;
@@ -285,7 +317,7 @@ export function renderConsentBanner() {
   return `<div class="consent-banner" role="dialog" aria-labelledby="consent-title">
     <div class="consent-copy">
       <h2 id="consent-title">Cookies and ads in Europe</h2>
-      <p>We use cookies for optional ads (Adsterra banners on most public pages, including a 160×600 beside chat; Monetag only on About) and, if enabled, analytics. Creating and joining still work if you reject ads. Read the <a href="/privacy" data-action="navigate">privacy policy</a> and <a href="/cookies" data-action="navigate">cookies</a> pages.</p>
+      <p>We use cookies for optional ads (Adsterra native and a desktop sticky 728×90 on blog and privacy pages, banners on other public pages, a 160×600 beside chat; Monetag only on About) and, if enabled, analytics. Creating and joining still work if you reject ads. Read the <a href="/privacy" data-action="navigate">privacy policy</a> and <a href="/cookies" data-action="navigate">cookies</a> pages.</p>
     </div>
     <div class="consent-actions">
       <button class="button button-secondary" type="button" data-action="consent-reject">Reject optional</button>

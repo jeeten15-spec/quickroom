@@ -482,10 +482,13 @@ export async function getMetrics(
   const frViews = Object.entries(pathTotals)
     .filter(([path]) => path.replace(/_/g, '/').startsWith('/fr'))
     .reduce((n, [, v]) => n + Number(v || 0), 0);
+  const esViews = Object.entries(pathTotals)
+    .filter(([path]) => path.replace(/_/g, '/').startsWith('/es'))
+    .reduce((n, [, v]) => n + Number(v || 0), 0);
   const blogArticleViews = Object.entries(pathTotals)
     .filter(([path]) => {
       const p = path.replace(/_/g, '/');
-      return p === '/blog' || p.startsWith('/blog/');
+      return p === '/blog' || p.startsWith('/blog/') || p === '/fr/blog' || p.startsWith('/fr/blog/') || p === '/es/blog' || p.startsWith('/es/blog/');
     })
     .reduce((n, [, v]) => n + Number(v || 0), 0);
   const adPageViews = Math.max(0, pageviews14d - homeViews - aboutViews);
@@ -524,6 +527,7 @@ export async function getMetrics(
     homeViews14d: homeViews,
     aboutViews14d: aboutViews,
     frViews14d: frViews,
+    esViews14d: esViews,
     blogArticleViews14d: blogArticleViews,
     adSurfaceViews14d: adPageViews
   };

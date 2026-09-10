@@ -1,3 +1,5 @@
+import { commercialUseCases } from './commercial-use-cases.js';
+
 export const useCasePages = {
   'temporary-chat-room': {
     title: 'Temporary Chat Room',
@@ -591,6 +593,8 @@ export const useCasePages = {
   }
 };
 
+Object.assign(useCasePages, commercialUseCases);
+
 /** Homepage job links — private coordination first, then broader use cases. */
 export const coordinationJobs = [
   {
@@ -700,5 +704,35 @@ export const coordinationJobs = [
     label: 'Study group free chat rooms',
     blurb:
       'Exam prep in free chat rooms and online chat rooms—create a room, share the code, revise together.'
+  },
+  {
+    href: '/vpn-travel-group-chat',
+    label: 'VPN travel group chat',
+    blurb: 'Trip planning next to a travel VPN—private room code, then the chat expires.'
+  },
+  {
+    href: '/split-bills-housemate-chat',
+    label: 'Housemate bills and utilities',
+    blurb: 'Rent, energy, broadband, and insurance quotes in a timed flat chat.'
+  },
+  {
+    href: '/dating-group-chat',
+    label: 'Dating group chat (18+)',
+    blurb: 'Group-date logistics without adding everyone on WhatsApp. Not a dating app.'
+  },
+  {
+    href: '/sports-watch-party-chat',
+    label: 'NFL / Premier League watch party',
+    blurb: 'Match-day banter for friends. Not a bookmaker. The room expires with the fixture.'
+  },
+  {
+    href: '/halloween-party-planning-chat',
+    label: 'Halloween party planning',
+    blurb: 'Costumes and ice in a group chat that ends 1 November.'
+  },
+  {
+    href: '/black-friday-shopping-chat',
+    label: 'Black Friday deal chat',
+    blurb: 'Cyber Monday finds without a January notification hangover.'
   }
 ];

@@ -28,6 +28,31 @@ export const frPages = {
         href: '/fr/chat-hackathon',
         label: 'Chat d’équipe hackathon',
         blurb: 'Coordination le temps du sprint, sans Discord obligatoire.'
+      },
+      {
+        href: '/fr/vpn-voyage',
+        label: 'Chat de voyage + VPN',
+        blurb: 'Itinéraire dans une salle qui expire ; le VPN s’occupe du Wi‑Fi.'
+      },
+      {
+        href: '/fr/colocation-factures',
+        label: 'Colocation et factures',
+        blurb: 'Loyer, énergie, box — sans groupe WhatsApp de 2019.'
+      },
+      {
+        href: '/fr/rendez-vous-groupe',
+        label: 'Rendez-vous en groupe (18+)',
+        blurb: 'La logistique du verre, pas une appli de rencontre.'
+      },
+      {
+        href: '/fr/soiree-foot',
+        label: 'Soirée foot',
+        blurb: 'Premier League et Ligue des champions entre amis. Pas un bookmaker.'
+      },
+      {
+        href: '/fr/blog',
+        label: 'Blog en français',
+        blurb: 'Halloween, Black Friday, élections US, argent de fin d’année.'
       }
     ]
   },
@@ -134,6 +159,89 @@ export const frPages = {
         paragraphs: [
           'Ne mettez pas de secrets, de clés API ou de dépôt git dans QuickRoom. Gardez le code dans GitHub et la comms longue dans Discord si l’événement l’utilise déjà.',
           'Ne publiez pas le code de salle sur un tweet public si la discussion doit rester interne.'
+        ]
+      }
+    ]
+  },
+  'fr/blog': {
+    isBlogIndex: true,
+    title: 'Blog QuickRoom en français',
+    seoTitle: 'Blog QuickRoom — chats saisonniers, VPN, foot | Français',
+    description:
+      'Articles en français : Halloween, soirées foot, VPN voyage, Black Friday, argent en colocation. Salles temporaires pour adultes.',
+    htmlLang: 'fr',
+    intro:
+      'Même produit, autre langue : des salles qui expirent, des articles un peu drôles, et les mots-clés que les gens tapent vraiment en octobre–janvier.'
+  },
+  'fr/vpn-voyage': {
+    title: 'Chat de voyage avec VPN',
+    seoTitle: 'VPN voyage — chat de groupe temporaire | QuickRoom',
+    description:
+      'Planifiez un trajet avec un VPN et une salle QuickRoom qui expire. Sans inscription, sans numéro.',
+    htmlLang: 'fr',
+    intro:
+      'Le VPN protège le Wi‑Fi de l’hôtel. La salle protège votre avenir contre un groupe WhatsApp éternel.',
+    sections: [
+      {
+        heading: 'Deux outils, un voyage',
+        paragraphs: [
+          'Salle privée au nom du voyage, code dans l’e-mail des billets, expiration au vol retour + 24 h. Pas de passeports dans le chat.'
+        ]
+      }
+    ]
+  },
+  'fr/colocation-factures': {
+    title: 'Chat colocation et factures',
+    seoTitle: 'Partager loyer et énergie entre colocs | QuickRoom',
+    description:
+      'Salle temporaire pour le loyer, l’énergie, la box et l’assurance habitation. Pas un conseil financier.',
+    htmlLang: 'fr',
+    intro:
+      'Les factures ont une saison. Le groupe « colloc 2019 » n’en a pas. Offrez-lui une date de mort.',
+    sections: [
+      {
+        heading: 'Octobre–décembre',
+        list: [
+          'Salle privée Business ou Famille',
+          '7 jours ou 3 mois',
+          'Pas de numéro de sécurité sociale dans le fil'
+        ]
+      }
+    ]
+  },
+  'fr/rendez-vous-groupe': {
+    title: 'Chat rendez-vous en groupe (18+)',
+    seoTitle: 'Rendez-vous en groupe sans WhatsApp | QuickRoom',
+    description:
+      'Logistique d’un verre à plusieurs, sans ajouter tout le monde dans l’appli de rencontre. 18+ uniquement.',
+    htmlLang: 'fr',
+    intro:
+      'L’appli sert à matcher. WhatsApp sert à rester. Une salle de six heures sert à se trouver au fond de la salle.',
+    sections: [
+      {
+        heading: 'Règles ennuyeuses',
+        list: [
+          'Lieu public',
+          'Prévenir quelqu’un hors salle',
+          'Pas d’adresse perso',
+          'Ce n’est pas un site de rencontre'
+        ]
+      }
+    ]
+  },
+  'fr/soiree-foot': {
+    title: 'Chat soirée foot',
+    seoTitle: 'Watch party Premier League et Ligue des champions | QuickRoom',
+    description:
+      'Salle le temps du match entre amis. Pas un bookmaker. 18+ uniquement.',
+    htmlLang: 'fr',
+    intro:
+      'Le match a une fin. Vos analyses devraient aussi. Une salle privée, six heures, nommée d’après le fixture.',
+    sections: [
+      {
+        heading: 'Petit caractère',
+        paragraphs: [
+          'Si vous faites une cagnotte légale, l’argent reste ailleurs. Jouer seulement si c’est légal chez vous, avec de l’argent que vous pouvez perdre.'
         ]
       }
     ]

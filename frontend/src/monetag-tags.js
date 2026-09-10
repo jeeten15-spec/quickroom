@@ -47,6 +47,13 @@ export function renderAdFooter() {
     </div>`;
 }
 
+/** Desktop sticky 728×90 — higher viewability than a mid-page banner. Never on chat. */
+export function renderAnchorAd() {
+  return `<aside class="iab-anchor" aria-label="Advertisement">
+      ${renderIabSlot('leader', 'iab-desktop')}
+    </aside>`;
+}
+
 /** One 160×600 per side on desktop. Optional 300×250 for chat on small screens. */
 export function renderAdSkyscraper(side, count = 1, { includeMobileBox = false } = {}) {
   const n = Math.max(1, Math.min(5, Number(count) || 1));

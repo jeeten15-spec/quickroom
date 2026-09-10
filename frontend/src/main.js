@@ -9,16 +9,16 @@ import {
   SITE_AUTHOR,
   renderAboutEditorial,
   renderAuthorByline,
-  renderComparisonTable,
   renderContentSections,
   renderLandingEditorial
 } from './editorial';
 import { legalPages } from './legal';
 import { frPages } from './fr-pages';
+import { esPages } from './es-pages';
 import { renderRelatedHtml } from './related';
 import { mountPaypalSupport, renderSupportBlock } from './support';
 import { renderExtrasDomString } from './page-copy';
-import { renderAdFooter, renderAdLeaderboard, renderAdSkyscraper } from './monetag-tags';
+import { renderAdFooter, renderAdLeaderboard, renderAdSkyscraper, renderAnchorAd, renderIabSlot } from './monetag-tags';
 import { hreflangPairs, renderLangToggle } from './lang';
 import {
   adRailCount,
@@ -29,12 +29,15 @@ import {
   initGeo,
   installConsentDefaults,
   isMonetizedView,
+  pushAdSense,
+  showAnchorAd,
   showChatRightRail,
   showPageBanners,
   loadCloudflareAnalytics,
   loadGoogleAnalytics,
-  renderAdSlot,
   renderConsentBanner,
+  renderInArticleAd,
+  renderInContentOffer,
   renderSponsoredLink,
   saveConsent,
   setUsAdsOptOut,
@@ -103,9 +106,11 @@ function getInitialView() {
           ? slug
           : frPages[slug]
             ? slug
-            : useCasePages[slug] || guides[slug] || articles[slug]
+            : esPages[slug]
               ? slug
-              : 'landing';
+              : useCasePages[slug] || guides[slug] || articles[slug]
+                ? slug
+                : 'landing';
 }
 
 function normalizePathname() {
@@ -135,6 +140,7 @@ function render() {
   const rails = adRailCount(state.view);
   const path = window.location.pathname;
   document.documentElement.classList.toggle('chat-boot', isChat);
+  document.documentElement.classList.toggle('has-anchor-ad', Boolean(showAds && showAnchorAd(state.view)));
   activeChat?.destroy();
   activeChat = null;
   app.innerHTML = `
@@ -154,6 +160,7 @@ function render() {
           ${state.view === 'dashboard' ? renderDashboard() : ''}
           ${legalPages[state.view] ? renderLegal(state.view) : ''}
           ${frPages[state.view] ? renderFrench(state.view) : ''}
+          ${esPages[state.view] ? renderSpanish(state.view) : ''}
           ${useCasePages[state.view] ? renderUseCase(state.view) : ''}
           ${guides[state.view] ? renderGuide(state.view) : ''}
           ${articles[state.view] ? renderArticle(state.view) : ''}
@@ -162,6 +169,7 @@ function render() {
       </div>
     </main>
     ${showAds ? renderAdFooter() : ''}
+    ${showAds && showAnchorAd(state.view) ? renderAnchorAd() : ''}
     ${state.ageConfirmed ? '' : renderAgeGate()}
     ${state.ageConfirmed && shouldShowConsentBanner(state.view) ? renderConsentBanner() : ''}
     ${state.contactOpen ? renderContactForm() : ''}
@@ -308,6 +316,7 @@ function renderSiteFooter() {
           <a href="/cookies" data-action="navigate">Cookies</a> <span>·</span>
           <a href="/privacy-choices" data-action="navigate">Privacy choices</a> <span>·</span>
           <a href="/fr" hreflang="fr">Français</a> <span>·</span>
+          <a href="/es" hreflang="es">Español</a> <span>·</span>
           <button type="button" data-action="open-contact">Contact</button> <span>·</span>
           <a href="${GITHUB_URL}" target="_blank" rel="noopener noreferrer">GitHub</a>
         </p>`;
@@ -325,12 +334,43 @@ function afterRender() {
   syncMonetag(state.view);
   if (state.ageConfirmed && canLoadAds(state.view)) {
     fillAdsterraSlots();
+    pushAdSense();
   }
   loadGoogleAnalytics();
   if (state.ageConfirmed && isMonetizedView(state.view)) {
     const path = window.location.pathname === '/' ? '/' : window.location.pathname.replace(/\/+$/, '');
     trackPageview(path);
   }
+}
+
+function articlesForLang(lang) {
+  return Object.entries(articles).filter(([, page]) => (page.htmlLang || 'en') === lang);
+}
+
+function renderLocaleBlogIndex({ lang, backHref, backLabel, title, intro, heading }) {
+  const articleLinks = articlesForLang(lang)
+    .map(
+      ([slug, page]) =>
+        `<li>
+          <a href="/${escapeHtml(slug)}" data-action="navigate">${escapeHtml(page.title)}</a>
+          <span class="muted small"> — ${escapeHtml(page.updatedAt || page.publishedAt)} · ${escapeHtml(page.author || SITE_AUTHOR.name)}</span>
+          <p class="muted small">${escapeHtml(page.description)}</p>
+        </li>`
+    )
+    .join('');
+  return `
+    <article class="info-page" lang="${escapeHtml(lang)}">
+      <a class="back-link" href="${escapeHtml(backHref)}" data-action="navigate">${escapeHtml(backLabel)}</a>
+      <p class="eyebrow">${escapeHtml(heading)}</p>
+      <h1>${escapeHtml(title)}</h1>
+      ${renderAuthorByline(escapeHtml, '10 September 2026')}
+      <p class="use-case-intro">${escapeHtml(intro)}</p>
+      ${renderInArticleAd()}
+      <ul class="blog-index">${articleLinks}</ul>
+      ${renderRelatedHtml(backHref === '/' ? '/blog' : backHref, { escapeHtml })}
+      ${renderSiteFooter()}
+    </article>
+  `;
 }
 
 function renderGithubTrust() {
@@ -554,15 +594,16 @@ function renderLegal(slug) {
       <p class="eyebrow">Legal</p>
       <h1>${escapeHtml(page.title)}</h1>
       <p class="use-case-intro">${escapeHtml(page.description)}</p>
-      <p class="article-date">Last updated 9 September 2026</p>
+      <p class="article-date">Last updated 10 September 2026</p>
       ${choices}
       ${page.sections
         .map(
-          (section) => `
+          (section, index) => `
             <section>
               <h2>${escapeHtml(section.heading)}</h2>
               ${(section.paragraphs || []).map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join('')}
             </section>
+            ${index === 0 && (slug === 'privacy' || slug === 'privacy-choices') ? `${renderInArticleAd()}${renderInContentOffer()}` : ''}
           `
         )
         .join('')}
@@ -574,6 +615,16 @@ function renderLegal(slug) {
 
 function renderFrench(slug) {
   const page = frPages[slug];
+  if (page.isBlogIndex) {
+    return renderLocaleBlogIndex({
+      lang: 'fr',
+      backHref: '/fr',
+      backLabel: 'QuickRoom FR',
+      heading: 'Éditorial',
+      title: page.title,
+      intro: page.intro
+    });
+  }
   if (page.isLanding) {
     return `
       <section class="landing fr-landing" lang="fr" aria-labelledby="quickroom-title-fr">
@@ -582,7 +633,7 @@ function renderFrench(slug) {
           <p class="tagline">${escapeHtml(page.intro)}</p>
           <p class="landing-support">${escapeHtml(page.description)}</p>
           <button class="button button-primary" type="button" data-action="open-create">Créer une salle privée</button>
-          ${showPageBanners('fr') ? renderAdSlot() : ''}
+          ${showPageBanners('fr') ? renderIabSlot('box') : ''}
           <section class="job-links">
             <h2>Usages</h2>
             <div class="job-link-list">
@@ -614,7 +665,7 @@ function renderFrench(slug) {
       <p class="use-case-intro">${escapeHtml(page.intro)}</p>
       <p>${escapeHtml(page.description)}</p>
       <button class="button button-primary use-case-cta" type="button" data-action="open-create">Créer une salle</button>
-      ${renderAdSlot()}
+      ${renderInArticleAd()}
       ${page.sections
         .map(
           (section) => `
@@ -632,6 +683,81 @@ function renderFrench(slug) {
         .join('')}
       ${renderRelatedHtml(`/${slug}`, { escapeHtml })}
       <button class="button button-primary use-case-cta" type="button" data-action="open-create">Créer une salle</button>
+      ${renderSiteFooter()}
+    </article>
+  `;
+}
+
+function renderSpanish(slug) {
+  const page = esPages[slug];
+  if (page.isBlogIndex) {
+    return renderLocaleBlogIndex({
+      lang: 'es',
+      backHref: '/es',
+      backLabel: 'QuickRoom ES',
+      heading: 'Editorial',
+      title: page.title,
+      intro: page.intro
+    });
+  }
+  if (page.isLanding) {
+    return `
+      <section class="landing es-landing" lang="es" aria-labelledby="quickroom-title-es">
+        <div class="landing-content">
+          <h1 id="quickroom-title-es">QuickRoom</h1>
+          <p class="tagline">${escapeHtml(page.intro)}</p>
+          <p class="landing-support">${escapeHtml(page.description)}</p>
+          <button class="button button-primary" type="button" data-action="open-create">Crear una sala privada</button>
+          ${showPageBanners('es') ? renderIabSlot('box') : ''}
+          <section class="job-links">
+            <h2>Usos</h2>
+            <div class="job-link-list">
+              ${page.jobs
+                .map(
+                  (job) => `
+                    <a class="job-link" href="${escapeHtml(job.href)}" data-action="navigate">
+                      <strong>${escapeHtml(job.label)}</strong>
+                      <span>${escapeHtml(job.blurb)}</span>
+                    </a>`
+                )
+                .join('')}
+            </div>
+          </section>
+        </div>
+        <footer>
+          ${renderRelatedHtml('/es', { escapeHtml })}
+          ${renderSiteFooter()}
+          <p>Solo 18+</p>
+        </footer>
+      </section>
+    `;
+  }
+  return `
+    <article class="info-page use-case-page" lang="es">
+      <a class="back-link" href="/es" data-action="navigate">QuickRoom ES</a>
+      <p class="eyebrow">Uso de QuickRoom</p>
+      <h1>${escapeHtml(page.title)}</h1>
+      <p class="use-case-intro">${escapeHtml(page.intro)}</p>
+      <p>${escapeHtml(page.description)}</p>
+      <button class="button button-primary use-case-cta" type="button" data-action="open-create">Crear una sala</button>
+      ${renderInArticleAd()}
+      ${(page.sections || [])
+        .map(
+          (section) => `
+            <section>
+              <h2>${escapeHtml(section.heading)}</h2>
+              ${(section.paragraphs || []).map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join('')}
+              ${
+                section.list
+                  ? `<ul>${section.list.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>`
+                  : ''
+              }
+            </section>
+          `
+        )
+        .join('')}
+      ${renderRelatedHtml(`/${slug}`, { escapeHtml })}
+      <button class="button button-primary use-case-cta" type="button" data-action="open-create">Crear una sala</button>
       ${renderSiteFooter()}
     </article>
   `;
@@ -745,6 +871,11 @@ function renderDashboardMetrics() {
         <p class="metric-label">French pages (14d)</p>
         <p class="metric-value">${escapeHtml(String(m.frViews14d ?? 0))}</p>
         <p class="metric-note">Whether the /fr locale is worth more SEO work</p>
+      </div>
+      <div class="metric-card">
+        <p class="metric-label">Spanish pages (14d)</p>
+        <p class="metric-value">${escapeHtml(String(m.esViews14d ?? 0))}</p>
+        <p class="metric-note">Whether /es is attracting US/LatAm/ES traffic</p>
       </div>
     </div>
     <p class="dashboard-updated">Window: last 7 days for weekly rooms · last 30 days for month/country room lists · last 14 days for pageviews · Updated ${escapeHtml(new Date(m.generatedAt).toLocaleString())}</p>
@@ -966,27 +1097,11 @@ function renderUseCase(slug) {
       <p class="use-case-intro">${escapeHtml(page.intro)}</p>
       <p>${escapeHtml(page.description)}</p>
       <button class="button button-primary use-case-cta" type="button" data-action="open-create">Create a room</button>
-      ${page.sections
-        .map(
-          (section) => `
-            <section>
-              <h2>${escapeHtml(section.heading)}</h2>
-              ${(section.paragraphs || [])
-                .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`)
-                .join('')}
-              ${
-                section.list
-                  ? `<ul>${section.list
-                      .map((item) => `<li>${escapeHtml(item)}</li>`)
-                      .join('')}</ul>`
-                  : ''
-              }
-            </section>
-          `
-        )
-        .join('')}
+      ${renderContentSections(page.sections, escapeHtml, {
+        afterFirstHtml: `${renderInArticleAd()}${renderInContentOffer()}`
+      })}
       ${renderSeoExtras(page.title)}
-      ${renderAdSlot()}
+      ${renderIabSlot('box')}
       ${renderRelatedHtml(`/${slug}`, { escapeHtml })}
       <button class="button button-primary use-case-cta" type="button" data-action="open-create">Create a room</button>
       ${renderSupportBlock({ compact: true })}
@@ -1004,27 +1119,12 @@ function renderGuide(slug) {
       <h1>${escapeHtml(guide.title)}</h1>
       <p class="use-case-intro">${escapeHtml(guide.intro)}</p>
       <p>${escapeHtml(guide.description)}</p>
-      ${guide.sections
-        .map(
-          (section) => `
-            <section>
-              <h2>${escapeHtml(section.heading)}</h2>
-              ${(section.paragraphs || [])
-                .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`)
-                .join('')}
-              ${
-                section.list
-                  ? `<ol>${section.list
-                      .map((item) => `<li>${escapeHtml(item)}</li>`)
-                      .join('')}</ol>`
-                  : ''
-              }
-            </section>
-          `
-        )
-        .join('')}
+      ${renderContentSections(guide.sections, escapeHtml, {
+        orderedLists: true,
+        afterFirstHtml: `${renderInArticleAd()}${renderInContentOffer()}`
+      })}
       ${renderSeoExtras(guide.title)}
-      ${renderAdSlot()}
+      ${renderIabSlot('box')}
       ${renderRelatedHtml(`/${slug}`, { escapeHtml })}
       <button class="button button-primary use-case-cta" type="button" data-action="open-create">Create a room</button>
       ${renderSupportBlock({ compact: true })}
@@ -1035,16 +1135,21 @@ function renderGuide(slug) {
 
 function renderArticle(slug) {
   const article = articles[slug];
+  const lang = article.htmlLang || 'en';
+  const blogHome = lang === 'fr' ? '/fr/blog' : lang === 'es' ? '/es/blog' : '/blog';
+  const blogLabel = lang === 'fr' ? 'Blog QuickRoom' : lang === 'es' ? 'Blog QuickRoom' : 'QuickRoom Blog';
   return `
-    <article class="info-page article-page">
-      <a class="back-link" href="/blog" data-action="navigate">QuickRoom Blog</a>
-      <p class="eyebrow">Walkthrough</p>
+    <article class="info-page article-page" lang="${escapeHtml(lang)}">
+      <a class="back-link" href="${blogHome}" data-action="navigate">${escapeHtml(blogLabel)}</a>
+      <p class="eyebrow">${lang === 'en' ? 'Walkthrough' : lang === 'fr' ? 'Article' : 'Artículo'}</p>
       <h1>${escapeHtml(article.title)}</h1>
       ${renderAuthorByline(escapeHtml, article.updatedAt || article.publishedAt)}
       <p class="use-case-intro">${escapeHtml(article.intro)}</p>
-      ${renderContentSections(article.sections, escapeHtml)}
+      ${renderContentSections(article.sections, escapeHtml, {
+        afterFirstHtml: `${renderInArticleAd()}${renderInContentOffer()}`
+      })}
       ${renderSeoExtras('a QuickRoom temporary chat')}
-      ${renderAdSlot()}
+      ${renderIabSlot('box')}
       ${renderRelatedHtml(`/${slug}`, { escapeHtml })}
       <button class="button button-primary use-case-cta" type="button" data-action="open-create">Create a room</button>
       ${renderSupportBlock({ compact: true })}
@@ -1054,40 +1159,15 @@ function renderArticle(slug) {
 }
 
 function renderBlog() {
-  const articleLinks = Object.entries(articles)
-    .map(
-      ([slug, page]) =>
-        `<li>
-          <a href="/${escapeHtml(slug)}" data-action="navigate">${escapeHtml(page.title)}</a>
-          <span class="muted small"> — ${escapeHtml(page.updatedAt || page.publishedAt)} · ${escapeHtml(page.author || SITE_AUTHOR.name)}</span>
-          <p class="muted small">${escapeHtml(page.description)}</p>
-        </li>`
-    )
-    .join('');
-  return `
-    <article class="info-page">
-      <a class="back-link" href="/" data-action="navigate">QuickRoom</a>
-      <p class="eyebrow">Editorial</p>
-      <h1>How QuickRoom actually works</h1>
-      ${renderAuthorByline(escapeHtml, '9 September 2026')}
-      <h2>Articles</h2>
-      <ul class="blog-index">${articleLinks}</ul>
-      ${renderAdSlot()}
-      <h2>Comparison snapshot</h2>
-      <p>Full notes live in <a href="/blog/quickroom-vs-discord-whatsapp-slack" data-action="navigate">QuickRoom vs WhatsApp, Discord, and Slack</a>. The table is the same one on the homepage so we do not maintain two stories.</p>
-      ${renderComparisonTable(escapeHtml)}
-      <h2>Practical setup guides</h2>
-      <ul>
-        <li><a href="/private-study-group-without-whatsapp" data-action="navigate">How to start a private study group without WhatsApp</a></li>
-        <li><a href="/temporary-chat-room-for-hackathons" data-action="navigate">A temporary chat room for hackathons</a></li>
-        <li><a href="/short-lived-event-backchannel" data-action="navigate">How to run a short-lived event backchannel</a></li>
-      </ul>
-      <p>Product questions: <a href="mailto:${escapeHtml(SITE_AUTHOR.email)}">${escapeHtml(SITE_AUTHOR.email)}</a>.</p>
-      ${renderGithubTrust()}
-      ${renderSupportBlock()}
-      ${renderSiteFooter()}
-    </article>
-  `;
+  return renderLocaleBlogIndex({
+    lang: 'en',
+    backHref: '/',
+    backLabel: 'QuickRoom',
+    heading: 'Editorial',
+    title: 'How QuickRoom actually works — plus seasonal group chats',
+    intro:
+      'Product walkthroughs, and a 2026 calendar of festivals, sports, and high-bid commercial queries (VPN, finance, dating, watch parties, utilities) written four weeks before the event. French and Spanish sit at /fr/blog and /es/blog.'
+  });
 }
 
 function updateDocumentMetadata() {
@@ -1096,7 +1176,8 @@ function updateDocumentMetadata() {
     guides[state.view] ||
     articles[state.view] ||
     legalPages[state.view] ||
-    frPages[state.view];
+    frPages[state.view] ||
+    esPages[state.view];
   const metadata =
     page
       ? { title: page.seoTitle || page.title, description: page.description, lang: page.htmlLang || 'en' }

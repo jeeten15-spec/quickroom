@@ -77,7 +77,7 @@ export function homeFaq() {
     },
     {
       q: 'Where do ads appear?',
-      a: 'On public articles, use-case pages, and About—not on Create/Join and not inside a live room. We keep the conversation free of ad units.'
+      a: 'On public articles, use-case pages, privacy, and About—not on Create/Join and not inside a live room. Blog and privacy use in-article native ads and a desktop sticky bar rather than a stack of banners. We keep the conversation free of ad units.'
     },
     {
       q: 'Is this for children or school classes under 18?',
@@ -120,9 +120,9 @@ export function jsonLdPerson() {
   };
 }
 
-export function renderContentSections(sections, escapeHtml, { orderedLists = false } = {}) {
+export function renderContentSections(sections, escapeHtml, { orderedLists = false, afterFirstHtml = '' } = {}) {
   return (sections || [])
-    .map((section) => {
+    .map((section, index) => {
       const paragraphs = (section.paragraphs || [])
         .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`)
         .join('');
@@ -132,7 +132,8 @@ export function renderContentSections(sections, escapeHtml, { orderedLists = fal
         : '';
       const figure = section.figure ? renderFigure(section.figure, escapeHtml) : '';
       const table = section.table === 'comparison' ? renderComparisonTable(escapeHtml) : '';
-      return `<section><h2>${escapeHtml(section.heading)}</h2>${paragraphs}${list}${figure}${table}</section>`;
+      const inject = index === 0 && afterFirstHtml ? afterFirstHtml : '';
+      return `<section><h2>${escapeHtml(section.heading)}</h2>${paragraphs}${list}${figure}${table}</section>${inject}`;
     })
     .join('');
 }

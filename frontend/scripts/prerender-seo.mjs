@@ -13,6 +13,7 @@ const { guides } = await import(pathToFileURL(path.join(root, 'src/guides.js')).
 const { articles } = await import(pathToFileURL(path.join(root, 'src/articles.js')).href);
 const { legalPages } = await import(pathToFileURL(path.join(root, 'src/legal.js')).href);
 const { frPages } = await import(pathToFileURL(path.join(root, 'src/fr-pages.js')).href);
+const { esPages } = await import(pathToFileURL(path.join(root, 'src/es-pages.js')).href);
 const { renderRelatedHtml } = await import(pathToFileURL(path.join(root, 'src/related.js')).href);
 const {
   SITE_AUTHOR,
@@ -24,7 +25,7 @@ const {
   renderContentSections,
   renderLandingEditorial
 } = await import(pathToFileURL(path.join(root, 'src/editorial.js')).href);
-const { monetagHeadHtml, renderAdFooter, renderAdLeaderboard, renderAdSkyscraper, renderIabSlot, renderNativeBanner, MONETAG_DIRECT_LINK } =
+const { monetagHeadHtml, renderAdFooter, renderAdLeaderboard, renderAdSkyscraper, renderAnchorAd, renderIabSlot, renderNativeBanner, MONETAG_DIRECT_LINK } =
   await import(pathToFileURL(path.join(root, 'src/monetag-tags.js')).href);
 const { adsenseHeadHtml, ADSENSE_ADS_TXT } = await import(
   pathToFileURL(path.join(root, 'src/adsense.js')).href
@@ -60,7 +61,7 @@ function bodyUseCase(slug, page) {
       <p class="use-case-intro">${escapeHtml(page.intro)}</p>
       <p>${escapeHtml(page.description)}</p>
       <p><a href="/">Create a temporary room on QuickRoom</a> — no signup, app, or phone number required.</p>
-      ${renderIabSlot('box')}
+      ${renderNativeBanner()}
       ${renderSections(page.sections)}
       ${renderExtrasHtml(page.title, { escapeHtml })}
       ${relatedLinks(`/${slug}`)}
@@ -73,13 +74,17 @@ function bodyLegal(slug, page) {
       <p class="eyebrow">Legal</p>
       <h1>${escapeHtml(page.title)}</h1>
       <p class="use-case-intro">${escapeHtml(page.description)}</p>
-      <p>Last updated 9 September 2026</p>
+      <p>Last updated 10 September 2026</p>
       ${page.sections
         .map(
-          (section) =>
+          (section, index) =>
             `<section><h2>${escapeHtml(section.heading)}</h2>${(section.paragraphs || [])
               .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`)
-              .join('')}</section>`
+              .join('')}</section>${
+              index === 0 && (slug === 'privacy' || slug === 'privacy-choices')
+                ? `${renderNativeBanner()}<p class="sponsored-link"><a href="${MONETAG_DIRECT_LINK}" rel="sponsored nofollow noopener">Sponsored offer</a></p>`
+                : ''
+            }`
         )
         .join('')}
       <p><a href="/cookies">Cookies</a> · <a href="/privacy-choices">Privacy choices</a> · <a href="/">QuickRoom</a></p>
@@ -87,6 +92,23 @@ function bodyLegal(slug, page) {
 }
 
 function bodyFrench(slug, page) {
+  if (page.isBlogIndex) {
+    const articleLinks = Object.entries(articles)
+      .filter(([, item]) => item.htmlLang === 'fr')
+      .map(
+        ([articleSlug, item]) =>
+          `<li><a href="/${escapeHtml(articleSlug)}">${escapeHtml(item.title)}</a> — ${escapeHtml(item.description)}</li>`
+      )
+      .join('');
+    return `<article class="info-page" lang="fr">
+      <a class="back-link" href="/fr">QuickRoom FR</a>
+      <h1>${escapeHtml(page.title)}</h1>
+      <p>${escapeHtml(page.intro)}</p>
+      ${renderNativeBanner()}
+      <ul class="blog-index">${articleLinks}</ul>
+      ${relatedLinks('/fr/blog')}
+    </article>`;
+  }
   if (page.isLanding) {
     return `<section lang="fr">
       <h1>QuickRoom</h1>
@@ -116,6 +138,53 @@ function bodyFrench(slug, page) {
     </article>`;
 }
 
+function bodySpanish(slug, page) {
+  if (page.isBlogIndex) {
+    const articleLinks = Object.entries(articles)
+      .filter(([, item]) => item.htmlLang === 'es')
+      .map(
+        ([articleSlug, item]) =>
+          `<li><a href="/${escapeHtml(articleSlug)}">${escapeHtml(item.title)}</a> — ${escapeHtml(item.description)}</li>`
+      )
+      .join('');
+    return `<article class="info-page" lang="es">
+      <a class="back-link" href="/es">QuickRoom ES</a>
+      <h1>${escapeHtml(page.title)}</h1>
+      <p>${escapeHtml(page.intro)}</p>
+      ${renderNativeBanner()}
+      <ul class="blog-index">${articleLinks}</ul>
+      ${relatedLinks('/es/blog')}
+    </article>`;
+  }
+  if (page.isLanding) {
+    return `<section lang="es">
+      <h1>QuickRoom</h1>
+      <p>${escapeHtml(page.intro)}</p>
+      <p>${escapeHtml(page.description)}</p>
+      ${renderIabSlot('box')}
+      <p><a href="/">Crear una sala</a></p>
+      <h2>Usos</h2>
+      <ul>${page.jobs
+        .map(
+          (job) =>
+            `<li><a href="${escapeHtml(job.href)}">${escapeHtml(job.label)}</a> — ${escapeHtml(job.blurb)}</li>`
+        )
+        .join('')}</ul>
+      ${relatedLinks('/es')}
+    </section>`;
+  }
+  return `<article class="info-page use-case-page" lang="es">
+      <a class="back-link" href="/es">QuickRoom ES</a>
+      <h1>${escapeHtml(page.title)}</h1>
+      <p class="use-case-intro">${escapeHtml(page.intro)}</p>
+      <p>${escapeHtml(page.description)}</p>
+      <p><a href="/">Crear una sala</a></p>
+      ${renderNativeBanner()}
+      ${renderSections(page.sections)}
+      ${relatedLinks(`/${slug}`)}
+    </article>`;
+}
+
 function bodyGuide(slug, page) {
   return `<article class="info-page guide-page">
       <a class="back-link" href="/">QuickRoom</a>
@@ -132,13 +201,16 @@ function bodyGuide(slug, page) {
 }
 
 function bodyArticle(slug, page) {
-  return `<article class="info-page article-page">
-      <a class="back-link" href="/blog">QuickRoom Blog</a>
+  const lang = page.htmlLang || 'en';
+  const blogHome = lang === 'fr' ? '/fr/blog' : lang === 'es' ? '/es/blog' : '/blog';
+  return `<article class="info-page article-page" lang="${escapeHtml(lang)}">
+      <a class="back-link" href="${blogHome}">QuickRoom Blog</a>
       <p class="eyebrow">Walkthrough</p>
       <h1>${escapeHtml(page.title)}</h1>
       ${renderAuthorByline(escapeHtml, page.updatedAt || page.publishedAt)}
       <p class="use-case-intro">${escapeHtml(page.intro)}</p>
-      ${renderIabSlot('box')}
+      ${renderNativeBanner()}
+      <p class="sponsored-link"><a href="${MONETAG_DIRECT_LINK}" rel="sponsored nofollow noopener">Sponsored offer</a> — optional, not required to create or join a room.</p>
       ${renderSections(page.sections)}
       ${renderExtrasHtml('a QuickRoom temporary chat', { escapeHtml })}
       <p><a href="/">Create a private temporary room</a></p>
@@ -157,6 +229,7 @@ function bodyAbout() {
 
 function bodyBlog() {
   const articleLinks = Object.entries(articles)
+    .filter(([, page]) => (page.htmlLang || 'en') === 'en')
     .map(
       ([slug, page]) =>
         `<li>
@@ -169,21 +242,12 @@ function bodyBlog() {
   return `<article class="info-page">
       <a class="back-link" href="/">QuickRoom</a>
       <p class="eyebrow">Editorial</p>
-      <h1>How QuickRoom actually works</h1>
-      ${renderAuthorByline(escapeHtml, '9 September 2026')}
+      <h1>How QuickRoom actually works — plus seasonal group chats</h1>
+      ${renderAuthorByline(escapeHtml, '10 September 2026')}
+      ${renderNativeBanner()}
       <h2>Articles</h2>
       <ul class="blog-index">${articleLinks}</ul>
-      ${renderIabSlot('box')}
-      <h2>Comparison snapshot</h2>
-      <p>Full notes live in <a href="/blog/quickroom-vs-discord-whatsapp-slack">QuickRoom vs WhatsApp, Discord, and Slack</a>. The table is the same one on the homepage so we do not maintain two stories.</p>
-      ${renderComparisonTable(escapeHtml)}
-      <h2>Practical setup guides</h2>
-      <ul>
-        <li><a href="/private-study-group-without-whatsapp">How to start a private study group without WhatsApp</a></li>
-        <li><a href="/temporary-chat-room-for-hackathons">A temporary chat room for hackathons</a></li>
-        <li><a href="/short-lived-event-backchannel">How to run a short-lived event backchannel</a></li>
-      </ul>
-      <p>Product questions: <a href="mailto:${escapeHtml(SITE_AUTHOR.email)}">${escapeHtml(SITE_AUTHOR.email)}</a>. <a href="/about">About</a>.</p>
+      <p>French: <a href="/fr/blog">/fr/blog</a> · Spanish: <a href="/es/blog">/es/blog</a></p>
       ${relatedLinks('/blog')}
     </article>`;
 }
@@ -247,7 +311,9 @@ const pages = [
     description:
       'Product walkthroughs with screenshots, a comparison table versus WhatsApp, Discord, and Slack, and the private vs public listing rule.',
     body: bodyBlog(),
-    railCount: 4,
+    railCount: 1,
+    native: false,
+    anchor: true,
     faq: homeFaq(),
     person: true
   },
@@ -258,7 +324,9 @@ const pages = [
     description: page.description,
     body: bodyUseCase(slug, page),
     faq: defaultFaq(page.title),
-    railCount: 4
+    railCount: 1,
+    native: false,
+    anchor: true
   })),
   ...Object.entries(guides).map(([slug, page]) => ({
     route: `/${slug}`,
@@ -266,7 +334,9 @@ const pages = [
     title: page.seoTitle,
     description: page.description,
     body: bodyGuide(slug, page),
-    faq: defaultFaq(page.title)
+    faq: defaultFaq(page.title),
+    native: false,
+    anchor: true
   })),
   ...Object.entries(articles).map(([slug, page]) => ({
     route: `/${slug}`,
@@ -275,8 +345,11 @@ const pages = [
     description: page.description,
     body: bodyArticle(slug, page),
     faq: defaultFaq('a QuickRoom temporary chat'),
-    lang: 'en',
+    lang: page.htmlLang || 'en',
     person: true,
+    native: false,
+    anchor: true,
+    railCount: 1,
     article: {
       headline: page.title,
       description: page.description,
@@ -291,7 +364,9 @@ const pages = [
     description: page.description,
     body: bodyLegal(slug, page),
     lang: page.htmlLang || 'en',
-    railCount: slug === 'privacy' ? 3 : slug === 'privacy-choices' ? 2 : 1
+    railCount: slug === 'privacy' || slug === 'privacy-choices' ? 1 : 1,
+    native: slug === 'privacy' || slug === 'privacy-choices' ? false : true,
+    anchor: slug === 'privacy' || slug === 'privacy-choices'
   })),
   ...Object.entries(frPages).map(([slug, page]) => ({
     route: `/${slug}`,
@@ -301,7 +376,21 @@ const pages = [
     body: bodyFrench(slug, page),
     lang: 'fr',
     noAds: false,
-    railCount: page.isLanding ? 2 : 1
+    native: !page.isBlogIndex,
+    railCount: page.isLanding ? 2 : 1,
+    anchor: !page.isLanding
+  })),
+  ...Object.entries(esPages).map(([slug, page]) => ({
+    route: `/${slug}`,
+    file: `${slug}.html`,
+    title: page.seoTitle || page.title,
+    description: page.description,
+    body: bodySpanish(slug, page),
+    lang: 'es',
+    noAds: false,
+    native: !page.isBlogIndex,
+    railCount: page.isLanding ? 2 : 1,
+    anchor: !page.isLanding
   }))
 ];
 
@@ -324,14 +413,15 @@ function gscMeta() {
   return `<meta name="google-site-verification" content="${escapeHtml(token)}" />`;
 }
 
-function wrapAds(body, { rails = 1, native = true } = {}) {
+function wrapAds(body, { rails = 1, native = true, anchor = false } = {}) {
   return `${renderAdLeaderboard()}
     <div class="ads-page-row has-ad-rails">
       ${renderAdSkyscraper('left', rails)}
       <div class="ads-page-main">${native ? renderNativeBanner() : ''}${body}</div>
       ${renderAdSkyscraper('right', rails)}
     </div>
-    ${renderAdFooter()}`;
+    ${renderAdFooter()}
+    ${anchor ? renderAnchorAd() : ''}`;
 }
 
 function hreflangTags(route) {
@@ -409,7 +499,13 @@ function renderHtml(page, { noindex = false } = {}) {
   </head>
   <body>
     <div id="app">${renderLangToggle(page.route)}${
-      page.noAds ? page.body || '' : wrapAds(page.body || '', { rails: page.railCount ?? 1, native: page.native !== false })
+      page.noAds
+        ? page.body || ''
+        : wrapAds(page.body || '', {
+            rails: page.railCount ?? 1,
+            native: page.native !== false,
+            anchor: Boolean(page.anchor)
+          })
     }</div>
   </body>
 </html>
