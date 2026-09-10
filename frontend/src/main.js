@@ -343,19 +343,16 @@ function renderGithubTrust() {
   `;
 }
 
-function renderExpiryMix(m) {
-  const rows = Array.isArray(m.expiryMixMonth) ? m.expiryMixMonth : [];
+function renderSimpleTable(headers, rows) {
   if (!rows.length) return '';
   return `
-    <h2>Expiry mix (30 days)</h2>
-    <p class="use-case-intro">How long people asked rooms to live. Longer rooms use more Worker/database time.</p>
     <table class="metrics-table">
-      <thead><tr><th>Duration</th><th>Rooms</th></tr></thead>
+      <thead><tr>${headers.map((h) => `<th>${escapeHtml(h)}</th>`).join('')}</tr></thead>
       <tbody>
         ${rows
           .map(
-            (row) =>
-              `<tr><td>${escapeHtml(row.label)}</td><td>${escapeHtml(String(row.count))}</td></tr>`
+            (cells) =>
+              `<tr>${cells.map((cell) => `<td>${escapeHtml(String(cell))}</td>`).join('')}</tr>`
           )
           .join('')}
       </tbody>
@@ -363,14 +360,54 @@ function renderExpiryMix(m) {
   `;
 }
 
-function renderRoomsByCountry(m) {
+function renderExpiryMix(m) {
+  const rows = Array.isArray(m.expiryMixMonth) ? m.expiryMixMonth : [];
+  if (!rows.length) return '';
+  return `
+    <h2>How long rooms were set to last (30 days)</h2>
+    <p class="use-case-intro">Creators only pick 1 hour, 6 hours, 24 hours, 7 days, or 3 months. “Not recorded (room already ended)” means an older room whose chosen duration was not saved after it closed. Longer rooms use more Worker/database time.</p>
+    ${renderSimpleTable(
+      ['Duration', 'Rooms'],
+      rows.map((row) => [row.label, row.count])
+    )}
+  `;
+}
+
+function renderTopRoomCountries(m) {
   const groups = Array.isArray(m.roomsByCountry) ? m.roomsByCountry : [];
+  const unknown = Number(m.roomsCountryUnknown || 0);
   if (!groups.length) {
-    return `<p class="metric-note">Country room lists appear after new rooms are created (country is stored at create time). Older rooms without a country code are grouped as Unknown.</p>`;
+    return `
+      <h2>Top 5 countries where rooms are created (30 days)</h2>
+      <p class="metric-note">${
+        unknown
+          ? `${unknown} rooms in this window were created before country was saved, so names are not available yet. New rooms will show country names here.`
+          : 'Country names appear after new rooms are created. Country is stored at create time from Cloudflare.'
+      }</p>
+    `;
   }
   return `
-    <h2>Rooms created by country (top 5, 30 days)</h2>
-    <p class="use-case-intro">Names and chosen duration only. Use this to see where demand is and whether live-room count justifies a Cloudflare plan change.</p>
+    <h2>Top 5 countries where rooms are created (30 days)</h2>
+    <p class="use-case-intro">Use these names for SEO locales and ad geo-targeting. Share is of rooms created in the last 30 days${
+      unknown ? `. ${unknown} older rooms have no country recorded and are left out of this list.` : '.'
+    }</p>
+    ${renderSimpleTable(
+      ['Country', 'Rooms', 'Share of creates'],
+      groups.map((group) => [
+        group.countryName || group.country,
+        group.count,
+        `${group.sharePct ?? 0}%`
+      ])
+    )}
+  `;
+}
+
+function renderRoomsByCountry(m) {
+  const groups = Array.isArray(m.roomsByCountry) ? m.roomsByCountry : [];
+  if (!groups.length) return '';
+  return `
+    <h2>Room names in those countries</h2>
+    <p class="use-case-intro">Public vs private names and chosen duration. Room names can hint at topics people search for.</p>
     ${groups
       .map((group) => {
         const publicRows = Array.isArray(group.publicRooms) ? group.publicRooms : [];
@@ -415,15 +452,61 @@ function renderRoomsByCountry(m) {
   `;
 }
 
+function renderGrowthSignals(m) {
+  const weekdays = Array.isArray(m.createsByWeekday) ? m.createsByWeekday : [];
+  const hours = Array.isArray(m.peakCreateHoursUtc) ? m.peakCreateHoursUtc : [];
+  const days = Array.isArray(m.createsByDay) ? m.createsByDay : [];
+  return `
+    <h2>Signals for growth and ads</h2>
+    <p class="use-case-intro">Weekday and UTC hour peaks help you time posts and ad campaigns. Daily creates show whether SEO is compounding. Page-type views show where ads can actually run (home is ad-light; about is Monetag-only).</p>
+    <div class="metrics-tables">
+      ${
+        weekdays.length
+          ? renderSimpleTable(
+              ['Weekday (UTC)', 'Rooms created'],
+              weekdays.map((row) => [row.label, row.count])
+            )
+          : ''
+      }
+      ${
+        hours.length
+          ? renderSimpleTable(
+              ['Busiest create hours (UTC)', 'Rooms'],
+              hours.map((row) => [row.label, row.count])
+            )
+          : '<p class="metric-note">Peak create hours appear once rooms are created this month.</p>'
+      }
+    </div>
+    ${
+      days.length
+        ? `
+          <h3>Rooms created per day (last 14 days)</h3>
+          ${renderSimpleTable(
+            ['Day (UTC)', 'Rooms'],
+            days.map((row) => [row.day, row.count])
+          )}
+        `
+        : ''
+    }
+  `;
+}
+
 function renderCountryPageviews(m) {
+  const top = Array.isArray(m.topPageviewCountries)
+    ? m.topPageviewCountries
+    : (Array.isArray(m.pageviewsByCountry) ? m.pageviewsByCountry.slice(0, 5) : []);
   const rows = Array.isArray(m.pageviewsByCountry) ? m.pageviewsByCountry : [];
   const paths = Array.isArray(m.pageviewsByPath) ? m.pageviewsByPath : [];
   if (!rows.length && !paths.length) {
     return `<p class="metric-note">Country pageviews will appear here after visitors load content pages.</p>`;
   }
   return `
-    <h2>Content pageviews (14 days)</h2>
-    <p class="use-case-intro">${escapeHtml(String(m.pageviews14d || 0))} counted views on landing, articles, and use cases. Country comes from Cloudflare. Rooms are not counted.</p>
+    <h2>Where visitors come from (14 days)</h2>
+    <p class="use-case-intro">${escapeHtml(String(m.pageviews14d || 0))} counted views on landing, articles, and use cases. Compare this list with the room-create countries: traffic without rooms may mean SEO in a market that is not converting; rooms without traffic may mean word-of-mouth worth advertising in. Country comes from Cloudflare. Chat rooms are not counted.</p>
+    ${renderSimpleTable(
+      ['Top visitor countries', 'Views'],
+      top.map((row) => [row.countryName || row.country, row.views])
+    )}
     <div class="metrics-tables">
       <table class="metrics-table">
         <thead><tr><th>Country</th><th>Views</th></tr></thead>
@@ -431,7 +514,7 @@ function renderCountryPageviews(m) {
           ${rows
             .map(
               (row) =>
-                `<tr><td>${escapeHtml(row.country)}</td><td>${escapeHtml(String(row.views))}</td></tr>`
+                `<tr><td>${escapeHtml(row.countryName || row.country)}</td><td>${escapeHtml(String(row.views))}</td></tr>`
             )
             .join('')}
         </tbody>
@@ -560,7 +643,7 @@ function renderDashboard() {
       <a class="back-link" href="/" data-action="navigate">QuickRoom</a>
       <p class="eyebrow">Operator metrics</p>
       <h1>Growth dashboard</h1>
-      <p class="use-case-intro">Rooms created / week, joining quality, share behaviour, and return creators. Extra month and country tables below are for capacity and Cloudflare plan decisions.</p>
+      <p class="use-case-intro">Rooms created, who actually joins, share behaviour, named countries for SEO and ads, and page-type views for where ads can run.</p>
       ${
         state.metrics
           ? renderDashboardMetrics()
@@ -628,9 +711,46 @@ function renderDashboardMetrics() {
         <p class="metric-value">${escapeHtml(String(m.stillLiveMonth ?? 0))}</p>
         <p class="metric-note">of ${escapeHtml(String(m.roomsCreatedMonth ?? 0))} created in 30 days</p>
       </div>
+      <div class="metric-card">
+        <p class="metric-label">Rooms with ≥2 people (30d)</p>
+        <p class="metric-value">${escapeHtml(String(m.pctTwoPlusMonth ?? 0))}%</p>
+        <p class="metric-note">Quality sessions — more people in chat means more ad impressions per room</p>
+      </div>
+      <div class="metric-card">
+        <p class="metric-label">Share-click rate (30d)</p>
+        <p class="metric-value">${escapeHtml(String(m.shareClickRateMonth ?? 0))}%</p>
+        <p class="metric-note">Viral loop: rooms where someone clicked share</p>
+      </div>
+      <div class="metric-card">
+        <p class="metric-label">Public rooms (30d)</p>
+        <p class="metric-value">${escapeHtml(String(m.publicSharePctMonth ?? 0))}%</p>
+        <p class="metric-note">Public rooms can appear on Home and help SEO</p>
+      </div>
+      <div class="metric-card">
+        <p class="metric-label">Home views (14d)</p>
+        <p class="metric-value">${escapeHtml(String(m.homeViews14d ?? 0))}</p>
+        <p class="metric-note">Create/join surface — ad-light by design</p>
+      </div>
+      <div class="metric-card">
+        <p class="metric-label">Blog + article views (14d)</p>
+        <p class="metric-value">${escapeHtml(String(m.blogArticleViews14d ?? 0))}</p>
+        <p class="metric-note">SEO pages where display ads can run</p>
+      </div>
+      <div class="metric-card">
+        <p class="metric-label">Ad-surface views (14d)</p>
+        <p class="metric-value">${escapeHtml(String(m.adSurfaceViews14d ?? 0))}</p>
+        <p class="metric-note">Content views excluding Home and About</p>
+      </div>
+      <div class="metric-card">
+        <p class="metric-label">French pages (14d)</p>
+        <p class="metric-value">${escapeHtml(String(m.frViews14d ?? 0))}</p>
+        <p class="metric-note">Whether the /fr locale is worth more SEO work</p>
+      </div>
     </div>
-    <p class="dashboard-updated">Window: last 7 days for rooms · last 30 days for month/country room lists · last 14 days for country pageviews · Updated ${escapeHtml(new Date(m.generatedAt).toLocaleString())}</p>
+    <p class="dashboard-updated">Window: last 7 days for weekly rooms · last 30 days for month/country room lists · last 14 days for pageviews · Updated ${escapeHtml(new Date(m.generatedAt).toLocaleString())}</p>
+    ${renderTopRoomCountries(m)}
     ${renderExpiryMix(m)}
+    ${renderGrowthSignals(m)}
     ${renderRoomsByCountry(m)}
     ${renderCountryPageviews(m)}
     <div class="form-actions">

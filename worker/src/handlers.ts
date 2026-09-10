@@ -115,7 +115,7 @@ const COUNTRY_NAMES: Record<string, string> = {
   AT: 'Austria',
   BE: 'Belgium',
   PT: 'Portugal',
-  XX: 'Unknown'
+  XX: 'Not recorded (created before we saved country)'
 };
 
 export async function createRoom(
@@ -377,7 +377,10 @@ export async function getMetrics(
   });
   const stillLiveMonth = enrichedMonth.filter((room) => room.live).length;
 
-  const roomsByCountry = Object.entries(countryCounts)
+  const namedCountryCounts = Object.entries(countryCounts).filter(([code]) => code !== 'XX' && code);
+  const roomsCountryUnknown = countryCounts.XX || 0;
+
+  const roomsByCountry = namedCountryCounts
     .sort((left, right) => right[1] - left[1])
     .slice(0, 5)
     .map(([country, count]) => {
@@ -392,12 +395,45 @@ export async function getMetrics(
         .map((room) => ({ name: room.name, expiry: room.expiry }));
       return {
         country,
-        countryName: COUNTRY_NAMES[country] || country,
+        countryName: countryDisplay(country),
         count,
+        sharePct: percent(count, roomsCreatedMonth),
         publicRooms,
         privateRooms
       };
     });
+
+  const weekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const weekdayCounts = Array.from({ length: 7 }, () => 0);
+  const hourCounts = Array.from({ length: 24 }, () => 0);
+  const dayCounts: Record<string, number> = {};
+  for (const [, rec] of monthRooms) {
+    const date = new Date(rec.createdAt);
+    weekdayCounts[date.getUTCDay()] += 1;
+    hourCounts[date.getUTCHours()] += 1;
+    const dayKey = date.toISOString().slice(0, 10);
+    dayCounts[dayKey] = (dayCounts[dayKey] || 0) + 1;
+  }
+  const createsByWeekday = weekdayNames.map((label, index) => ({
+    label,
+    count: weekdayCounts[index]
+  }));
+  const peakCreateHoursUtc = hourCounts
+    .map((count, hour) => ({ hour, count }))
+    .sort((left, right) => right.count - left.count)
+    .filter((row) => row.count > 0)
+    .slice(0, 5)
+    .map((row) => ({
+      label: `${String(row.hour).padStart(2, '0')}:00–${String((row.hour + 1) % 24).padStart(2, '0')}:00 UTC`,
+      count: row.count
+    }));
+  const createsByDay = Object.entries(dayCounts)
+    .sort((left, right) => left[0].localeCompare(right[0]))
+    .slice(-14)
+    .map(([day, count]) => ({ day, count }));
+
+  const monthTwoPlus = monthRooms.filter(([, room]) => (room.participantsPeak || 1) >= 2).length;
+  const monthWithShare = monthRooms.filter(([, room]) => (room.shareClicks || 0) > 0).length;
 
   const expiryMixList = Object.entries(expiryMix)
     .sort((left, right) => right[1] - left[1])
@@ -429,11 +465,31 @@ export async function getMetrics(
   const pageviewsByCountry = Object.entries(countryTotals)
     .sort((left, right) => right[1] - left[1])
     .slice(0, 40)
-    .map(([country, views]) => ({ country, views }));
+    .map(([country, views]) => ({
+      country,
+      countryName: countryDisplay(country),
+      views
+    }));
   const pageviewsByPath = Object.entries(pathTotals)
     .sort((left, right) => right[1] - left[1])
     .slice(0, 25)
     .map(([path, views]) => ({ path: path.replace(/_/g, '/') || '/', views }));
+  const pageviews14d = pageviewsByCountry.reduce((n, row) => n + row.views, 0);
+  const homeViews = pathTotals._ || pathTotals[''] || 0;
+  const aboutViews = Object.entries(pathTotals)
+    .filter(([path]) => path.replace(/_/g, '/') === '/about')
+    .reduce((n, [, v]) => n + Number(v || 0), 0);
+  const frViews = Object.entries(pathTotals)
+    .filter(([path]) => path.replace(/_/g, '/').startsWith('/fr'))
+    .reduce((n, [, v]) => n + Number(v || 0), 0);
+  const blogArticleViews = Object.entries(pathTotals)
+    .filter(([path]) => {
+      const p = path.replace(/_/g, '/');
+      return p === '/blog' || p.startsWith('/blog/');
+    })
+    .reduce((n, [, v]) => n + Number(v || 0), 0);
+  const adPageViews = Math.max(0, pageviews14d - homeViews - aboutViews);
+  const topPageviewCountries = pageviewsByCountry.slice(0, 5);
 
   return {
     generatedAt: now,
@@ -454,9 +510,22 @@ export async function getMetrics(
     stillLiveMonth,
     expiryMixMonth: expiryMixList,
     roomsByCountry,
-    pageviews14d: pageviewsByCountry.reduce((n, row) => n + row.views, 0),
+    roomsCountryUnknown,
+    createsByWeekday,
+    peakCreateHoursUtc,
+    createsByDay,
+    pctTwoPlusMonth: percent(monthTwoPlus, roomsCreatedMonth),
+    shareClickRateMonth: percent(monthWithShare, roomsCreatedMonth),
+    publicSharePctMonth: percent(publicMonth, roomsCreatedMonth),
+    pageviews14d,
     pageviewsByCountry,
-    pageviewsByPath
+    pageviewsByPath,
+    topPageviewCountries,
+    homeViews14d: homeViews,
+    aboutViews14d: aboutViews,
+    frViews14d: frViews,
+    blogArticleViews14d: blogArticleViews,
+    adSurfaceViews14d: adPageViews
   };
 }
 
@@ -1028,7 +1097,7 @@ function expiryLabel(
   if (expiry && expiry in EXPIRY_LABELS) {
     return EXPIRY_LABELS[expiry as ExpiryOption];
   }
-  if (expiresAt == null) return 'Unknown';
+  if (expiresAt == null) return 'Not recorded (room already ended)';
   const ms = Number(expiresAt) - createdAt;
   const hour = 60 * 60 * 1000;
   if (ms <= hour * 1.5) return '1 hour';
@@ -1036,7 +1105,12 @@ function expiryLabel(
   if (ms <= hour * 30) return '24 hours';
   if (ms <= hour * 24 * 10) return '7 days';
   if (ms <= hour * 24 * 100) return '3 months';
-  return 'Custom';
+  return 'Not one of the usual options';
+}
+
+function countryDisplay(code: string): string {
+  const key = String(code || 'XX').toUpperCase();
+  return COUNTRY_NAMES[key] || key;
 }
 
 function median(values: number[]): number {
