@@ -226,7 +226,7 @@ html.has-anchor-ad .iab-anchor {
     grid-template-columns: 176px minmax(0, 1fr) 176px;
   }
   .ads-page-row.has-ad-rails.ads-page-row-chat {
-    grid-template-columns: minmax(0, 1fr) 400px;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 400px);
   }
   .ads-page-row:not(.has-ad-rails) {
     grid-template-columns: minmax(0, 1fr);

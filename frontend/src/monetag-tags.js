@@ -54,11 +54,12 @@ export function renderChatBottomLeader() {
     </div>`;
 }
 
-/** Native (highest CPM we have) plus 300×250 on the chat right rail. Desktop only for native; phones keep a small box. */
+/** Highest-CPM stack we have: native 1:1, 300×250, then 160×600. Phones keep a small box only. */
 export function renderChatRightRail() {
   return `<div class="iab-rail iab-rail-right iab-rail-chat">
       ${renderNativeBanner('iab-desktop iab-chat-native')}
       ${renderIabSlot('box', 'iab-desktop')}
+      ${renderIabSlot('sky', 'iab-desktop')}
       ${renderIabSlot('box', 'iab-mobile')}
     </div>`;
 }
