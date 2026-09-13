@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img" aria-labelledby="t d">
+  <title id="t">QuickRoom share dialog with room code, join link, and QR</title>
+  <desc id="d">Mock of the share surface after creating a room.</desc>
+  <rect width="960" height="540" fill="#FAFAFA"/>
+  <rect x="140" y="48" width="680" height="444" rx="16" fill="#ffffff" stroke="#e5e5e5"/>
+  <text x="176" y="100" fill="#111111" font-family="system-ui,sans-serif" font-size="22" font-weight="650">Share this room</text>
+  <text x="176" y="128" fill="#666666" font-family="system-ui,sans-serif" font-size="14">Nobody else needs an account. Send the code or the link.</text>
+  <text x="176" y="172" fill="#666666" font-family="system-ui,sans-serif" font-size="12">ROOM CODE</text>
+  <rect x="176" y="184" width="280" height="48" rx="8" fill="#f4f7ff" stroke="#cddcff"/>
+  <text x="196" y="214" fill="#111111" font-family="ui-monospace,monospace" font-size="20" font-weight="650">WK4-LAB</text>
+  <text x="176" y="264" fill="#666666" font-family="system-ui,sans-serif" font-size="12">JOIN LINK</text>
+  <rect x="176" y="276" width="400" height="40" rx="8" fill="#ffffff" stroke="#e5e5e5"/>
+  <text x="188" y="302" fill="#111111" font-family="ui-monospace,monospace" font-size="13">https://quickroom.org/?room=wk4-lab</text>
+  <rect x="620" y="176" width="160" height="160" rx="8" fill="#ffffff" stroke="#111111"/>
+  <rect x="644" y="200" width="28" height="28" fill="#111111"/>
+  <rect x="728" y="200" width="28" height="28" fill="#111111"/>
+  <rect x="644" y="284" width="28" height="28" fill="#111111"/>
+  <rect x="684" y="240" width="12" height="12" fill="#111111"/>
+  <rect x="708" y="256" width="20" height="20" fill="#111111"/>
+  <rect x="668" y="268" width="16" height="16" fill="#111111"/>
+  <text x="640" y="360" fill="#666666" font-family="system-ui,sans-serif" font-size="12">QR for in-person join</text>
+  <rect x="176" y="348" width="200" height="44" rx="10" fill="#0066ff"/>
+  <text x="218" y="376" fill="#ffffff" font-family="system-ui,sans-serif" font-size="15" font-weight="600">Copy link</text>
+  <text x="176" y="430" fill="#777777" font-family="system-ui,sans-serif" font-size="13">Private rooms never appear on the homepage list.</text>
+</svg>

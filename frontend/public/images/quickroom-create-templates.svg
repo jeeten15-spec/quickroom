@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img" aria-labelledby="t d">
+  <title id="t">QuickRoom create flow: choosing a room template</title>
+  <desc id="d">Mock of the create screen with Study, Coding, Event, and Interview templates.</desc>
+  <rect width="960" height="540" fill="#FAFAFA"/>
+  <rect x="48" y="36" width="864" height="468" rx="16" fill="#ffffff" stroke="#e5e5e5"/>
+  <text x="80" y="88" fill="#111111" font-family="system-ui,sans-serif" font-size="22" font-weight="650">Create a room</text>
+  <text x="80" y="118" fill="#666666" font-family="system-ui,sans-serif" font-size="14">Pick a starting template. Then name, expiry, and nickname.</text>
+  <g font-family="system-ui,sans-serif" font-size="15" font-weight="600">
+    <rect x="80" y="148" width="180" height="88" rx="12" fill="#ffffff" stroke="#0066ff"/>
+    <text x="100" y="184" fill="#111111">=Ú Study</text>
+    <text x="100" y="208" fill="#666666" font-size="12" font-weight="400">Study Room</text>
+    <rect x="276" y="148" width="180" height="88" rx="12" fill="#ffffff" stroke="#e5e5e5"/>
+    <text x="296" y="184" fill="#111111">=» Coding</text>
+    <text x="296" y="208" fill="#666666" font-size="12" font-weight="400">Coding Room</text>
+    <rect x="472" y="148" width="180" height="88" rx="12" fill="#ffffff" stroke="#e5e5e5"/>
+    <text x="492" y="184" fill="#111111">=Å Event</text>
+    <text x="492" y="208" fill="#666666" font-size="12" font-weight="400">Event Room</text>
+    <rect x="668" y="148" width="180" height="88" rx="12" fill="#ffffff" stroke="#e5e5e5"/>
+    <text x="688" y="184" fill="#111111"><™ Interview</text>
+    <text x="688" y="208" fill="#666666" font-size="12" font-weight="400">Interview Room</text>
+  </g>
+  <text x="80" y="280" fill="#666666" font-family="system-ui,sans-serif" font-size="12">ROOM NAME</text>
+  <rect x="80" y="292" width="520" height="44" rx="8" fill="#ffffff" stroke="#e5e5e5"/>
+  <text x="96" y="320" fill="#111111" font-family="system-ui,sans-serif" font-size="15">Week 4 lab</text>
+  <text x="80" y="372" fill="#666666" font-family="system-ui,sans-serif" font-size="12">EXPIRY</text>
+  <rect x="80" y="384" width="200" height="44" rx="8" fill="#ffffff" stroke="#e5e5e5"/>
+  <text x="96" y="412" fill="#111111" font-family="system-ui,sans-serif" font-size="15">7 days</text>
+  <rect x="680" y="384" width="184" height="48" rx="10" fill="#0066ff"/>
+  <text x="714" y="414" fill="#ffffff" font-family="system-ui,sans-serif" font-size="16" font-weight="600">Continue</text>
+</svg>

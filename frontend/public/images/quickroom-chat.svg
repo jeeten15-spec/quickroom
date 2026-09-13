@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img" aria-labelledby="t d">
+  <title id="t">QuickRoom chat with messages, composer, and participant list</title>
+  <desc id="d">Mock of the in-browser chat. Ads are not placed inside live rooms.</desc>
+  <rect width="960" height="540" fill="#FAFAFA"/>
+  <rect x="32" y="28" width="896" height="484" rx="16" fill="#ffffff" stroke="#e5e5e5"/>
+  <rect x="32" y="28" width="896" height="56" rx="16" fill="#ffffff"/>
+  <rect x="32" y="72" width="896" height="1" fill="#ececec"/>
+  <text x="56" y="62" fill="#111111" font-family="system-ui,sans-serif" font-size="16" font-weight="650">Week 4 lab</text>
+  <text x="780" y="62" fill="#666666" font-family="system-ui,sans-serif" font-size="13">Expires in 6d</text>
+  <rect x="700" y="84" width="204" height="320" fill="#fafafa"/>
+  <text x="716" y="112" fill="#777777" font-family="system-ui,sans-serif" font-size="12">IN ROOM</text>
+  <text x="716" y="140" fill="#111111" font-family="system-ui,sans-serif" font-size="14">Maya</text>
+  <text x="716" y="164" fill="#111111" font-family="system-ui,sans-serif" font-size="14">Omar</text>
+  <text x="716" y="188" fill="#111111" font-family="system-ui,sans-serif" font-size="14">Priya</text>
+  <rect x="56" y="100" width="360" height="56" rx="12" fill="#f4f7ff"/>
+  <text x="72" y="124" fill="#0066ff" font-family="system-ui,sans-serif" font-size="12">Maya</text>
+  <text x="72" y="144" fill="#111111" font-family="system-ui,sans-serif" font-size="14">Diagram is on slide 4  Ill paste a crop.</text>
+  <rect x="56" y="168" width="400" height="56" rx="12" fill="#f6f6f6"/>
+  <text x="72" y="192" fill="#555555" font-family="system-ui,sans-serif" font-size="12">Omar</text>
+  <text x="72" y="212" fill="#111111" font-family="system-ui,sans-serif" font-size="14">Got it. Room dies Friday  no leftover group.</text>
+  <rect x="56" y="432" width="620" height="48" rx="10" fill="#ffffff" stroke="#e5e5e5"/>
+  <text x="76" y="462" fill="#999999" font-family="system-ui,sans-serif" font-size="14">Message&</text>
+  <rect x="692" y="432" width="88" height="48" rx="10" fill="#0066ff"/>
+  <text x="716" y="462" fill="#ffffff" font-family="system-ui,sans-serif" font-size="15" font-weight="600">Send</text>
+  <text x="56" y="404" fill="#888888" font-family="system-ui,sans-serif" font-size="12">Live rooms do not show ad units.</text>
+</svg>

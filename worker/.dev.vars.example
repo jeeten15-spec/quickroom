@@ -1,0 +1,6 @@
+# Copy to .dev.vars for local Worker development. Never commit real values.
+FIREBASE_PROJECT_ID=your-firebase-project-id
+FIREBASE_DATABASE_URL=https://your-firebase-project-id-default-rtdb.firebaseio.com
+FIREBASE_STORAGE_BUCKET=your-firebase-project-id.firebasestorage.app
+ALLOWED_ORIGINS=http://localhost:5173,https://quickroom.org
+FIREBASE_SERVICE_ACCOUNT_JSON={"type":"service_account","project_id":"your-firebase-project-id"}
