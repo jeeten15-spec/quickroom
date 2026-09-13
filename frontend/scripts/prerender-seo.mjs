@@ -74,7 +74,7 @@ function bodyLegal(slug, page) {
       <p class="eyebrow">Legal</p>
       <h1>${escapeHtml(page.title)}</h1>
       <p class="use-case-intro">${escapeHtml(page.description)}</p>
-      <p>Last updated 10 September 2026</p>
+      <p>Last updated 13 September 2026</p>
       ${page.sections
         .map(
           (section, index) =>

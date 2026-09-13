@@ -50,6 +50,16 @@ export function renderAdFooter() {
 export function renderChatBottomLeader() {
   return `<div class="iab-row iab-row-chat-bottom" aria-label="Advertisement">
       ${renderIabSlot('leader', 'iab-desktop')}
+      ${renderIabSlot('box', 'iab-desktop')}
+    </div>`;
+}
+
+/** Native (highest CPM we have) plus 300×250 on the chat right rail. Desktop only for native; phones keep a small box. */
+export function renderChatRightRail() {
+  return `<div class="iab-rail iab-rail-right iab-rail-chat">
+      ${renderNativeBanner('iab-desktop iab-chat-native')}
+      ${renderIabSlot('box', 'iab-desktop')}
+      ${renderIabSlot('box', 'iab-mobile')}
     </div>`;
 }
 

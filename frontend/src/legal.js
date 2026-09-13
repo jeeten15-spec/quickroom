@@ -3,7 +3,7 @@ export const legalPages = {
     title: 'Privacy Policy',
     seoTitle: 'Privacy Policy | QuickRoom',
     description:
-      'How QuickRoom handles anonymous authentication, room data, Cloudflare, analytics, advertising consent in Europe, and US state privacy choices.',
+      'How QuickRoom handles anonymous authentication, room data, advertising consent in Europe, and US state privacy choices.',
     htmlLang: 'en',
     sections: [
       {
@@ -18,36 +18,7 @@ export const legalPages = {
         paragraphs: [
           'We do not ask for your name, email, or phone number to use a room. You choose a nickname. The browser signs in with Firebase Anonymous Authentication, which creates a random identifier for that browser session.',
           'Room contents (messages, uploaded images, nicknames, room settings, and expiry) are stored so the room can function until it expires. After expiry, rooms and their images are removed according to the product lifecycle.',
-          'Cloudflare sits in front of the site and API. Cloudflare sees IP addresses, user-agent, and country as part of operating the network. We use the country code Cloudflare already derives to count pageviews by country. We do not store your IP address in our analytics counters.'
-        ]
-      },
-      {
-        heading: 'Analytics',
-        paragraphs: [
-          'First-party analytics record the page path, an approximate date, and country (for example US, FR, AU). These counters exist so we can see whether content reaches the United States, Europe, Australia, and Canada. They are aggregate counts, not profiles.',
-          'If Cloudflare Web Analytics is enabled, Cloudflare provides cookieless traffic reports, including country, in the Cloudflare dashboard.',
-          'If Google Analytics is enabled, it only runs after you allow analytics cookies (required in the EEA, UK, and Switzerland).'
-        ]
-      },
-      {
-        heading: 'Advertising (content pages only)',
-        paragraphs: [
-          'Adsterra still fills some IAB frames on public pages except About: a 728×90 along the top and bottom on wide screens, a 300×250 on small screens, and at most one 160×600 rail on blog, privacy, and long articles (Home still uses more rails). Live chat keeps a single right-hand 160×600 on wide screens and a 728×90 along the bottom of the chat window on laptop/desktop only (not on phones, so the message box stays clear). Create and the operator dashboard have no ads.',
-          'On blog posts, use-case pages, and the privacy pages we also use higher-yield formats than stacked banners: one Native 1:1 unit in the article body, a labeled sponsored text offer, a desktop sticky 728×90 anchor, and an Adsterra Social Bar script (not loaded inside live chat). We do not use Monetag OnClick, pop-under, or other forced-click formats.',
-          'Some articles recommend privacy tools such as Mullvad, Proton VPN, and IVPN with links to their official sites. Those recommendations are labeled. A VPN is optional and is not required to create or join a room.',
-          'You can add an AdSense in-article unit by setting VITE_ADSENSE_SLOT_IN_ARTICLE after Google approval; that unit is meant to replace the Adsterra native on that page rather than stack two networks in the same slot. Monetag in-page push, vignette, and the sponsored link on About stay on /about only, delayed, vignette at most once per session.',
-          'Google AdSense remains in the HTML head and /ads.txt so the site can finish Google’s publisher review. AdSense units are not injected into the same frames as Adsterra.',
-          'In the European Economic Area, the United Kingdom, and Switzerland, advertising cookies and personalized ads are off until you accept them in the consent message. We use Google Consent Mode where Google tags are present. After AdSense approval, Google’s certified Privacy & messaging / Funding Choices message should also be turned on in the AdSense dashboard—that is the IAB TCF 2.2 CMP Google requires for publishers.',
-          'In the United States, you can use Privacy choices to opt out of the sale/sharing of personal information for advertising. We also honour the Global Privacy Control (GPC) signal where present.',
-          'Adsterra, Google, Monetag, and their advertising partners may process data as described in their advertising privacy documentation. We do not control their full vendor list; the consent tools show partners when they are active.'
-        ]
-      },
-      {
-        heading: 'Legal bases (GDPR / UK GDPR)',
-        paragraphs: [
-          'Operating rooms, security, fraud prevention, and aggregate server-side country counts: legitimate interests in providing and understanding the service.',
-          'Non-essential advertising and Google Analytics cookies in the EEA/UK/Switzerland: consent.',
-          'You may withdraw consent from the banner, Privacy choices, or by clearing site data. You may contact us to ask about access or deletion of account-linked data. Anonymous Firebase IDs are not a customer account with a name or email attached.'
+          'In the European Economic Area, the United Kingdom, and Switzerland, advertising cookies and personalized ads are off until you accept them in the consent message. We use Google Consent Mode where Google tags are present.'
         ]
       },
       {
@@ -61,7 +32,7 @@ export const legalPages = {
       {
         heading: 'Children',
         paragraphs: [
-          'QuickRoom is 18+ only. We do not direct the product at children, including K–12 school classes.'
+          'QuickRoom is 18+ only.'
         ]
       },
       {

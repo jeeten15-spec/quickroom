@@ -18,7 +18,7 @@ import { esPages } from './es-pages';
 import { renderRelatedHtml } from './related';
 import { mountPaypalSupport, renderSupportBlock } from './support';
 import { renderExtrasDomString } from './page-copy';
-import { renderAdFooter, renderAdLeaderboard, renderAdSkyscraper, renderAnchorAd, renderChatBottomLeader, renderIabSlot } from './monetag-tags';
+import { renderAdFooter, renderAdLeaderboard, renderAdSkyscraper, renderAnchorAd, renderChatBottomLeader, renderChatRightRail, renderIabSlot } from './monetag-tags';
 import { renderVpnPicks } from './vpn-picks';
 import { hreflangPairs, renderLangToggle } from './lang';
 import {
@@ -166,7 +166,7 @@ function render() {
           ${guides[state.view] ? renderGuide(state.view) : ''}
           ${articles[state.view] ? renderArticle(state.view) : ''}
         </div>
-        ${showAds || showChatRail ? renderAdSkyscraper('right', 1, { includeMobileBox: showChatRail }) : ''}
+        ${showChatRail ? renderChatRightRail() : showAds ? renderAdSkyscraper('right', 1) : ''}
       </div>
       ${showChatRail ? renderChatBottomLeader() : ''}
     </main>
@@ -596,7 +596,7 @@ function renderLegal(slug) {
       <p class="eyebrow">Legal</p>
       <h1>${escapeHtml(page.title)}</h1>
       <p class="use-case-intro">${escapeHtml(page.description)}</p>
-      <p class="article-date">Last updated 10 September 2026</p>
+      <p class="article-date">Last updated 13 September 2026</p>
       ${choices}
       ${page.sections
         .map(
