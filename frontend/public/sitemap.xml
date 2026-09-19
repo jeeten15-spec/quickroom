@@ -521,6 +521,30 @@
       <xhtml:link rel="alternate" hreflang="x-default" href="https://quickroom.org/" />
   </url>
   <url>
+    <loc>https://quickroom.org/blog/iphone-18-pro-offers-group-chat</loc>
+    <lastmod>2026-09-19</lastmod>
+      <xhtml:link rel="alternate" hreflang="en" href="https://quickroom.org/blog/iphone-18-pro-offers-group-chat" />
+      <xhtml:link rel="alternate" hreflang="fr" href="https://quickroom.org/fr/blog/chat-offres-iphone-18-pro" />
+      <xhtml:link rel="alternate" hreflang="es" href="https://quickroom.org/es/blog/chat-ofertas-iphone-18-pro" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://quickroom.org/" />
+  </url>
+  <url>
+    <loc>https://quickroom.org/fr/blog/chat-offres-iphone-18-pro</loc>
+    <lastmod>2026-09-19</lastmod>
+      <xhtml:link rel="alternate" hreflang="en" href="https://quickroom.org/blog/iphone-18-pro-offers-group-chat" />
+      <xhtml:link rel="alternate" hreflang="fr" href="https://quickroom.org/fr/blog/chat-offres-iphone-18-pro" />
+      <xhtml:link rel="alternate" hreflang="es" href="https://quickroom.org/es/blog/chat-ofertas-iphone-18-pro" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://quickroom.org/" />
+  </url>
+  <url>
+    <loc>https://quickroom.org/es/blog/chat-ofertas-iphone-18-pro</loc>
+    <lastmod>2026-09-19</lastmod>
+      <xhtml:link rel="alternate" hreflang="en" href="https://quickroom.org/blog/iphone-18-pro-offers-group-chat" />
+      <xhtml:link rel="alternate" hreflang="fr" href="https://quickroom.org/fr/blog/chat-offres-iphone-18-pro" />
+      <xhtml:link rel="alternate" hreflang="es" href="https://quickroom.org/es/blog/chat-ofertas-iphone-18-pro" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://quickroom.org/" />
+  </url>
+  <url>
     <loc>https://quickroom.org/privacy</loc>
     <lastmod>2026-09-19</lastmod>
       <xhtml:link rel="alternate" hreflang="en" href="https://quickroom.org/privacy" />

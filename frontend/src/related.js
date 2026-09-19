@@ -77,6 +77,7 @@ const RELATED = {
     { href: '/blog/vpn-travel-chat-privacy', label: 'VPN travel chat' }
   ],
   '/blog': [
+    { href: '/blog/iphone-18-pro-offers-group-chat', label: 'iPhone 18 Pro offers group chat' },
     { href: '/blog/seasonal-group-chat-calendar', label: 'Seasonal group chat calendar' },
     { href: '/fr/blog', label: 'Blog en français' },
     { href: '/es/blog', label: 'Blog en español' }
@@ -98,9 +99,15 @@ const RELATED = {
     { href: '/blog/year-end-money-talk-housemate-bills', label: 'Year-end money talk' }
   ],
   '/blog/black-friday-deal-chat-without-family-group': [
+    { href: '/blog/iphone-18-pro-offers-group-chat', label: 'iPhone 18 Pro offers chat' },
     { href: '/black-friday-shopping-chat', label: 'Black Friday shopping use case' },
     { href: '/blog/vpn-travel-chat-privacy', label: 'VPN travel chat' },
     { href: '/blog/year-end-money-talk-housemate-bills', label: 'Housemate bills chat' }
+  ],
+  '/blog/iphone-18-pro-offers-group-chat': [
+    { href: '/blog/black-friday-deal-chat-without-family-group', label: 'Black Friday deal chat' },
+    { href: '/blog/year-end-money-talk-housemate-bills', label: 'Year-end money talk' },
+    { href: '/private-chat-room-no-signup', label: 'Private room, no signup' }
   ],
   '/blog/vpn-travel-chat-privacy': [
     { href: '/vpn-travel-group-chat', label: 'VPN travel use case' },
@@ -153,6 +160,7 @@ const RELATED = {
     { href: '/halloween-party-planning-chat', label: 'Halloween planning' }
   ],
   '/fr/blog': [
+    { href: '/fr/blog/chat-offres-iphone-18-pro', label: 'Offres iPhone 18 Pro' },
     { href: '/fr/blog/calendrier-saisons-chat-de-groupe', label: 'Calendrier saisonnier' },
     { href: '/es/blog', label: 'Blog en español' },
     { href: '/blog', label: 'English blog' }
@@ -163,6 +171,7 @@ const RELATED = {
     { href: '/es/ver-el-partido', label: 'Ver el partido' }
   ],
   '/es/blog': [
+    { href: '/es/blog/chat-ofertas-iphone-18-pro', label: 'Ofertas iPhone 18 Pro' },
     { href: '/es/blog/calendario-chats-de-grupo-de-temporada', label: 'Calendario de temporada' },
     { href: '/fr/blog', label: 'Blog en français' },
     { href: '/blog', label: 'English blog' }

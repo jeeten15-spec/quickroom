@@ -36,14 +36,14 @@ export function renderNativeBanner(extraClass = '') {
 export function renderAdLeaderboard() {
   return `<div class="iab-row iab-row-leader">
       ${renderIabSlot('leader', 'iab-desktop')}
-      ${renderIabSlot('box', 'iab-mobile')}
+      ${renderIabSlot('mobile', 'iab-mobile')}
     </div>`;
 }
 
 export function renderAdFooter() {
   return `<div class="iab-row iab-row-footer">
       ${renderIabSlot('leader', 'iab-desktop')}
-      ${renderIabSlot('box', 'iab-mobile')}
+      ${renderIabSlot('mobile', 'iab-mobile')}
     </div>`;
 }
 
@@ -54,10 +54,10 @@ export function renderChatBottomLeader() {
     </div>`;
 }
 
-/** 50px 728×90 strip above the chat chrome on phones. Never overlays Send / Share / Leave. */
+/** True 320×50 above the chat chrome on phones. Never overlays Send / Share / Leave. */
 export function renderChatMobileStrip() {
   return `<div class="iab-row iab-row-chat-mobile" aria-label="Advertisement">
-      ${renderIabSlot('leader', 'iab-mobile iab-chat-mobile-strip')}
+      ${renderIabSlot('mobile', 'iab-mobile iab-chat-mobile-strip')}
     </div>`;
 }
 

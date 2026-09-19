@@ -26,15 +26,19 @@ export const ADSTERRA = {
   socialBar: {
     src: 'https://pl31271245.profitableratecpmnetwork.com/b2/01/1c/b2011ca9c26121c80792f3d72d304822.js'
   },
-  /** No 320×50 invoke snippet was provided; mobile strips scale the 728×90 leader. */
-  mobile: null
+  mobile: {
+    key: '231c5d8e0023ea517cb0c057c290a85b',
+    width: 320,
+    height: 50,
+    host: 'https://www.highrevenueformat.com'
+  }
 };
 
 const KIND_TO_SPEC = {
   sky: ADSTERRA.sky,
   leader: ADSTERRA.leader,
   box: ADSTERRA.box,
-  mobile: ADSTERRA.mobile || ADSTERRA.leader
+  mobile: ADSTERRA.mobile
 };
 
 let mediaBound = false;

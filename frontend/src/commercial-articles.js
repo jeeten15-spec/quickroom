@@ -9,7 +9,7 @@ function meta(page, lang) {
   return {
     ...page,
     publishedAt: page.publishedAt || PUBLISHED,
-    updatedAt: UPDATED,
+    updatedAt: page.updatedAt || UPDATED,
     author: AUTHOR,
     htmlLang: lang
   };
@@ -886,6 +886,120 @@ const packs = [
         {
           heading: 'Si también quieres la conexión privada, usa un VPN',
           vpnPicks: 'es'
+        }
+      ]
+    }
+  },
+  {
+    en: {
+      slug: 'blog/iphone-18-pro-offers-group-chat',
+      title: 'iPhone 18 Pro offers: a global deal chat that expires with the launch week',
+      seoTitle: 'iPhone 18 Pro Best Offers Group Chat | US UK EU Global Deals | QuickRoom',
+      description:
+        'Compare iPhone 18 Pro launch offers worldwide in a temporary group chat. Carrier trade-ins, VAT, and store prices for adults in the US, UK, Canada, and Europe—no leftover family thread.',
+      publishedAt: '19 September 2026',
+      updatedAt: '19 September 2026',
+      intro:
+        'Launch week is a contact sport: US carrier trade-ins, UK VAT-inclusive shelves, EU shop prices that look cheaper until you add the brick, and a cousin who “found it cheaper in Hong Kong” without the charger. You can compare public offers together without turning the family WhatsApp into a 256GB spreadsheet.',
+      sections: [
+        {
+          heading: 'This is a chat room, not an Apple Store',
+          paragraphs: [
+            'QuickRoom does not sell iPhones. Open a Private room named after the model and the week (“iPhone 18 Pro — 19 Sep”), set expiry for seven days, and paste the code only to people who already know each other. Nickname, link, timer. That is the product.',
+            'Keywords people actually type: iPhone 18 Pro deals, iPhone 18 Pro trade-in, cheapest iPhone 18 Pro UK, iPhone 18 Pro carrier offer US, iPhone 18 Pro EU price.'
+          ],
+          figure: PRODUCT_SHOTS.create
+        },
+        {
+          heading: 'How to compare offers without lying to yourselves',
+          list: [
+            'Paste the public product page, not a screenshot of a card, CVV, or Apple ID.',
+            'Say the country and the currency in the same message. “$999” in Canada is not “$999” in the US.',
+            'Carrier “free” phones are a contract. Write the months, the early-exit fee, and whether the handset is locked.',
+            'VAT, shipping, and the missing charger are part of the price. If someone omits them, the offer is incomplete, not clever.',
+            'Grey-import and “friend in Shenzhen” listings are adult risk. If you would not tell a bank the story, do not use that checkout.',
+            '18+ only. This is not a school procurement thread.'
+          ]
+        },
+        {
+          heading: 'A sane room for launch week',
+          paragraphs: [
+            'Keep the family group for birthdays. Keep the Apple Store, carrier, and bank apps for the actual purchase. The QuickRoom is the scratch pad: which 256GB Natural finish is actually in stock in London, whether the US trade-in number survived the fine print, and who is waiting for the EU listing to stop flickering.',
+            'When the week is over, let the room expire. Returns and delivery tracking belong in the retailer app. Nobody needs a permanent museum of almost-deals.'
+          ],
+          figure: PRODUCT_SHOTS.share
+        }
+      ]
+    },
+    fr: {
+      slug: 'fr/blog/chat-offres-iphone-18-pro',
+      title: 'Offres iPhone 18 Pro : un chat mondial qui expire avec la semaine de lancement',
+      seoTitle: 'Chat offres iPhone 18 Pro — USA, UK, UE | QuickRoom',
+      description:
+        'Comparez les offres de lancement iPhone 18 Pro dans une salle temporaire. Reprises opérateurs, TVA et prix magasin pour adultes aux USA, au Royaume-Uni, au Canada et en Europe.',
+      publishedAt: '19 September 2026',
+      updatedAt: '19 September 2026',
+      intro:
+        'La semaine de lancement est un sport de contact : reprises US, prix TTC au Royaume-Uni, étiquettes UE plus belles avant le chargeur, et le cousin qui a « trouvé moins cher à Hong Kong ». On peut comparer des offres publiques sans transformer le WhatsApp familial en tableur 256 Go.',
+      sections: [
+        {
+          heading: 'Une salle de chat, pas l’Apple Store',
+          paragraphs: [
+            'QuickRoom ne vend pas d’iPhone. Salle privée nommée d’après le modèle et la semaine, expiration 7 jours, code seulement aux gens qui se connaissent déjà.',
+            'Mots-clés : offres iPhone 18 Pro, reprise iPhone 18 Pro, iPhone 18 Pro moins cher UK, forfait opérateur US.'
+          ]
+        },
+        {
+          heading: 'Comparer sans se mentir',
+          list: [
+            'Collez la page publique, pas une carte bancaire.',
+            'Pays et devise dans le même message.',
+            '« Gratuit » chez l’opérateur est un contrat. Notez les mois et le déverrouillage.',
+            'TVA, livraison, chargeur : c’est le prix.',
+            '18+ uniquement.'
+          ]
+        },
+        {
+          heading: 'Après la semaine de lancement',
+          paragraphs: [
+            'Laissez la salle mourir. Les retours restent dans l’appli du marchand. Le groupe famille reprend les anniversaires.'
+          ]
+        }
+      ]
+    },
+    es: {
+      slug: 'es/blog/chat-ofertas-iphone-18-pro',
+      title: 'Ofertas iPhone 18 Pro: un chat mundial que caduca con la semana de lanzamiento',
+      seoTitle: 'Chat ofertas iPhone 18 Pro — EE. UU., UK, UE | QuickRoom',
+      description:
+        'Compara ofertas de lanzamiento del iPhone 18 Pro en un chat temporal. Canjes de operadora, IVA y precio de tienda para adultos en EE. UU., Reino Unido, Canadá y Europa.',
+      publishedAt: '19 September 2026',
+      updatedAt: '19 September 2026',
+      intro:
+        'La semana de lanzamiento es un deporte de contacto: canjes en EE. UU., precios con IVA en el Reino Unido, etiquetas UE más bonitas hasta el cargador, y el primo que «lo vio más barato en Hong Kong». Se pueden comparar ofertas públicas sin convertir el WhatsApp familiar en una hoja de 256 GB.',
+      sections: [
+        {
+          heading: 'Una sala de chat, no la Apple Store',
+          paragraphs: [
+            'QuickRoom no vende iPhones. Sala privada con el nombre del modelo y la semana, caducidad de 7 días, código solo para gente que ya se conoce.',
+            'Palabras clave: ofertas iPhone 18 Pro, canje iPhone 18 Pro, iPhone 18 Pro más barato UK, oferta operadora EE. UU.'
+          ]
+        },
+        {
+          heading: 'Comparar sin mentirse',
+          list: [
+            'Pega la ficha pública, no una tarjeta.',
+            'País y moneda en el mismo mensaje.',
+            '«Gratis» de operadora es un contrato. Apunta los meses y si va bloqueado.',
+            'IVA, envío y cargador forman el precio.',
+            'Solo 18+.'
+          ]
+        },
+        {
+          heading: 'Cuando acabe la semana',
+          paragraphs: [
+            'Deja morir la sala. Las devoluciones van en la app de la tienda. El grupo familiar vuelve a los cumpleaños.'
+          ]
         }
       ]
     }
