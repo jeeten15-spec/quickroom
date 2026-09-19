@@ -43,6 +43,13 @@ export const UPCOMING_EVENTS = [
     keywords: ['Premier League pub chat', 'football watch party group chat', 'FPL mini league chat']
   },
   {
+    id: 'iphone-18-pro-2026',
+    eventDay: '2026-09-19',
+    writeFrom: '2026-08-22',
+    title: 'iPhone 18 Pro launch-week offers',
+    keywords: ['iPhone 18 Pro deals', 'iPhone 18 Pro trade-in chat', 'cheapest iPhone 18 Pro UK']
+  },
+  {
     id: 'halloween-2026',
     eventDay: '2026-10-31',
     writeFrom: '2026-10-03',

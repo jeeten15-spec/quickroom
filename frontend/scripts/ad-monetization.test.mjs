@@ -4,7 +4,7 @@ import {
   INTERSTITIAL_CLOSE_AFTER_MS,
   shouldShowMobileInterstitial
 } from '../src/interstitial.js';
-import { bannerRefreshDelayMs, chatControlsAreActive } from '../src/adsterra.js';
+import { ADSTERRA, bannerRefreshDelayMs, chatControlsAreActive } from '../src/adsterra.js';
 
 describe('mobile interstitial gate', () => {
   it('shows once on mobile when ads are allowed', () => {
@@ -43,6 +43,12 @@ describe('banner refresh timing', () => {
     }
     assert.equal(bannerRefreshDelayMs(() => 0), 60_000);
     assert.equal(bannerRefreshDelayMs(() => 0.999), 89_970);
+  });
+
+  it('uses the real 320×50 Adsterra zone on mobile', () => {
+    assert.equal(ADSTERRA.mobile.key, '231c5d8e0023ea517cb0c057c290a85b');
+    assert.equal(ADSTERRA.mobile.width, 320);
+    assert.equal(ADSTERRA.mobile.height, 50);
   });
 });
 
