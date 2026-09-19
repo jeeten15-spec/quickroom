@@ -59,7 +59,7 @@ export const legalPages = {
       {
         heading: 'Advertising and analytics cookies',
         paragraphs: [
-          'Adsterra, Google AdSense (head tag and ads.txt only), Monetag, and (if enabled) Google Analytics set cookies only after you allow them in Europe, or according to US privacy choices. Cloudflare Web Analytics, when enabled, is designed to operate without advertising cookies.',
+          'Adsterra, Google AdSense (head tag and ads.txt only), Monetag, and (if enabled) Google Analytics set cookies only after you allow them in Europe, or according to US privacy choices. Visible banner frames may reload about once a minute. On a phone, creating a room or joining a listed public room may show one timed advertisement overlay per browser session before chat starts. Cloudflare Web Analytics, when enabled, is designed to operate without advertising cookies.',
           'You can change your mind on Privacy choices or by clearing site data for quickroom.org.'
         ]
       }

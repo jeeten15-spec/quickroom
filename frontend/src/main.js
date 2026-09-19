@@ -18,11 +18,14 @@ import { esPages } from './es-pages';
 import { renderRelatedHtml } from './related';
 import { mountPaypalSupport, renderSupportBlock } from './support';
 import { renderExtrasDomString } from './page-copy';
-import { renderAdFooter, renderAdLeaderboard, renderAdSkyscraper, renderAnchorAd, renderChatBottomLeader, renderChatRightRail, renderIabSlot } from './monetag-tags';
+import { renderAdFooter, renderAdLeaderboard, renderAdSkyscraper, renderAnchorAd, renderChatBottomLeader, renderChatMobileStrip, renderChatRightRail, renderIabSlot } from './monetag-tags';
+import { fillBannerSlot } from './adsterra';
+import { presentMobileInterstitial } from './interstitial';
 import { renderVpnPicks } from './vpn-picks';
 import { hreflangPairs, renderLangToggle } from './lang';
 import {
   adRailCount,
+  adsConsentOk,
   applyConsentMode,
   canLoadAds,
   fillAdsterraSlots,
@@ -150,6 +153,7 @@ function render() {
     </div>
     ${showAds ? renderAdLeaderboard() : ''}
     <main class="page-shell">
+      ${showChatRail ? renderChatMobileStrip() : ''}
       <div class="ads-page-row${showAds || showChatRail ? ' has-ad-rails' : ''}${isChat ? ' ads-page-row-chat' : ''}">
         ${showAds ? renderAdSkyscraper('left', rails) : ''}
         <div class="ads-page-main">
@@ -596,7 +600,7 @@ function renderLegal(slug) {
       <p class="eyebrow">Legal</p>
       <h1>${escapeHtml(page.title)}</h1>
       <p class="use-case-intro">${escapeHtml(page.description)}</p>
-      <p class="article-date">Last updated 13 September 2026</p>
+      <p class="article-date">Last updated 19 September 2026</p>
       ${choices}
       ${page.sections
         .map(
@@ -1382,7 +1386,7 @@ app.addEventListener('click', async (event) => {
     formData.set('room', roomId);
     formData.set('nickname', state.joinNickname);
     try {
-      await submitJoinRoom(formData);
+      await submitJoinRoom(formData, { interstitial: true });
     } catch (error) {
       state.joinCode = roomId;
       state.joinOpen = true;
@@ -1498,6 +1502,7 @@ async function submitCreateRoom() {
       allowPrivateChat: state.create.allowPrivateChat
     });
     rememberNickname(state.create.nickname);
+    await presentMobileInterstitial({ adsAllowed: adsConsentOk(), fillSlot: fillBannerSlot });
     navigateToRoom(response.roomId);
     return;
   } catch (error) {
@@ -1509,7 +1514,7 @@ async function submitCreateRoom() {
   }
 }
 
-async function submitJoinRoom(formData) {
+async function submitJoinRoom(formData, { interstitial = false } = {}) {
   const roomId = roomIdFromInput(formData.get('room'));
   const nickname = validateNickname(formData.get('nickname'));
   state.busy = true;
@@ -1517,6 +1522,9 @@ async function submitJoinRoom(formData) {
   try {
     const response = await apiRequest('/api/joinRoom', { roomId, nickname });
     rememberNickname(nickname);
+    if (interstitial) {
+      await presentMobileInterstitial({ adsAllowed: adsConsentOk(), fillSlot: fillBannerSlot });
+    }
     navigateToRoom(response.roomId);
     return;
   } catch (error) {

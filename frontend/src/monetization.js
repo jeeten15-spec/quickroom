@@ -1,5 +1,5 @@
 import { adsenseClientId } from './adsense.js';
-import { fillAdsterraSlots as mountAdsterra } from './adsterra.js';
+import { fillAdsterraSlots as mountAdsterra, stopBannerRefresh } from './adsterra.js';
 import {
   MONETAG_DIRECT_LINK,
   MONETAG_IPP_SRC,
@@ -222,7 +222,10 @@ export function canLoadAds(view) {
 }
 
 export function fillAdsterraSlots() {
-  if (!adsConsentOk()) return;
+  if (!adsConsentOk()) {
+    stopBannerRefresh();
+    return;
+  }
   mountAdsterra();
 }
 
@@ -317,7 +320,7 @@ export function renderConsentBanner() {
   return `<div class="consent-banner" role="dialog" aria-labelledby="consent-title">
     <div class="consent-copy">
       <h2 id="consent-title">Cookies and ads in Europe</h2>
-      <p>We use cookies for optional ads (Adsterra native, Social Bar, and a desktop sticky 728×90 on blog and privacy pages; a 728×90 under chat on laptops; Monetag only on About) and, if enabled, analytics. Creating and joining still work if you reject ads. Read the <a href="/privacy" data-action="navigate">privacy policy</a> and <a href="/cookies" data-action="navigate">cookies</a> pages.</p>
+      <p>We use cookies for optional ads (Adsterra banners that refresh about once a minute while they stay on screen, a 50px chat strip on phones, one timed interstitial before a new mobile room, Social Bar on article pages, Monetag only on About). Creating and joining still work if you reject ads. Read the <a href="/privacy" data-action="navigate">privacy policy</a> and <a href="/cookies" data-action="navigate">cookies</a> pages.</p>
     </div>
     <div class="consent-actions">
       <button class="button button-secondary" type="button" data-action="consent-reject">Reject optional</button>

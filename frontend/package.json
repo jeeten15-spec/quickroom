@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build && node scripts/prerender-seo.mjs",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --test scripts/ad-monetization.test.mjs"
   },
   "devDependencies": {
     "vite": "^7.0.0"
