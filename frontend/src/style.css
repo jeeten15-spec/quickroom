@@ -9,7 +9,7 @@
   box-sizing: border-box;
 }
 
-html.chat-boot .iab-row:not(.iab-row-chat-bottom),
+html.chat-boot .iab-row:not(.iab-row-chat-bottom):not(.iab-row-chat-mobile),
 html.chat-boot .iab-rail-left,
 html.chat-boot .iab-anchor {
   display: none !important;
@@ -83,7 +83,8 @@ button:disabled {
   padding: 8px 12px;
 }
 
-.iab-row-chat-bottom {
+.iab-row-chat-bottom,
+.iab-row-chat-mobile {
   display: none;
 }
 
@@ -200,24 +201,40 @@ html.has-anchor-ad .iab-anchor {
     align-items: stretch;
   }
   html.chat-boot .chat-page {
-    height: calc(100dvh - 120px);
-    min-height: 280px;
+    height: calc(100dvh - 108px);
+    min-height: 240px;
   }
   html.chat-boot .iab-rail-chat {
-    max-height: 56px;
+    display: none;
+  }
+  html.chat-boot .iab-row-chat-mobile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 52px;
+    padding: 1px 0;
     overflow: hidden;
-    padding: 4px 0 8px;
+    position: relative;
+    z-index: 2;
+    pointer-events: auto;
   }
-  html.chat-boot .iab-rail-chat .iab-slot-box {
-    width: min(100%, 320px);
+  html.chat-boot .iab-chat-mobile-strip {
+    width: min(100%, 728px);
     height: 50px;
-    min-height: 50px;
+    overflow: hidden;
+    border: 0;
+    background: #f4f4f4;
   }
-  html.chat-boot .iab-rail-chat iframe {
-    width: 300px;
-    height: 250px;
-    transform: scale(0.2);
+  html.chat-boot .iab-chat-mobile-strip .iab-slot-label,
+  html.chat-boot .iab-chat-mobile-strip .iab-slot-size {
+    display: none;
+  }
+  html.chat-boot .iab-chat-mobile-strip iframe {
+    width: 728px;
+    height: 90px;
+    transform: scale(0.548);
     transform-origin: top center;
+    pointer-events: auto;
   }
 }
 
@@ -987,6 +1004,8 @@ code {
   gap: 16px;
   padding: 14px;
   border-radius: 12px 12px 0 0;
+  position: relative;
+  z-index: 3;
 }
 
 .room-title,
@@ -1152,6 +1171,9 @@ code {
   gap: 8px;
   padding: 10px;
   border-top: 1px solid #e5e5e5;
+  position: relative;
+  z-index: 3;
+  background: #ffffff;
 }
 
 .image-file-input { display: none; }
@@ -1499,6 +1521,52 @@ code {
   display: grid;
   gap: 8px;
   margin: 16px 0 24px;
+}
+
+html[data-ad-interstitial='1'] {
+  overflow: hidden;
+}
+
+.ad-interstitial {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px 16px 28px;
+  background: rgba(16, 16, 16, 0.94);
+  color: #fafafa;
+}
+
+.ad-interstitial-kicker {
+  margin: 0;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: #bbbbbb;
+}
+
+.ad-interstitial-copy {
+  margin: 0;
+  max-width: 28rem;
+  text-align: center;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.ad-interstitial-slot {
+  width: 300px;
+  height: 250px;
+  background: #222;
+  border-color: #444;
+}
+
+.ad-interstitial-close {
+  min-width: 220px;
+  min-height: 44px;
 }
 
 .metrics-tables {

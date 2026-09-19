@@ -54,13 +54,19 @@ export function renderChatBottomLeader() {
     </div>`;
 }
 
-/** Highest-CPM stack we have: native 1:1, 300×250, then 160×600. Phones keep a small box only. */
+/** 50px 728×90 strip above the chat chrome on phones. Never overlays Send / Share / Leave. */
+export function renderChatMobileStrip() {
+  return `<div class="iab-row iab-row-chat-mobile" aria-label="Advertisement">
+      ${renderIabSlot('leader', 'iab-mobile iab-chat-mobile-strip')}
+    </div>`;
+}
+
+/** Highest-CPM stack we have: native 1:1, 300×250, then 160×600. Desktop only. */
 export function renderChatRightRail() {
   return `<div class="iab-rail iab-rail-right iab-rail-chat">
       ${renderNativeBanner('iab-desktop iab-chat-native')}
       ${renderIabSlot('box', 'iab-desktop')}
       ${renderIabSlot('sky', 'iab-desktop')}
-      ${renderIabSlot('box', 'iab-mobile')}
     </div>`;
 }
 
